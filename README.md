@@ -161,8 +161,6 @@ The case study shows how DataEvolver evolves from an initial logical plan to a r
 - **GitHub Release (recommended; small download for a clean clone)**:  
   [Download `DataEvolver_Demo_small.mov`](https://github.com/Akanezora0/DataEvolver/releases/download/demo-2026-04-18/DataEvolver_Demo_small.mov)
 
-- **Bundled in this repo** (if you already have the source tree): [`assets/DataEvolver_Demo_small.mov`](assets/DataEvolver_Demo_small.mov)
-
 ---
 
 ## 🖥️ System Interfaces
