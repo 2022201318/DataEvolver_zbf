@@ -9,7 +9,7 @@
   <a href="assets/DataEvolver.pdf">📄 Paper (PDF)</a> |
   <a href="#-demo-video">🎬 Demo</a> |
   <a href="#-quick-start-one-command">⚡ Quick Start</a> |
-  <a href="#-citation">📚 Citation</a>
+  <!-- <a href="#-citation">📚 Citation</a> -->
 </p>
 
 ---
@@ -118,13 +118,110 @@ Access:
 
 ---
 
-## 🛠️ What You Can Do
+## 🛠️ Usage Guide
 
-- Create a pipeline session from raw input + seed examples.
-- Advance workflow step-by-step and inspect artifacts at each stage.
-- Rerun from any step (`rerun`) for controlled iteration.
-- Run trial execution + quality checks before full execution.
-- Track token usage and iterative history.
+DataEvolver supports three aligned interaction modes:
+
+- **Web UI** for visual workflow orchestration and artifact inspection
+- **CLI** for deterministic, scriptable, and reproducible operations
+- **HTTP API** for integration into your own systems
+
+### A) Frontend Walkthrough (Recommended for first-time users)
+
+1. Start backend and frontend:
+
+```bash
+# terminal 1
+source .venv/bin/activate
+python run_server.py --reload
+
+# terminal 2
+cd frontend
+npm run dev
+```
+
+2. Open `http://127.0.0.1:5173`.
+3. Create or select a pipeline session.
+4. Upload/provide your task input and seed examples.
+5. Run the workflow step-by-step (or use advance controls):
+   - `understanding`
+   - `orchestration`
+   - `operator_evolution` (when needed)
+   - `instantiation`
+   - `trial_run`
+   - `quality_check`
+   - `experience` (if quality is not passed)
+6. Inspect stage artifacts and state transitions in the canvas/history panels.
+7. Trigger full execution only after quality criteria are satisfied.
+
+### B) CLI Walkthrough (Recommended for research scripts and reproducibility)
+
+#### 1) Initialize and check status
+
+```bash
+source .venv/bin/activate
+dataevolver --help
+dataevolver lang en
+dataevolver state my_pipeline
+```
+
+#### 2) Run the next step (state-driven)
+
+```bash
+dataevolver advance my_pipeline
+dataevolver state my_pipeline
+dataevolver next my_pipeline
+```
+
+`advance` always runs the next required step according to workflow state.
+
+#### 3) Run all steps continuously
+
+```bash
+dataevolver workflow advance-all my_pipeline --max-steps 32
+```
+
+#### 4) Execute a specific step directly
+
+```bash
+dataevolver understand my_pipeline
+dataevolver orchestrate my_pipeline
+dataevolver instantiate my_pipeline
+dataevolver trial my_pipeline
+dataevolver quality-check my_pipeline
+dataevolver experience my_pipeline
+dataevolver run my_pipeline
+```
+
+#### 5) Rerun from a step and collect token stats
+
+```bash
+dataevolver rerun my_pipeline orchestration
+dataevolver tokens my_pipeline
+dataevolver tokens --json my_pipeline
+```
+
+#### 6) Machine-readable output for automation
+
+```bash
+dataevolver state --json my_pipeline
+dataevolver advance --json my_pipeline
+```
+
+> If you do not install editable package, you can run CLI as:
+> `python -m cli.app --help`
+
+### C) HTTP API Quick Reference
+
+Core routes:
+
+- `POST /api/sessions/start`
+- `GET /api/workflow/{pipeline_id}/state`
+- `POST /api/workflow/{pipeline_id}/advance`
+- `POST /api/workflow/{pipeline_id}/rerun`
+- `POST /api/pipeline/{pipeline_id}/run-full`
+
+OpenAPI docs: `http://127.0.0.1:8000/docs`
 
 ---
 
