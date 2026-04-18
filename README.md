@@ -84,7 +84,7 @@ This pushes the system from:
 
 ## 🧠 Framework Overview
 
-📎 [Open framework figure (PDF)](assets/ill.png)
+📎 [Open framework figure](assets/ill.png)
 
 **Figure explanation.**
 DataEvolver takes raw data, seed data, and optional user descriptions as input, then runs four major stages:
