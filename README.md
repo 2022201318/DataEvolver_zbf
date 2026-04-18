@@ -6,11 +6,15 @@
 </p>
 
 <p align="center">
-  <a href="assets/DataEvolver.png">📄 Paper</a> |
+  <a href="assets/DataEvolver.pdf">📄 Paper</a> |
   <a href="#-demo-video">🎬 Demo</a> |
   <a href="#-framework-overview">🧠 Framework</a> |
   <a href="#-main-results">📊 Results</a> |
   <a href="#-quick-start">⚡ Quick Start</a>
+</p>
+
+<p align="center">
+  <img src="assets/DataEvolver.png" width="85%" alt="DataEvolver overview figure"/>
 </p>
 
 ---
@@ -84,7 +88,9 @@ This pushes the system from:
 
 ## 🧠 Framework Overview
 
-📎 [Open framework figure](assets/ill.png)
+<p align="center">
+  <img src="assets/ill.png" width="95%" alt="DataEvolver framework: understanding, orchestration, instantiation, trial and quality feedback"/>
+</p>
 
 **Figure explanation.**
 DataEvolver takes raw data, seed data, and optional user descriptions as input, then runs four major stages:
@@ -142,7 +148,9 @@ It lowers amortized token cost in data preparation by **about 40% on average**.
 
 ### Case study
 
-📎 [Open case analysis (PDF)](assets/case.png)
+<p align="center">
+  <img src="assets/case.png" width="95%" alt="Case study: pipeline evolution and refinement"/>
+</p>
 
 The case study shows how DataEvolver evolves from an initial logical plan to a refined executable pipeline, and how trial feedback is translated into better constraints and better data in later rounds.
 
@@ -349,24 +357,3 @@ The current release mainly targets:
 - text-to-SQL training data
 
 The architecture is extensible to broader tasks and modalities in future versions.
-
----
-
-## 📚 Citation
-
-If you find DataEvolver useful, please cite:
-
-```bibtex
-@article{dataevolver2026,
-  title={DataEvolver: Automatic Data Preparation for Large Language Models through Multi-Level Self-Evolving},
-  author={Anonymous},
-  journal={ACL 2026},
-  year={2026}
-}
-```
-
----
-
-## Star History
-
-If this project helps your research or product, please consider starring the repository.
