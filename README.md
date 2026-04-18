@@ -8,7 +8,7 @@
 <p align="center">
   <a href="assets/DataEvolver.pdf">📄 Paper (PDF)</a> |
   <a href="#-demo-video">🎬 Demo</a> |
-  <a href="#-quick-start-one-command">⚡ Quick Start</a> |
+  <a href="#-quick-start-one-command">⚡ Quick Start</a> 
   <!-- <a href="#-citation">📚 Citation</a> -->
 </p>
 
@@ -60,7 +60,7 @@ When quality passes, DataEvolver runs full execution (`run-full`) for final data
 
 ### Case Study
 
-📎 [Open case analysis (PDF)](assets/case.pdf)
+📎 ![Open case analysis (PDF)](assets/case.pdf)
 
 ---
 
