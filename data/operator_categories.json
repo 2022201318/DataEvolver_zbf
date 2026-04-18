@@ -1,0 +1,38 @@
+{
+  "io": {
+    "label": "I/O & Boundary",
+    "label_zh": "输入输出边界",
+    "description": "Read/write dataset boundaries; no semantic optimisation.",
+    "card_variant": "slate"
+  },
+  "structure": {
+    "label": "Structural Transform",
+    "label_zh": "结构变换",
+    "description": "Shape, schema, and field-interface transforms (skeleton layer).",
+    "card_variant": "cyan"
+  },
+  "control": {
+    "label": "Selection & Control",
+    "label_zh": "选择与流控",
+    "description": "Filter, dedupe, sample, sort — control which rows flow without redefining semantics.",
+    "card_variant": "amber"
+  },
+  "semantic": {
+    "label": "Semantic (LLM)",
+    "label_zh": "语义生成与改写",
+    "description": "LLM actions by output shape: generate, rewrite, extract structure, expand content.",
+    "card_variant": "violet"
+  },
+  "quality": {
+    "label": "Quality & Verification",
+    "label_zh": "质量与校验",
+    "description": "Judgement, scoring, consistency and verification — reports/scores, not mixed transform duties.",
+    "card_variant": "rose"
+  },
+  "bridge": {
+    "label": "Bridge (Evolved)",
+    "label_zh": "桥接算子（演化）",
+    "description": "Task-specific operators synthesized when closure check finds a capability gap (Layer 2).",
+    "card_variant": "emerald"
+  }
+}

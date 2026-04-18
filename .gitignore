@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+
+# Local secrets (use *.example.json as template)
+config/api_config.json
+config/api_keys.json
+
+# Logs and caches
+logs/*.log
+cache/
+temp/
+
+# IDE
+.idea/
+.vscode/

@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataEvolver — Dual-Layer Self-Evolution Data Preparation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #06090f;
+  --bg-panel: #0c1219;
+  --bg-card: #111a24;
+  --bg-card-hover: #162030;
+  --border: #1a2a3a;
+  --border-glow: #00e5c830;
+  --cyan: #00e5c8;
+  --cyan-dim: #00e5c860;
+  --cyan-glow: #00e5c820;
+  --teal: #00b4d8;
+  --orange: #ff8c42;
+  --orange-dim: #ff8c4260;
+  --magenta: #e040fb;
+  --green: #4ceb9a;
+  --red: #ff5c6a;
+  --text: #e8edf3;
+  --text-dim: #7a8b9e;
+  --text-muted: #4a5b6e;
+  --font-display: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 14px; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-display);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
+
+/* ═══ BACKGROUND GRID ═══ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #00e5c806 1px, transparent 1px),
+    linear-gradient(#00e5c806 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, #00e5c808 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, #ff8c4205 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══ TOP NAV ═══ */
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 56px;
+  background: #06090fdd;
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  position: relative;
+}
+
+.logo-icon svg { width: 100%; height: 100%; }
+
+.logo-text {
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--cyan), var(--teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-left: 4px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2px;
+}
+
+.nav-link {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.nav-link:hover { color: var(--text); background: #ffffff08; }
+.nav-link.active {
+  color: var(--cyan);
+  background: var(--cyan-glow);
+}
+
+.nav-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.nav-btn {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.btn-outline:hover { border-color: var(--cyan-dim); color: var(--text); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--cyan), var(--teal));
+  color: var(--bg-deep);
+  letter-spacing: 0.02em;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 20px var(--cyan-dim), 0 4px 12px #00000040;
+  transform: translateY(-1px);
+}
+
+/* ═══ LAYOUT ═══ */
+.main {
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+
+/* ═══ HERO SECTION ═══ */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pipeline-banner {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pipeline-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--orange), transparent);
+}
+
+.banner-overline {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--cyan);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.banner-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+.banner-title span {
+  background: linear-gradient(135deg, var(--cyan), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.banner-desc {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 460px;
+}
+
+/* Dual flow visual */
+.dual-flow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.flow-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.flow-card:hover {
+  border-color: var(--border-glow);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px #00000040;
+}
+
+.flow-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.flow-card:hover::after { opacity: 1; }
+
+.flow-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+}
+
+.flow-icon.op { background: linear-gradient(135deg, #00e5c820, #00b4d815); color: var(--cyan); }
+.flow-icon.pipe { background: linear-gradient(135deg, #ff8c4220, #e040fb15); color: var(--orange); }
+
+.flow-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.flow-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.flow-desc {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ═══ DAG CANVAS ═══ */
+.dag-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  min-height: 360px;
+}
+
+.dag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dag-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.dag-title-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan-dim);
+}
+
+.dag-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.dag-ctrl-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.dag-ctrl-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
+.dag-canvas {
+  width: 100%;
+  height: 320px;
+  position: relative;
+}
+
+/* ═══ METRICS ROW ═══ */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.metric-card:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-1px);
+}
+
+.metric-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-value.cyan { color: var(--cyan); }
+.metric-value.orange { color: var(--orange); }
+.metric-value.green { color: var(--green); }
+.metric-value.magenta { color: var(--magenta); }
+
+.metric-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.metric-change.up {
+  color: var(--green);
+  background: #4ceb9a12;
+}
+
+.metric-change.down {
+  color: var(--red);
+  background: #ff5c6a12;
+}
+
+.metric-sparkline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  opacity: 0.25;
+}
+
+/* ═══ BOTTOM GRID ═══ */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* Data Input Panel */
+.input-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-title svg { opacity: 0.6; }
+
+.panel-body {
+  padding: 18px 22px;
+}
+
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  transition: all 0.3s;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.upload-zone:hover {
+  border-color: var(--cyan-dim);
+  background: var(--cyan-glow);
+}
+
+.upload-icon {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.upload-text {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.upload-hint {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.data-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.data-item:hover { background: var(--bg-card-hover); }
+
+.data-dot {
+  width: 8px; height: 8px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.data-dot.raw { background: var(--teal); }
+.data-dot.seed { background: var(--orange); }
+
+.data-info { flex: 1; min-width: 0; }
+
+.data-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-meta {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.data-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.badge-raw { background: #00b4d815; color: var(--teal); }
+.badge-seed { background: #ff8c4215; color: var(--orange); }
+
+/* Pipeline Evolution Panel */
+.evo-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.evo-timeline {
+  padding: 18px 22px;
+}
+
+.evo-gen {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #ffffff06;
+  animation: fadeSlideIn 0.5s ease both;
+}
+
+.evo-gen:last-child { border-bottom: none; }
+
+.gen-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 40px;
+}
+
+.gen-num {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.gen-num.active {
+  background: linear-gradient(135deg, var(--cyan), var(--teal));
+  color: var(--bg-deep);
+  box-shadow: 0 0 12px var(--cyan-dim);
+}
+
+.gen-num.done {
+  background: var(--bg-card);
+  color: var(--green);
+  border: 1px solid #4ceb9a30;
+}
+
+.gen-num.pending {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.gen-line {
+  width: 2px;
+  flex: 1;
+  min-height: 10px;
+  background: var(--border);
+}
+
+.gen-content { flex: 1; }
+
+.gen-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.gen-desc {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.gen-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.gen-stat {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: var(--bg-card);
+}
+
+.gen-stat b { color: var(--cyan); font-weight: 600; }
+
+/* Quality Comparison */
+.quality-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.quality-chart {
+  padding: 18px 22px;
+}
+
+.quality-bar-group {
+  margin-bottom: 18px;
+}
+
+.qbar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.qbar-name {
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.qbar-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.qbar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-card);
+  overflow: hidden;
+  position: relative;
+}
+
+.qbar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+.qbar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 20px;
+  background: linear-gradient(90deg, transparent, #ffffff40);
+}
+
+.qbar-fill.cyan { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+.qbar-fill.orange { background: linear-gradient(90deg, #e67328, var(--orange)); }
+.qbar-fill.green { background: linear-gradient(90deg, #2dbd6e, var(--green)); }
+
+.qbar-seed-marker {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--orange);
+  border-radius: 1px;
+  z-index: 2;
+}
+
+.qbar-seed-marker::before {
+  content: 'Seed';
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--orange);
+  white-space: nowrap;
+}
+
+.quality-legend {
+  display: flex;
+  gap: 16px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* ═══ CODE / EXPERIENCE SECTION ═══ */
+.code-exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.code-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.code-body {
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.7;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.code-line {
+  display: flex;
+  padding: 0 22px;
+  transition: background 0.15s;
+}
+
+.code-line:hover { background: #ffffff05; }
+
+.code-ln {
+  color: var(--text-muted);
+  min-width: 32px;
+  text-align: right;
+  margin-right: 16px;
+  user-select: none;
+}
+
+.code-text { flex: 1; }
+.code-text .kw { color: var(--magenta); }
+.code-text .fn { color: var(--cyan); }
+.code-text .str { color: var(--green); }
+.code-text .cm { color: var(--text-muted); font-style: italic; }
+.code-text .op { color: var(--orange); }
+.code-text .var { color: var(--text); }
+
+/* Experience / Insights */
+.exp-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.exp-item {
+  padding: 14px 22px;
+  border-bottom: 1px solid #ffffff06;
+  display: flex;
+  gap: 14px;
+  transition: background 0.2s;
+}
+
+.exp-item:hover { background: #ffffff04; }
+.exp-item:last-child { border-bottom: none; }
+
+.exp-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.exp-icon.insight { background: #00e5c815; color: var(--cyan); }
+.exp-icon.warning { background: #ff8c4215; color: var(--orange); }
+.exp-icon.success { background: #4ceb9a15; color: var(--green); }
+
+.exp-content { flex: 1; }
+
+.exp-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.exp-desc {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.exp-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  margin-top: 6px;
+  display: inline-block;
+}
+
+/* ═══ FOOTER ═══ */
+.footer {
+  text-align: center;
+  padding: 32px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 3px var(--cyan-dim)); }
+  50% { filter: drop-shadow(0 0 8px var(--cyan)); }
+}
+
+@keyframes dataflow {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.fade-in {
+  animation: fadeSlideIn 0.6s ease both;
+}
+
+.fade-in-d1 { animation-delay: 0.08s; }
+.fade-in-d2 { animation-delay: 0.16s; }
+.fade-in-d3 { animation-delay: 0.24s; }
+.fade-in-d4 { animation-delay: 0.32s; }
+.fade-in-d5 { animation-delay: 0.4s; }
+.fade-in-d6 { animation-delay: 0.48s; }
+
+/* ═══ SECTION LABELS ═══ */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
+/* Tabs */
+.tab-bar {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--bg-card);
+  border-radius: 8px;
+}
+
+.tab {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover { color: var(--text-dim); }
+.tab.active { background: var(--bg-panel); color: var(--cyan); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1100px) {
+  .hero { grid-template-columns: 1fr; }
+  .bottom-grid { grid-template-columns: 1fr; }
+  .code-exp-grid { grid-template-columns: 1fr; }
+  .metrics-row { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="topnav">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 32 32" fill="none">
+        <path d="M16 3L4 10v12l12 7 12-7V10L16 3z" stroke="url(#lg1)" stroke-width="1.5" fill="none"/>
+        <path d="M16 3v26M4 10l12 7 12-7" stroke="url(#lg1)" stroke-width="1" opacity="0.4"/>
+        <circle cx="16" cy="16" r="3" fill="url(#lg1)"/>
+        <circle cx="16" cy="3" r="2" fill="#00e5c8"/>
+        <circle cx="4" cy="10" r="1.5" fill="#00b4d8"/>
+        <circle cx="28" cy="10" r="1.5" fill="#00b4d8"/>
+        <circle cx="4" cy="22" r="1.5" fill="#ff8c42"/>
+        <circle cx="28" cy="22" r="1.5" fill="#ff8c42"/>
+        <circle cx="16" cy="29" r="2" fill="#4ceb9a"/>
+        <defs>
+          <linearGradient id="lg1" x1="4" y1="3" x2="28" y2="29">
+            <stop stop-color="#00e5c8"/><stop offset="1" stop-color="#ff8c42"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <span class="logo-text">DataEvolver</span>
+    <span class="logo-tag">v2.4</span>
+  </div>
+  <div class="nav-links">
+    <div class="nav-link active">Dashboard</div>
+    <div class="nav-link">Operators</div>
+    <div class="nav-link">Pipelines</div>
+    <div class="nav-link">Experience</div>
+    <div class="nav-link">Settings</div>
+  </div>
+  <div class="nav-status">
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-dim);">
+      <div class="status-dot"></div>
+      Evolution Active
+    </div>
+    <button class="nav-btn btn-outline">Export</button>
+    <button class="nav-btn btn-primary" id="runBtn">▶ Run Evolution</button>
+  </div>
+</nav>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main">
+
+  <!-- HERO SECTION -->
+  <div class="hero fade-in">
+    <div class="hero-left">
+      <div class="pipeline-banner">
+        <div class="banner-overline">Dual-Layer Self-Evolution Engine</div>
+        <div class="banner-title">
+          原始数据 → <span>智能进化</span> → 高质量输出
+        </div>
+        <div class="banner-desc">
+          输入原始数据与少量高质量 Seed 数据，通过算子自进化构建逻辑 DAG，实例化为可执行代码，
+          再经 Pipeline 自进化迭代优化，最终使增强数据达到 Seed 品质。
+        </div>
+      </div>
+
+      <div class="dual-flow">
+        <div class="flow-card fade-in fade-in-d1">
+          <div class="flow-icon op">⬡</div>
+          <div class="flow-label">Layer 1</div>
+          <div class="flow-name">算子自进化</div>
+          <div class="flow-desc">自动发现、组合逻辑算子，构建 DAG 拓扑图，每个节点实例化为可执行代码片段</div>
+        </div>
+        <div class="flow-card fade-in fade-in-d2">
+          <div class="flow-icon pipe">⟳</div>
+          <div class="flow-label">Layer 2</div>
+          <div class="flow-name">Pipeline 自进化</div>
+          <div class="flow-desc">执行数据准备 Pipeline，与 Seed 数据比对质量，总结经验并迭代优化</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAG Visualization -->
+    <div class="dag-panel fade-in fade-in-d3">
+      <div class="dag-header">
+        <div class="dag-title">
+          <div class="dag-title-dot"></div>
+          Operator DAG — 实时拓扑
+        </div>
+        <div class="dag-controls">
+          <button class="dag-ctrl-btn" title="Zoom In">+</button>
+          <button class="dag-ctrl-btn" title="Zoom Out">−</button>
+          <button class="dag-ctrl-btn" title="Reset">⟲</button>
+        </div>
+      </div>
+      <div class="dag-canvas">
+        <svg id="dagSvg" width="100%" height="100%"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- METRICS ROW -->
+  <div class="section-label fade-in fade-in-d3">Runtime Metrics</div>
+  <div class="metrics-row">
+    <div class="metric-card fade-in fade-in-d1">
+      <div class="metric-label">Quality Score</div>
+      <div class="metric-value cyan" id="metricQuality">94.7</div>
+      <div class="metric-change up">↑ 12.3%</div>
+      <svg class="metric-sparkline" id="spark1"></svg>
+    </div>
+    <div class="metric-card fade-in fade-in-d2">
+      <div class="metric-label">Active Operators</div>
+      <div class="metric-value orange" id="metricOps">47</div>
+      <div class="metric-change up">↑ 8 new</div>
+      <svg class="metric-sparkline" id="spark2"></svg>
+    </div>
+    <div class="metric-card fade-in fade-in-d3">
+      <div class="metric-label">Pipeline Gen</div>
+      <div class="metric-value green" id="metricGen">G-5</div>
+      <div class="metric-change up">↑ evolving</div>
+      <svg class="metric-sparkline" id="spark3"></svg>
+    </div>
+    <div class="metric-card fade-in fade-in-d4">
+      <div class="metric-label">Seed 匹配度</div>
+      <div class="metric-value magenta" id="metricMatch">96.2%</div>
+      <div class="metric-change up">↑ 3.8%</div>
+      <svg class="metric-sparkline" id="spark4"></svg>
+    </div>
+  </div>
+
+  <!-- BOTTOM GRID -->
+  <div class="section-label fade-in fade-in-d4">Evolution Workspace</div>
+  <div class="bottom-grid">
+
+    <!-- Data Input -->
+    <div class="input-panel fade-in fade-in-d4">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h12v2H2z"/></svg>
+          数据输入
+        </div>
+        <div class="tab-bar">
+          <div class="tab active">全部</div>
+          <div class="tab">Raw</div>
+          <div class="tab">Seed</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">↑</div>
+          <div class="upload-text">拖拽或点击上传数据文件</div>
+          <div class="upload-hint">.csv .json .parquet — 最大 2GB</div>
+        </div>
+        <div class="data-item">
+          <div class="data-dot raw"></div>
+          <div class="data-info">
+            <div class="data-name">train_raw_corpus.jsonl</div>
+            <div class="data-meta">128,450 samples · 2.3 GB</div>
+          </div>
+          <div class="data-badge badge-raw">RAW</div>
+        </div>
+        <div class="data-item">
+          <div class="data-dot seed"></div>
+          <div class="data-info">
+            <div class="data-name">seed_high_quality.json</div>
+            <div class="data-meta">256 samples · 1.2 MB</div>
+          </div>
+          <div class="data-badge badge-seed">SEED</div>
+        </div>
+        <div class="data-item">
+          <div class="data-dot raw"></div>
+          <div class="data-info">
+            <div class="data-name">supplementary_data.csv</div>
+            <div class="data-meta">45,200 samples · 890 MB</div>
+          </div>
+          <div class="data-badge badge-raw">RAW</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipeline Evolution Timeline -->
+    <div class="evo-panel fade-in fade-in-d5">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm0 2v5l3.5 2-.5 1L7 9V3h1z"/></svg>
+          Pipeline 进化历程
+        </div>
+        <div class="tab-bar">
+          <div class="tab active">Timeline</div>
+          <div class="tab">Graph</div>
+        </div>
+      </div>
+      <div class="evo-timeline">
+        <div class="evo-gen">
+          <div class="gen-marker">
+            <div class="gen-num done">G1</div>
+            <div class="gen-line"></div>
+          </div>
+          <div class="gen-content">
+            <div class="gen-title">初始 Pipeline 构建</div>
+            <div class="gen-desc">基础清洗 + 格式标准化算子链，以 Seed 数据为目标建立基线</div>
+            <div class="gen-stats">
+              <div class="gen-stat">Quality <b>72.1</b></div>
+              <div class="gen-stat">Ops <b>12</b></div>
+              <div class="gen-stat">Time <b>4m 23s</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="evo-gen">
+          <div class="gen-marker">
+            <div class="gen-num done">G2</div>
+            <div class="gen-line"></div>
+          </div>
+          <div class="gen-content">
+            <div class="gen-title">语义增强进化</div>
+            <div class="gen-desc">引入语义对齐算子，发现并修复分布偏移，质量显著提升</div>
+            <div class="gen-stats">
+              <div class="gen-stat">Quality <b>81.5</b></div>
+              <div class="gen-stat">Ops <b>23</b></div>
+              <div class="gen-stat">Time <b>6m 11s</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="evo-gen">
+          <div class="gen-marker">
+            <div class="gen-num done">G3</div>
+            <div class="gen-line"></div>
+          </div>
+          <div class="gen-content">
+            <div class="gen-title">经验指导重构</div>
+            <div class="gen-desc">根据前两代经验总结，移除冗余分支，优化 DAG 关键路径</div>
+            <div class="gen-stats">
+              <div class="gen-stat">Quality <b>88.3</b></div>
+              <div class="gen-stat">Ops <b>31</b></div>
+              <div class="gen-stat">Time <b>5m 47s</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="evo-gen">
+          <div class="gen-marker">
+            <div class="gen-num done">G4</div>
+            <div class="gen-line"></div>
+          </div>
+          <div class="gen-content">
+            <div class="gen-title">精细化微调</div>
+            <div class="gen-desc">边缘 case 处理算子进化，长尾分布优化，Seed 匹配度突破 90%</div>
+            <div class="gen-stats">
+              <div class="gen-stat">Quality <b>92.1</b></div>
+              <div class="gen-stat">Ops <b>39</b></div>
+              <div class="gen-stat">Time <b>7m 02s</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="evo-gen">
+          <div class="gen-marker">
+            <div class="gen-num active">G5</div>
+          </div>
+          <div class="gen-content">
+            <div class="gen-title" style="color:var(--cyan);">收敛优化中...</div>
+            <div class="gen-desc">全维度质量逼近 Seed 标准，自动发现新增算子提升鲁棒性</div>
+            <div class="gen-stats">
+              <div class="gen-stat">Quality <b>94.7</b></div>
+              <div class="gen-stat">Ops <b>47</b></div>
+              <div class="gen-stat">Time <b>running</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality Comparison -->
+    <div class="quality-panel fade-in fade-in-d6">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 14V2h2v12H1zm4-3V5h2v6H5zm4-2V4h2v5H9zm4-4V1h2v4h-2z"/></svg>
+          质量对比 · Seed Benchmark
+        </div>
+      </div>
+      <div class="quality-chart">
+        <div class="quality-bar-group">
+          <div class="qbar-label">
+            <span class="qbar-name">语义完整性</span>
+            <span class="qbar-value" style="color:var(--cyan)">95.2%</span>
+          </div>
+          <div class="qbar-track">
+            <div class="qbar-fill cyan" style="width: 0%" data-target="95.2"></div>
+            <div class="qbar-seed-marker" style="left: 97%"></div>
+          </div>
+        </div>
+        <div class="quality-bar-group">
+          <div class="qbar-label">
+            <span class="qbar-name">格式一致性</span>
+            <span class="qbar-value" style="color:var(--cyan)">97.8%</span>
+          </div>
+          <div class="qbar-track">
+            <div class="qbar-fill cyan" style="width: 0%" data-target="97.8"></div>
+            <div class="qbar-seed-marker" style="left: 98.5%"></div>
+          </div>
+        </div>
+        <div class="quality-bar-group">
+          <div class="qbar-label">
+            <span class="qbar-name">多样性指标</span>
+            <span class="qbar-value" style="color:var(--orange)">88.4%</span>
+          </div>
+          <div class="qbar-track">
+            <div class="qbar-fill orange" style="width: 0%" data-target="88.4"></div>
+            <div class="qbar-seed-marker" style="left: 94%"></div>
+          </div>
+        </div>
+        <div class="quality-bar-group">
+          <div class="qbar-label">
+            <span class="qbar-name">信息密度</span>
+            <span class="qbar-value" style="color:var(--cyan)">93.6%</span>
+          </div>
+          <div class="qbar-track">
+            <div class="qbar-fill cyan" style="width: 0%" data-target="93.6"></div>
+            <div class="qbar-seed-marker" style="left: 96%"></div>
+          </div>
+        </div>
+        <div class="quality-bar-group">
+          <div class="qbar-label">
+            <span class="qbar-name">噪声水平</span>
+            <span class="qbar-value" style="color:var(--green)">96.1%</span>
+          </div>
+          <div class="qbar-track">
+            <div class="qbar-fill green" style="width: 0%" data-target="96.1"></div>
+            <div class="qbar-seed-marker" style="left: 97.5%"></div>
+          </div>
+        </div>
+        <div class="quality-bar-group">
+          <div class="qbar-label">
+            <span class="qbar-name">逻辑连贯性</span>
+            <span class="qbar-value" style="color:var(--cyan)">91.9%</span>
+          </div>
+          <div class="qbar-track">
+            <div class="qbar-fill cyan" style="width: 0%" data-target="91.9"></div>
+            <div class="qbar-seed-marker" style="left: 95%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="quality-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>当前输出</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Seed 基线</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CODE + EXPERIENCE -->
+  <div class="section-label fade-in fade-in-d5">Operator Instance & Evolution Experience</div>
+  <div class="code-exp-grid">
+    <!-- Code Panel -->
+    <div class="code-panel fade-in fade-in-d5">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 4L1 8l4.5 4 1-1L3 8l3.5-3zM10.5 4l-1 1L13 8l-3.5 3 1 1L15 8z"/></svg>
+          算子代码实例 — semantic_aligner.py
+        </div>
+        <div class="tab-bar">
+          <div class="tab active">Code</div>
+          <div class="tab">Output</div>
+          <div class="tab">Log</div>
+        </div>
+      </div>
+      <div class="code-body">
+        <div class="code-line"><span class="code-ln">1</span><span class="code-text"><span class="cm"># Auto-generated by DataEvolver G5</span></span></div>
+        <div class="code-line"><span class="code-ln">2</span><span class="code-text"><span class="kw">import</span> numpy <span class="kw">as</span> np</span></div>
+        <div class="code-line"><span class="code-ln">3</span><span class="code-text"><span class="kw">from</span> evolver.ops <span class="kw">import</span> BaseOperator</span></div>
+        <div class="code-line"><span class="code-ln">4</span><span class="code-text"></span></div>
+        <div class="code-line"><span class="code-ln">5</span><span class="code-text"><span class="kw">class</span> <span class="fn">SemanticAligner</span>(BaseOperator):</span></div>
+        <div class="code-line"><span class="code-ln">6</span><span class="code-text">    <span class="str">"""对齐输入文本与 Seed 语义分布"""</span></span></div>
+        <div class="code-line"><span class="code-ln">7</span><span class="code-text"></span></div>
+        <div class="code-line"><span class="code-ln">8</span><span class="code-text">    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="var">self</span>, threshold<span class="op">=</span><span class="op">0.82</span>):</span></div>
+        <div class="code-line"><span class="code-ln">9</span><span class="code-text">        <span class="var">self</span>.threshold <span class="op">=</span> threshold</span></div>
+        <div class="code-line"><span class="code-ln">10</span><span class="code-text">        <span class="var">self</span>.seed_emb <span class="op">=</span> <span class="kw">None</span></span></div>
+        <div class="code-line"><span class="code-ln">11</span><span class="code-text"></span></div>
+        <div class="code-line"><span class="code-ln">12</span><span class="code-text">    <span class="kw">def</span> <span class="fn">fit_seed</span>(<span class="var">self</span>, seed_data):</span></div>
+        <div class="code-line"><span class="code-ln">13</span><span class="code-text">        <span class="cm"># 计算 seed 数据的语义质心</span></span></div>
+        <div class="code-line"><span class="code-ln">14</span><span class="code-text">        embeddings <span class="op">=</span> <span class="var">self</span>.<span class="fn">encode</span>(seed_data)</span></div>
+        <div class="code-line"><span class="code-ln">15</span><span class="code-text">        <span class="var">self</span>.seed_emb <span class="op">=</span> np.<span class="fn">mean</span>(embeddings, axis<span class="op">=</span><span class="op">0</span>)</span></div>
+        <div class="code-line"><span class="code-ln">16</span><span class="code-text"></span></div>
+        <div class="code-line"><span class="code-ln">17</span><span class="code-text">    <span class="kw">def</span> <span class="fn">transform</span>(<span class="var">self</span>, batch):</span></div>
+        <div class="code-line"><span class="code-ln">18</span><span class="code-text">        <span class="cm"># 经验 E-14: 先做粗筛再精排效率 ↑40%</span></span></div>
+        <div class="code-line"><span class="code-ln">19</span><span class="code-text">        scores <span class="op">=</span> <span class="var">self</span>.<span class="fn">cosine_sim</span>(batch, <span class="var">self</span>.seed_emb)</span></div>
+        <div class="code-line"><span class="code-ln">20</span><span class="code-text">        mask <span class="op">=</span> scores <span class="op">>=</span> <span class="var">self</span>.threshold</span></div>
+        <div class="code-line"><span class="code-ln">21</span><span class="code-text">        <span class="kw">return</span> batch[mask], scores[mask]</span></div>
+      </div>
+    </div>
+
+    <!-- Experience Panel -->
+    <div class="exp-panel fade-in fade-in-d6">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 4 4.5.7-3.3 3.2.8 4.5L8 11.2 3.9 13.4l.8-4.5L1.5 5.7 6 5z"/></svg>
+          进化经验库
+        </div>
+        <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);">28 insights</span>
+      </div>
+      <div class="exp-item">
+        <div class="exp-icon insight">💡</div>
+        <div class="exp-content">
+          <div class="exp-title">E-14: 粗筛 + 精排双阶段策略</div>
+          <div class="exp-desc">先用低计算量的统计特征进行粗筛（阈值 0.6），再对候选集进行语义精排，整体效率提升 40%</div>
+          <div class="exp-tag">G3 → G4 · 已应用</div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-icon warning">⚠</div>
+        <div class="exp-content">
+          <div class="exp-title">E-21: 长文本截断需保持语义完整</div>
+          <div class="exp-desc">G2 中截断策略导致 12% 样本语义残缺，改为段落边界截断后质量提升 6.2%</div>
+          <div class="exp-tag">G2 · 修复于 G3</div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-icon success">✓</div>
+        <div class="exp-content">
+          <div class="exp-title">E-25: 分布对齐优于逐样本匹配</div>
+          <div class="exp-desc">对比整体分布特征比逐一与 Seed 样本匹配更有效，多样性指标提升 8.7%</div>
+          <div class="exp-tag">G4 → G5 · 验证中</div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-icon insight">💡</div>
+        <div class="exp-content">
+          <div class="exp-title">E-27: DAG 剪枝减少冗余路径</div>
+          <div class="exp-desc">移除相关度 < 0.3 的算子分支后，Pipeline 执行效率提升 25%，质量无损</div>
+          <div class="exp-tag">G5 · 新发现</div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-icon success">✓</div>
+        <div class="exp-content">
+          <div class="exp-title">E-28: 动态阈值优于固定阈值</div>
+          <div class="exp-desc">基于当前 batch 质量分布动态调整过滤阈值，边缘 case 召回率提升 15%</div>
+          <div class="exp-tag">G5 · 新发现</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    DataEvolver — Dual-Layer Self-Evolution Data Preparation System &nbsp;·&nbsp; Built for intelligent data augmentation at scale
+  </div>
+</div>
+
+<script>
+// ═══ DAG VISUALIZATION ═══
+function renderDAG() {
+  const svg = document.getElementById('dagSvg');
+  const w = svg.clientWidth || 660;
+  const h = svg.clientHeight || 320;
+
+  const nodes = [
+    { id: 'input', label: 'Raw\nInput', x: 0.08, y: 0.5, type: 'source' },
+    { id: 'seed', label: 'Seed\nData', x: 0.08, y: 0.15, type: 'seed' },
+    { id: 'clean', label: '数据清洗', x: 0.25, y: 0.35, type: 'op' },
+    { id: 'format', label: '格式标准化', x: 0.25, y: 0.72, type: 'op' },
+    { id: 'semantic', label: '语义对齐', x: 0.44, y: 0.28, type: 'op-active' },
+    { id: 'filter', label: '质量过滤', x: 0.44, y: 0.65, type: 'op' },
+    { id: 'augment', label: '数据增强', x: 0.62, y: 0.2, type: 'op' },
+    { id: 'balance', label: '分布均衡', x: 0.62, y: 0.55, type: 'op' },
+    { id: 'dedup', label: '去重优化', x: 0.62, y: 0.82, type: 'op' },
+    { id: 'merge', label: '融合输出', x: 0.80, y: 0.42, type: 'op-active' },
+    { id: 'output', label: '高质量\n输出', x: 0.93, y: 0.42, type: 'output' },
+  ];
+
+  const edges = [
+    ['input', 'clean'], ['input', 'format'],
+    ['seed', 'semantic'], ['clean', 'semantic'], ['clean', 'filter'],
+    ['format', 'filter'], ['semantic', 'augment'], ['semantic', 'balance'],
+    ['filter', 'balance'], ['filter', 'dedup'],
+    ['augment', 'merge'], ['balance', 'merge'], ['dedup', 'merge'],
+    ['merge', 'output']
+  ];
+
+  const nodeMap = {};
+  nodes.forEach(n => {
+    n.px = n.x * w;
+    n.py = n.y * h;
+    nodeMap[n.id] = n;
+  });
+
+  let svgContent = `<defs>
+    <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5c840"/>
+      <stop offset="100%" stop-color="#00e5c810"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <linearGradient id="nodeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#162030"/>
+      <stop offset="100%" stop-color="#111a24"/>
+    </linearGradient>
+    <linearGradient id="activeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00e5c830"/>
+      <stop offset="100%" stop-color="#00b4d820"/>
+    </linearGradient>
+  </defs>`;
+
+  // Draw edges
+  edges.forEach(([from, to], i) => {
+    const a = nodeMap[from], b = nodeMap[to];
+    const mx = (a.px + b.px) / 2;
+    svgContent += `<path d="M${a.px},${a.py} C${mx},${a.py} ${mx},${b.py} ${b.px},${b.py}"
+      fill="none" stroke="#00e5c825" stroke-width="1.5"
+      stroke-dasharray="5,3" style="animation: dataflow 1s linear infinite; animation-delay:${i * 0.15}s"/>`;
+    // Animated particle
+    svgContent += `<circle r="2.5" fill="#00e5c8" opacity="0.7">
+      <animateMotion dur="${2 + i * 0.3}s" repeatCount="indefinite" 
+        path="M${a.px},${a.py} C${mx},${a.py} ${mx},${b.py} ${b.px},${b.py}"/>
+    </circle>`;
+  });
+
+  // Draw nodes
+  nodes.forEach(n => {
+    const colors = {
+      'source': { fill: '#00b4d820', stroke: '#00b4d860', text: '#00b4d8' },
+      'seed': { fill: '#ff8c4220', stroke: '#ff8c4260', text: '#ff8c42' },
+      'op': { fill: 'url(#nodeGrad)', stroke: '#1a2a3a', text: '#e8edf3' },
+      'op-active': { fill: 'url(#activeGrad)', stroke: '#00e5c850', text: '#00e5c8' },
+      'output': { fill: '#4ceb9a20', stroke: '#4ceb9a60', text: '#4ceb9a' },
+    };
+    const c = colors[n.type];
+    const rw = n.type === 'source' || n.type === 'output' || n.type === 'seed' ? 32 : 42;
+    const rh = n.type === 'source' || n.type === 'output' || n.type === 'seed' ? 32 : 26;
+
+    if (n.type === 'op-active') {
+      svgContent += `<rect x="${n.px - rw - 3}" y="${n.py - rh - 3}" width="${(rw + 3) * 2}" height="${(rh + 3) * 2}"
+        rx="12" fill="none" stroke="#00e5c830" stroke-width="1" filter="url(#glow)">
+        <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+      </rect>`;
+    }
+
+    svgContent += `<rect x="${n.px - rw}" y="${n.py - rh}" width="${rw * 2}" height="${rh * 2}"
+      rx="10" fill="${c.fill}" stroke="${c.stroke}" stroke-width="1"/>`;
+
+    const lines = n.label.split('\n');
+    lines.forEach((line, li) => {
+      const dy = lines.length > 1 ? (li - (lines.length - 1) / 2) * 13 : 0;
+      svgContent += `<text x="${n.px}" y="${n.py + dy + 4}" text-anchor="middle"
+        font-family="'Outfit', sans-serif" font-size="10" font-weight="600" fill="${c.text}">${line}</text>`;
+    });
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+// ═══ SPARKLINES ═══
+function renderSparkline(id, data, color) {
+  const svg = document.getElementById(id);
+  if (!svg) return;
+  const w = svg.clientWidth || 200;
+  const h = 40;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * (h - 4) - 2;
+    return `${x},${y}`;
+  });
+
+  svg.innerHTML = `
+    <defs><linearGradient id="sg_${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <polygon points="0,${h} ${points.join(' ')} ${w},${h}" fill="url(#sg_${id})"/>
+    <polyline points="${points.join(' ')}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+  `;
+}
+
+// ═══ QUALITY BAR ANIMATION ═══
+function animateQualityBars() {
+  document.querySelectorAll('.qbar-fill').forEach(bar => {
+    const target = bar.dataset.target;
+    setTimeout(() => { bar.style.width = target + '%'; }, 300);
+  });
+}
+
+// ═══ METRIC COUNTER ANIMATION ═══
+function animateCounter(el, target, suffix = '') {
+  const isFloat = target % 1 !== 0;
+  let current = 0;
+  const step = target / 40;
+  const interval = setInterval(() => {
+    current += step;
+    if (current >= target) {
+      current = target;
+      clearInterval(interval);
+    }
+    el.textContent = (isFloat ? current.toFixed(1) : Math.round(current)) + suffix;
+  }, 30);
+}
+
+// ═══ RUN BUTTON ═══
+document.getElementById('runBtn').addEventListener('click', function() {
+  this.innerHTML = '⟳ Evolving...';
+  this.style.background = 'linear-gradient(135deg, #ff8c42, #e040fb)';
+  setTimeout(() => {
+    this.innerHTML = '▶ Run Evolution';
+    this.style.background = 'linear-gradient(135deg, var(--cyan), var(--teal))';
+  }, 3000);
+});
+
+// ═══ UPLOAD ZONE ═══
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadZone.style.borderColor = '#00e5c8';
+  uploadZone.style.background = '#00e5c810';
+});
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.style.borderColor = '';
+  uploadZone.style.background = '';
+});
+
+// ═══ NAV TABS ═══
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', function() {
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.tab-bar').forEach(bar => {
+  bar.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      bar.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+});
+
+// ═══ INIT ═══
+window.addEventListener('load', () => {
+  renderDAG();
+  animateQualityBars();
+
+  const s1 = Array.from({length: 20}, (_, i) => 70 + Math.sin(i * 0.5) * 8 + i * 1.2);
+  const s2 = Array.from({length: 20}, (_, i) => 10 + Math.floor(i * 1.8) + Math.random() * 4);
+  const s3 = Array.from({length: 20}, () => Math.random());
+  const s4 = Array.from({length: 20}, (_, i) => 80 + Math.sin(i * 0.3) * 5 + i * 0.8);
+
+  renderSparkline('spark1', s1, '#00e5c8');
+  renderSparkline('spark2', s2, '#ff8c42');
+  renderSparkline('spark3', s3, '#4ceb9a');
+  renderSparkline('spark4', s4, '#e040fb');
+});
+
+window.addEventListener('resize', renderDAG);
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{
+  "bridge.evolved.text1.v1": {
+    "description": "Stub evolved bridge operator for pipeline text1 (workflow runner)",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": true,
+    "category": "bridge"
+  },
+  "evolved.text1.remove_self_loops": {
+    "description": "Eliminates self-loops in the 'records' output to ensure a valid data flow.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "structure",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.declare_output_keys": {
+    "description": "Ensures all output keys are properly declared and utilized in the pipeline.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "structure",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.strip_unnecessary_fields": {
+    "description": "Removes extraneous fields from records to align with the desired output structure.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "quality",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.refine_output_responses": {
+    "description": "Refines output responses to ensure they are concise and directly answer the instruction.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": true,
+    "category": "semantic",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.validate_output_quality": {
+    "description": "Checks that outputs do not include unnecessary context or explanations.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "quality",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.ensure_final_output": {
+    "description": "Validates that 'records' is properly emitted from the final step of the pipeline.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "structure",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.log_transformation_process": {
+    "description": "Logs the transformation process for better debugging and monitoring.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "control",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.handle_schema_errors": {
+    "description": "Implements error handling for validation steps to manage potential schema mismatches.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "quality",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.text1.condense_output": {
+    "description": "Condenses output responses to eliminate unnecessary context and focus on direct answers.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": true,
+    "category": "semantic",
+    "source": "llm_operator_evolution"
+  }
+}
