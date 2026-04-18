@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="assets/DataEvolver.pdf">📄 Paper</a> |
+  <a href="assets/DataEvolver.png">📄 Paper</a> |
   <a href="#-demo-video">🎬 Demo</a> |
   <a href="#-framework-overview">🧠 Framework</a> |
   <a href="#-main-results">📊 Results</a> |
@@ -84,7 +84,7 @@ This pushes the system from:
 
 ## 🧠 Framework Overview
 
-📎 [Open framework figure (PDF)](assets/ill.pdf)
+📎 [Open framework figure (PDF)](assets/ill.png)
 
 **Figure explanation.**
 DataEvolver takes raw data, seed data, and optional user descriptions as input, then runs four major stages:
@@ -142,7 +142,7 @@ It lowers amortized token cost in data preparation by **about 40% on average**.
 
 ### Case study
 
-📎 [Open case analysis (PDF)](assets/case.pdf)
+📎 [Open case analysis (PDF)](assets/case.png)
 
 The case study shows how DataEvolver evolves from an initial logical plan to a refined executable pipeline, and how trial feedback is translated into better constraints and better data in later rounds.
 
