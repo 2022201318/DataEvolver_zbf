@@ -7,7 +7,7 @@ from pathlib import Path
 # 生成脚本需在 import 子系统前把仓库根加入 sys.path，并注入环境变量供 bundle_runner 解析。
 RUN_PIPELINE_ENTRY = '''#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""DataEvolver 实例化包入口：少量评估（pilot）或全量执行（full）。由 instantiate 生成，勿手改。"""
+"""多模态数据准备 实例化包入口：少量评估（pilot）或全量执行（full）。由 instantiate 生成，勿手改。"""
 from __future__ import annotations
 
 import os
@@ -25,7 +25,7 @@ def _find_repo_root(start: Path) -> Path:
         if (d / "config").is_dir() and (d / "data").is_dir():
             return d
     sys.exit(
-        "未找到 DataEvolver 仓库根（需含 config/ 与 data/）。"
+        "未找到 多模态数据准备 仓库根（需含 config/ 与 data/）。"
         "请 cd 到仓库根、设置 DATAEVOLVER_ROOT，或从本文件所在目录执行: python run_pipeline.py"
     )
 

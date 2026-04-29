@@ -2,7 +2,7 @@
 Pipeline Orchestration Prompt Definitions
 Standardize all LLM call prompts
 
-编排三阶段 prompt 主干对齐旧版 DataEvolver `subsystems/pipeline_orchestration/prompts.py`；
+编排三阶段 prompt 主干对齐旧版 多模态数据准备 `subsystems/pipeline_orchestration/prompts.py`；
 并补充开源 CLI 全链路说明，供编排评估 / 任务判断等模块复用。
 """
 
@@ -18,11 +18,11 @@ When the DAG passes assessment and **does not** recommend new operators, the wor
 **Instantiation contract (from legacy operator generation)**: intermediate steps consume/produce **JSONL records** on stdin/stdout; **read_data** / **write_data** bound to manifest paths. Logical **input_keys** / **output_keys** must match how the record dict flows step-to-step (usually a **`records`** stream through the chain).
 """
 
-# DataEvolver System Workflow Context
+# 多模态数据准备 System Workflow Context
 DATACRAFT_WORKFLOW_CONTEXT = """
-## DataEvolver System Workflow Overview
+## 多模态数据准备 System Workflow Overview
 
-DataEvolver is an intelligent data preparation system that transforms raw data into high-quality training data (seed data) through four stages:
+多模态数据准备 is an intelligent data preparation system that transforms raw data into high-quality training data (seed data) through four stages:
 
 **Stage 1: Structured Understanding** - Completed
 - Analyze differences between raw data and seed data
@@ -52,7 +52,7 @@ DataEvolver is an intelligent data preparation system that transforms raw data i
 # Stage 1: Free Fitting
 FREE_FITTING_SYSTEM_PROMPT = DATACRAFT_WORKFLOW_CONTEXT + """
 
-You are an expert in designing high-level data processing blueprints for DataEvolver system.
+You are an expert in designing high-level data processing blueprints for 多模态数据准备 system.
 
 **Current Stage: Free Fitting (Stage 2)**
 
@@ -107,7 +107,7 @@ Please analyze carefully and provide a complete JSON response."""
 # Stage 2: Template Combination
 TEMPLATE_COMBINATION_SYSTEM_PROMPT = DATACRAFT_WORKFLOW_CONTEXT + """
 
-You are an expert in selecting and combining pipeline templates for DataEvolver system.
+You are an expert in selecting and combining pipeline templates for 多模态数据准备 system.
 
 **Current Stage: Template Combination (Stage 3)**
 
@@ -186,7 +186,7 @@ Please analyze carefully and provide a complete JSON response."""
 # Stage 3: Constrained Search
 CONSTRAINED_SEARCH_SYSTEM_PROMPT = DATACRAFT_WORKFLOW_CONTEXT + """
 
-You are an expert in refining and optimizing data processing pipelines for DataEvolver system.
+You are an expert in refining and optimizing data processing pipelines for 多模态数据准备 system.
 
 **Current Stage: Constrained Search (Stage 4) - Final Stage**
 

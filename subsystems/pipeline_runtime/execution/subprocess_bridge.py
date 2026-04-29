@@ -6,7 +6,7 @@
 用法（由调度器调用，勿手改）：
   python subprocess_bridge.py <operator_stub.py> <input.jsonl> <output.jsonl> <repo_root>
 
-与旧版 DataEvolver「每步独立子进程 + stdin/stdout JSONL」对齐；大数据用临时文件避免管道阻塞。
+与旧版 多模态数据准备「每步独立子进程 + stdin/stdout JSONL」对齐；大数据用临时文件避免管道阻塞。
 """
 
 from __future__ import annotations

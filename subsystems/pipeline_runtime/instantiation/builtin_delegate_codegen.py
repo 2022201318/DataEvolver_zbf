@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 BUILTIN_DELEGATE_MODULE = '''# -*- coding: utf-8 -*-
-# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.
+# 多模态数据准备: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.
 # Not a passthrough stub; trial/subprocess 与本文件一致。
 from __future__ import annotations
 

@@ -70,7 +70,7 @@ def _resolve_root(root: Optional[Path]) -> Path:
     if not (r / "config").is_dir() or not (r / "data").is_dir():
         typer.secho(
             _tr(
-                "警告: 当前目录不像仓库根（需含 config/ 与 data/）。请 cd 到 DataEvolver 仓库根、设置环境变量 DATAEVOLVER_ROOT，或使用 --root。",
+                "警告: 当前目录不像仓库根（需含 config/ 与 data/）。请 cd 到 多模态数据准备 仓库根、设置环境变量 DATAEVOLVER_ROOT，或使用 --root。",
                 "Warning: current directory does not look like repo root (needs config/ and data/). Please cd to repo root, set DATAEVOLVER_ROOT, or use --root.",
             ),
             err=True,
@@ -551,7 +551,7 @@ def wf_validate_dag_only(
 
 app = typer.Typer(
     no_args_is_help=True,
-    help="DataEvolver 开源版 CLI。推荐：`dataevolver --help`（支持短命令别名与中英文输出）。",
+    help="多模态数据准备 开源版 CLI。推荐：`dataevolver --help`（支持短命令别名与中英文输出）。",
 )
 
 

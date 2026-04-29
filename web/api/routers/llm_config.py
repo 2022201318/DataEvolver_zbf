@@ -1,7 +1,7 @@
 """
 LLM settings: read for the settings form, save from the frontend into repo `config/`.
 
-Writes (aligned with legacy DataEvolver):
+Writes (aligned with legacy 多模态数据准备):
 - `config/config.json` — `llm` block + preserves `logging` / `api` / `storage` / `processing`
 - `config/api_keys.json` — `openai` + `custom` slots
 - `config/api_config.json` — primary source for `ConfigManager.llm_config()`
@@ -162,7 +162,7 @@ def save_llm(request: Request, body: SaveLlmBody) -> dict[str, Any]:
         system_cfg["logging"] = {"level": "INFO", "file": "logs/dataevolver.log"}
     if not isinstance(system_cfg.get("api"), dict):
         system_cfg["api"] = {
-            "title": "DataEvolver API",
+            "title": "多模态数据准备 API",
             "version": "0.1.0",
             "cors_origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
         }

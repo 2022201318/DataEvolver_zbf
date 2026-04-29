@@ -18,7 +18,7 @@ import uvicorn
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="DataEvolver API server")
+    parser = argparse.ArgumentParser(description="多模态数据准备 API server")
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--reload", action="store_true")

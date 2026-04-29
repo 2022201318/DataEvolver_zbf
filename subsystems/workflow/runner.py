@@ -1,5 +1,5 @@
 """
-将「推进一步」映射为可持久化的后端步骤，落盘路径与旧版 DataEvolver 对齐。
+将「推进一步」映射为可持久化的后端步骤，落盘路径与旧版 多模态数据准备 对齐。
 
 - **理解**：单次 LLM 完整 profile（`full_analyzer`）。
 - **编排**：三阶段 LLM（`pipeline_orchestration.orchestrator_open`，对齐旧版 `PipelineOrchestratorSimple`），写入 `data/orchestration_results/`。

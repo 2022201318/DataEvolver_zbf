@@ -1,7 +1,7 @@
 """
 实例化包入口 `run_pipeline.py` 调用的运行时：pilot / full。
 
-与 `dataevolver workflow trial` / `run-pipeline` 写入相同落盘路径，便于 DataEvolver 评估与前端读 JSON。
+与 `dataevolver workflow trial` / `run-pipeline` 写入相同落盘路径，便于 多模态数据准备 评估与前端读 JSON。
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def find_repo_root(start: Path) -> Path:
         if (d / "config").is_dir() and (d / "data").is_dir():
             return d
     raise FileNotFoundError(
-        "未找到 DataEvolver 仓库根（需含 config/ 与 data/）。请 cd 到仓库根或设置环境变量 DATAEVOLVER_ROOT。"
+        "未找到 多模态数据准备 仓库根（需含 config/ 与 data/）。请 cd 到仓库根或设置环境变量 DATAEVOLVER_ROOT。"
     )
 
 
@@ -130,7 +130,7 @@ def entrypoint_main(argv: list[str] | None = None) -> int:
 
     argv = argv if argv is not None else sys.argv[1:]
     ap = argparse.ArgumentParser(
-        description="DataEvolver 生成管线入口：pilot=采样+可选 LLM 评估，full=全量执行。",
+        description="多模态数据准备 生成管线入口：pilot=采样+可选 LLM 评估，full=全量执行。",
     )
     ap.add_argument(
         "--mode",

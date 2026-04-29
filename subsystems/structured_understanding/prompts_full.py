@@ -1,4 +1,4 @@
-# 自旧版 DataEvolver `prompts.py` 迁入；示例 JSON 内补全逗号，避免误导模型。
+# 自旧版 多模态数据准备 `prompts.py` 迁入；示例 JSON 内补全逗号，避免误导模型。
 # 单次 UNIFIED_PROFILE 在旧版「三步理解」之上强化了 delta 可证伪性；下方块保留旧版多轮调试的 schema 深度要求。
 
 STRUCTURED_UNDERSTANDING_SYSTEM_PROMPT = """You are an expert in data analysis and understanding. Your task is to analyze raw data and seed data to produce a comprehensive structured understanding.
@@ -153,7 +153,7 @@ Please provide a high-level dataset analysis in JSON format (keep it concise and
 # 单次 LLM：由浅入深输出完整 profile（减少调用次数与总 token）
 # ---------------------------------------------------------------------------
 
-UNIFIED_PROFILE_SYSTEM_PROMPT = """You are a senior data/ML engineer for the DataEvolver system. Your job is **structured, evidence-based** comparison of **raw** training inputs vs **seed** target examples—not generic “quality” commentary.
+UNIFIED_PROFILE_SYSTEM_PROMPT = """You are a senior data/ML engineer for the 多模态数据准备 system. Your job is **structured, evidence-based** comparison of **raw** training inputs vs **seed** target examples—not generic “quality” commentary.
 
 Hard rules:
 1. Output **ONLY one JSON object** with exactly three top-level keys: `basic_information`, `schema_analysis`, `dataset_level_delta`.

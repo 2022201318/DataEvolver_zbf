@@ -1583,7 +1583,7 @@ export function MainLayout() {
         </div>
               {!sidebarCollapsed && (
                 <div className="min-w-0">
-                  <p className="text-lg font-semibold text-[var(--text)] leading-none">DataEvolver</p>
+                  <p className="text-lg font-semibold text-[var(--text)] leading-none">多模态数据准备</p>
                   <p className="text-xs text-[var(--text-muted)] mt-1 truncate">{t.productSub}</p>
                 </div>
               )}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 对「注册表内无内置 handler」的算子（如 evolved.*），用 LLM 生成 `run(records, context)` 模块。
-风格对齐旧版 DataEvolver operator_generation，但契约固定为开源运行时（与 trial / subprocess 一致）。
+风格对齐旧版 多模态数据准备 operator_generation，但契约固定为开源运行时（与 trial / subprocess 一致）。
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from core.llm_client import LLMClientError, chat_completion, parse_message_conte
 
 logger = logging.getLogger(__name__)
 
-_CODEGEN_SYSTEM = """You are an expert Python engineer for the DataEvolver open-source runtime.
+_CODEGEN_SYSTEM = """You are an expert Python engineer for the 多模态数据准备 open-source runtime.
 
 Output **only** one JSON object: {"code": "<entire Python module as a single string>"}.
 

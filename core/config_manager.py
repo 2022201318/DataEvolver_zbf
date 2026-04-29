@@ -44,7 +44,7 @@ class ConfigManager:
         return {
             "logging": {"level": "INFO", "file": "logs/dataevolver.log"},
             "api": {
-                "title": "DataEvolver API",
+                "title": "多模态数据准备 API",
                 "version": "0.1.0",
                 "cors_origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
             },

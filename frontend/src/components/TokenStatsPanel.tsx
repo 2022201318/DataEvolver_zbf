@@ -38,7 +38,7 @@ export function TokenStatsPanel() {
             </button>
           </div>
           <p className="text-xs text-[var(--text-dim)]">
-            统计 DataEvolver 四阶段中调用 LLM 的 Token 与时间开销。后端使用 FastAPI 统一汇总并实时推送。
+            统计 多模态数据准备 四阶段中调用 LLM 的 Token 与时间开销。后端使用 FastAPI 统一汇总并实时推送。
           </p>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-lg bg-[var(--bg-card)] px-3 py-2.5">

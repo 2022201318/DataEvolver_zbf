@@ -8,7 +8,7 @@ export default {
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
-        /* DataEvolver 主色：青/橙双轨、科技感 */
+        /* 多模态数据准备 主色：青/橙双轨、科技感 */
         de: {
           cyan: '#00e5c8',
           'cyan-dim': '#00e5c860',

@@ -110,7 +110,7 @@ export function InstantiationPage({ mode = 'full' }: { mode?: 'full' | 'summary'
         </div>
       </div>
       <p className="text-sm text-[var(--text-muted)]">
-        第三步：DataEvolver 将 DAG 中的每个算子实例化为具体 Python 代码。你可以逐步展开阅读，也可以结合日志 Debug。
+        第三步：多模态数据准备 将 DAG 中的每个算子实例化为具体 Python 代码。你可以逐步展开阅读，也可以结合日志 Debug。
         接口预留：GET /api/pipeline/{'{id}'}/instantiation/steps 或 instantiation_step_done 推送；新 step 完成时追加并高亮。
       </p>
       <div className="space-y-3">
