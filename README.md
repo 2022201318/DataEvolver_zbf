@@ -386,7 +386,7 @@ We welcome issues, ideas, and contributions!
 - UI polish on the evolution canvas  
 - Docs, examples, and reproducible benchmark scripts  
 
----
+<!-- ---
 
 ## 📖 Citation
 
@@ -407,4 +407,4 @@ If you use DataEvolver in research, please cite our paper:
 
 <p align="center">
   <sub>Built for teams who want <b>executable</b> and <b>seed-aligned</b> data pipelines — not one-shot prompts.</sub>
-</p>
+</p> -->
