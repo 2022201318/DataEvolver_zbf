@@ -1,0 +1,3 @@
+{"instruction":"Read invoice screenshot and summarize key amount.","input":"image_path=assets/mock/invoice_a.png","output":"Invoice summary: total amount is $1240.50 and currency is USD."}
+{"instruction":"Read receipt photo and summarize key amount.","input":"image_path=assets/mock/receipt_b.png","output":"Receipt summary: paid amount is $87.20."}
+{"instruction":"Read lab screenshot and summarize highlighted indicator.","input":"image_path=assets/mock/lab_c.png","output":"Lab summary: highlighted CRP value is 12.4 mg/L."}

@@ -1,0 +1,39 @@
+{
+  "step_index": 2,
+  "step_id": "step_2",
+  "operator_name": "remove_field",
+  "description": "Remove the 'text' field from the records to simplify the data structure.",
+  "input_keys": [
+    "records"
+  ],
+  "output_keys": [
+    "records"
+  ],
+  "parameters": {
+    "field_names": [
+      "text"
+    ]
+  },
+  "requires_llm": false,
+  "prompt_generated": false,
+  "relative_dir": "data/generated_pipelines/med_case_1/step_002",
+  "orchestration_step": {
+    "step_id": "step_2",
+    "operator": "remove_field",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "parameters": {
+      "field_names": [
+        "text"
+      ]
+    },
+    "description": "Remove the 'text' field from the records to simplify the data structure.",
+    "mapped_from_abstract_step": "step_2",
+    "refinement_source": "operator_registry"
+  },
+  "impl_kind": "builtin_delegate"
+}

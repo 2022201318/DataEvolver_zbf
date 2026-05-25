@@ -1,6 +1,12 @@
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { LiveArtifactsForCanvas } from '../lib/buildEvolutionRowsFromPipeline'
-import { buildEvolutionRowsFromPipeline } from '../lib/buildEvolutionRowsFromPipeline'
+import {
+  buildEvolutionRowsFromPipeline,
+  type IterationHistoryArtifact,
+  type OrchestrationArchiveArtifact,
+  type RoundHistoryArtifact,
+} from '../lib/buildEvolutionRowsFromPipeline'
+import { mergeEvolutionRows } from '../lib/mergeEvolutionRows'
 import type { ReactNode } from 'react'
 import { Database, Eye, Languages, PanelLeftClose, PanelLeftOpen, Play, Save, Settings, Trash2, Upload, UploadCloud, Wand2, X } from 'lucide-react'
 import { useAppStore } from '../stores/appStore'
@@ -9,6 +15,7 @@ import {
   advanceWorkflow,
   ApiError,
   fetchArtifactHistory,
+  fetchArtifactHistoryFile,
   fetchExperience,
   fetchInstantiationSteps,
   fetchLlmConfigFromServer,
@@ -70,6 +77,7 @@ interface EvolutionRow {
   experienceMetrics?: Metric
   needNext: boolean
   completed: boolean
+  rowUi?: LiveArtifactsForCanvas
 }
 
 type StepTimingMap = Record<string, number>
@@ -154,6 +162,16 @@ interface UploadPreviewState {
   raw: string[]
   seed: string[]
   description: string[]
+}
+
+function pickArtifactPath(obj: unknown, key: string): string | null {
+  if (!obj || typeof obj !== 'object') return null
+  const path = (obj as Record<string, unknown>).paths
+  if (!path || typeof path !== 'object') return null
+  const v = (path as Record<string, unknown>)[key]
+  if (typeof v !== 'string') return null
+  const s = v.trim()
+  return s ? s : null
 }
 
 /** 上传后数据预览区：每个文件展示文件开头的行数（整行不截断） */
@@ -749,7 +767,7 @@ export function MainLayout() {
 
   const reloadOperatorPool = useCallback(async () => {
     try {
-      const data = await fetchOperators()
+      const data = await fetchOperators(pipelineId)
       setOperatorPool(mapApiOperatorsToPoolItems(data.operators, language))
     } catch (e) {
       const detail = e instanceof ApiError ? e.detail : String(e)
@@ -759,7 +777,7 @@ export function MainLayout() {
       })
       setOperatorPool([])
     }
-  }, [language, setToast])
+  }, [language, pipelineId, setToast])
 
   useEffect(() => {
     void reloadOperatorPool()
@@ -799,6 +817,102 @@ export function MainLayout() {
       const understanding = underRes?.data ?? null
       void _runLatest
       setArtifactHistoryCount(_history?.entries?.length ?? 0)
+      const historyArtifacts: {
+        rounds: RoundHistoryArtifact[]
+        iterations: IterationHistoryArtifact[]
+        orchestrationArchives: OrchestrationArchiveArtifact[]
+      } = {
+        rounds: [],
+        iterations: [],
+        orchestrationArchives: [],
+      }
+      if (_history) {
+        const cache = new Map<string, Record<string, unknown> | null>()
+        const readJsonByPath = async (relativePath: string | null): Promise<Record<string, unknown> | null> => {
+          if (!relativePath) return null
+          if (cache.has(relativePath)) return cache.get(relativePath) ?? null
+          try {
+            const r = await fetchArtifactHistoryFile(pid, relativePath)
+            cache.set(relativePath, r.data)
+            return r.data
+          } catch {
+            cache.set(relativePath, null)
+            return null
+          }
+        }
+        const roundSnapshots = Array.isArray(_history.round_snapshots) ? _history.round_snapshots : []
+        const roundTasks = roundSnapshots.map(async (snap) => {
+          const round = Number((snap as Record<string, unknown>).round ?? 0)
+          if (!Number.isFinite(round) || round < 1) return
+          const orchestrationPath = pickArtifactPath(snap, 'orchestration')
+          const instantiationPath = pickArtifactPath(snap, 'instantiation')
+          const qualityPath = pickArtifactPath(snap, 'quality_check')
+          const trialPath = pickArtifactPath(snap, 'trial')
+          const experiencePath = pickArtifactPath(snap, 'experience')
+          const understandingPath = pickArtifactPath(snap, 'understanding')
+          const [orchestration, instantiation, qualityCheck, trialData, experienceData, understandingData] =
+            await Promise.all([
+            readJsonByPath(orchestrationPath),
+            readJsonByPath(instantiationPath),
+            readJsonByPath(qualityPath),
+            readJsonByPath(trialPath),
+            readJsonByPath(experiencePath),
+            readJsonByPath(understandingPath),
+          ])
+          historyArtifacts.rounds.push({
+            round: Math.round(round),
+            quality_passed:
+              typeof (snap as Record<string, unknown>).quality_passed === 'boolean'
+                ? ((snap as Record<string, unknown>).quality_passed as boolean)
+                : undefined,
+            understanding: understandingData,
+            orchestration,
+            instantiation,
+            quality_check: qualityCheck,
+            trial: trialData,
+            experience: experienceData,
+          })
+        })
+        const entryItems = Array.isArray(_history.entries) ? _history.entries : []
+        const archiveTasks = entryItems
+          .filter((entry) => entry && typeof entry === 'object' && String((entry as Record<string, unknown>).kind ?? '') === 'orchestration')
+          .map(async (entry) => {
+            const e = entry as Record<string, unknown>
+            const archPath = typeof e.path === 'string' ? e.path : null
+            const orchestration = await readJsonByPath(archPath)
+            if (!orchestration) return
+            const maybeRound = Number(e.round ?? e.orchestration_revision ?? wf?.state.round ?? 1)
+            historyArtifacts.orchestrationArchives.push({
+              round: Number.isFinite(maybeRound) && maybeRound >= 1 ? Math.round(maybeRound) : Math.max(1, Number(wf?.state.round ?? 1)),
+              understanding_revision:
+                Number.isFinite(Number(e.understanding_revision)) && Number(e.understanding_revision) >= 1
+                  ? Math.round(Number(e.understanding_revision))
+                  : undefined,
+              orchestration_revision:
+                Number.isFinite(Number(e.orchestration_revision)) && Number(e.orchestration_revision) >= 1
+                  ? Math.round(Number(e.orchestration_revision))
+                  : undefined,
+              orchestration,
+            })
+          })
+        const iterationTasks = entryItems
+          .filter((entry) => entry && typeof entry === 'object' && String((entry as Record<string, unknown>).kind ?? '') === 'iteration_snapshot')
+          .map(async (entry) => {
+            const e = entry as Record<string, unknown>
+            const round = Number(e.round ?? 0)
+            const iteration = Number(e.iteration ?? 0)
+            if (!Number.isFinite(round) || round < 1 || !Number.isFinite(iteration) || iteration < 1) return
+            const orchestrationPath = pickArtifactPath(e, 'orchestration')
+            const orchestration = await readJsonByPath(orchestrationPath)
+            historyArtifacts.iterations.push({
+              round: Math.round(round),
+              iteration: Math.round(iteration),
+              reason: typeof e.reason === 'string' ? e.reason : undefined,
+              orchestration,
+            })
+          })
+        await Promise.all([...roundTasks, ...archiveTasks, ...iterationTasks])
+      }
       if (!wf) {
         wf = {
           ok: true,
@@ -834,40 +948,22 @@ export function MainLayout() {
         understanding,
         dagResponse: dagJson,
         instantiationSteps: inst?.steps ?? null,
+        instantiationMeta: (inst?.meta && typeof inst.meta === 'object' ? inst.meta : null) as Record<string, unknown> | null,
         quality: quality?.data ?? null,
         trial: trial?.data ?? null,
         experience: experience?.data ?? null,
         tokens: tokens ?? null,
         history: _history ?? null,
+        historyArtifacts,
         lastAdvanceMessage: wf.state.last_message ?? '',
         language,
       })
       const timing = timingPatch ? { ...stepDurations, ...timingPatch } : stepDurations
       const measuredRows = applyMeasuredDurations(built.rows as EvolutionRow[], timing)
-      setRows((prev) => {
-        const incoming = measuredRows
-        if (!incoming.length) return []
-        // 后端未返回完整 history 时，保留“已完成的历史轮次”，避免进入下一轮后第一轮被清空。
-        if (incoming.length === 1) {
-          const cur = incoming[0]
-          const prevRoundId = Math.max(0, cur.id - 1)
-          const preserved = prev
-            .filter((r) => r.id < cur.id)
-            .map((r) =>
-              r.id === prevRoundId
-                ? {
-                    ...r,
-                    completed: true,
-                    needNext: true,
-                  }
-                : { ...r, completed: true }
-            )
-          const merged = [...preserved, cur]
-          merged.sort((a, b) => a.id - b.id)
-          return merged
-        }
-        return incoming
-      })
+      const currentRound = Math.max(1, Number(wf.state.round ?? 1))
+      setRows((prev) =>
+        mergeEvolutionRows(prev as EvolutionRow[], measuredRows as EvolutionRow[], currentRound) as EvolutionRow[]
+      )
       setFinished(built.finished)
       setLiveArtifacts(built.live)
       setWorkflowState(wf.state)
@@ -967,19 +1063,33 @@ export function MainLayout() {
     (key: UploadFileKey) => async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
       if (!file) return
-      const { rows: lineCount, preview } = await parsePreviewLines(file)
-      uploadFilesRef.current[key] = file
-      setUpload({
-        [key]: {
-          name: file.name,
-          size: file.size,
-          rows: lineCount,
-        },
-      })
-      setUploadPreview((prev) => ({
-        ...prev,
-        [key]: preview,
-      }))
+      try {
+        const { rows: lineCount, preview } = await parsePreviewLines(file)
+        uploadFilesRef.current[key] = file
+        setUpload({
+          [key]: {
+            name: file.name,
+            size: file.size,
+            rows: lineCount,
+          },
+        })
+        setUploadPreview((prev) => ({
+          ...prev,
+          [key]: preview,
+        }))
+      } catch (e) {
+        const msg =
+          language === 'zh'
+            ? `读取文件失败：${file.name}`
+            : `Failed to read file: ${file.name}`
+        setToast({
+          message: `${msg}${e instanceof Error && e.message ? ` (${e.message})` : ''}`,
+          type: 'error',
+        })
+      } finally {
+        // 允许用户重复选择同一个文件也能触发 onChange
+        event.target.value = ''
+      }
     }
 
   const selectDagTab = (rowId: number, tabId: number) => {
@@ -1017,10 +1127,22 @@ export function MainLayout() {
       const stepKey = idx >= 0 && idx < order.length ? order[idx] : null
       const roundId = Math.max(1, Number(workflowState?.round ?? 1))
       setWorkflowExecutingStep(stepKey)
-      const startedAt = Date.now()
       try {
-        const res = await advanceWorkflow(pipelineId)
-        const elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+        const runAdvanceWithRecovery = async (expectedStep: string | null) => {
+          let startedAt = Date.now()
+          let res = await advanceWorkflow(pipelineId)
+          let elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          const detail = (res.detail ?? {}) as Record<string, unknown>
+          const status = typeof detail.status === 'string' ? detail.status : ''
+          if (status === 'skipped' && expectedStep && (expectedStep === 'orchestration' || expectedStep === 'instantiation')) {
+            await rerunWorkflowFromStep(pipelineId, expectedStep)
+            startedAt = Date.now()
+            res = await advanceWorkflow(pipelineId)
+            elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          }
+          return { res, elapsedSec }
+        }
+        const { res, elapsedSec } = await runAdvanceWithRecovery(stepKey)
         const executedStep = (res.step || stepKey || '').trim()
         const timingPatch: StepTimingMap =
           executedStep.length > 0 ? { [timingKey(roundId, executedStep)]: elapsedSec } : {}
@@ -1086,9 +1208,17 @@ export function MainLayout() {
               : null
           const roundId = Math.max(1, Number(wf.state.round ?? 1))
           setWorkflowExecutingStep(nextKey)
-          const startedAt = Date.now()
-          const adv = await advanceWorkflow(pipelineId)
-          const elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          let startedAt = Date.now()
+          let adv = await advanceWorkflow(pipelineId)
+          let elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          const advDetail = (adv.detail ?? {}) as Record<string, unknown>
+          const advStatus = typeof advDetail.status === 'string' ? advDetail.status : ''
+          if (advStatus === 'skipped' && nextKey && (nextKey === 'orchestration' || nextKey === 'instantiation')) {
+            await rerunWorkflowFromStep(pipelineId, nextKey)
+            startedAt = Date.now()
+            adv = await advanceWorkflow(pipelineId)
+            elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          }
           const executedStep = (adv.step || nextKey || '').trim()
           if (executedStep.length > 0) {
             timingPatch[timingKey(roundId, executedStep)] = elapsedSec
@@ -1170,9 +1300,17 @@ export function MainLayout() {
           const stepKey = idx >= 0 && idx < order.length ? order[idx] : null
           const roundId = Math.max(1, Number(wf.state.round ?? 1))
           setWorkflowExecutingStep(stepKey)
-          const startedAt = Date.now()
-          const adv = await advanceWorkflow(pid)
-          const elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          let startedAt = Date.now()
+          let adv = await advanceWorkflow(pid)
+          let elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          const advDetail = (adv.detail ?? {}) as Record<string, unknown>
+          const advStatus = typeof advDetail.status === 'string' ? advDetail.status : ''
+          if (advStatus === 'skipped' && stepKey && (stepKey === 'orchestration' || stepKey === 'instantiation')) {
+            await rerunWorkflowFromStep(pid, stepKey)
+            startedAt = Date.now()
+            adv = await advanceWorkflow(pid)
+            elapsedSec = Math.max(0.01, (Date.now() - startedAt) / 1000)
+          }
           const executedStep = (adv.step || stepKey || '').trim()
           if (executedStep) {
             timingPatch[timingKey(roundId, executedStep)] = elapsedSec
@@ -1583,7 +1721,7 @@ export function MainLayout() {
         </div>
               {!sidebarCollapsed && (
                 <div className="min-w-0">
-                  <p className="text-lg font-semibold text-[var(--text)] leading-none">多模态数据准备</p>
+                  <p className="text-lg font-semibold text-[var(--text)] leading-none">DataEvolver</p>
                   <p className="text-xs text-[var(--text-muted)] mt-1 truncate">{t.productSub}</p>
                 </div>
               )}

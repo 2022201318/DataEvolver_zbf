@@ -1,0 +1,571 @@
+{
+  "pipeline_id": "a2",
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Read raw data from the specified JSONL file into the main record stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "remove_field",
+        "description": "Remove the 'text' field from the records to streamline the output structure.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "validate_schema",
+        "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "check_format",
+        "description": "Check the format of the records to ensure they meet the specified quality standards.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "write_data",
+        "description": "Write the processed records to the specified JSONL file.",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5"
+    ],
+    "total_nodes": 5,
+    "total_edges": 4
+  },
+  "pipeline_plan": [
+    {
+      "step": 1,
+      "operator": "read_data",
+      "description": "Read raw data from the specified JSONL file into the main record stream."
+    },
+    {
+      "step": 2,
+      "operator": "remove_field",
+      "description": "Remove the 'text' field from the records to streamline the output structure."
+    },
+    {
+      "step": 3,
+      "operator": "validate_schema",
+      "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed."
+    },
+    {
+      "step": 4,
+      "operator": "check_format",
+      "description": "Check the format of the records to ensure they meet the specified quality standards."
+    },
+    {
+      "step": 5,
+      "operator": "write_data",
+      "description": "Write the processed records to the specified JSONL file."
+    }
+  ],
+  "source": "open_orchestrator_v1",
+  "meta": {
+    "created_at": "2026-05-25T07:42:01.394179+00:00",
+    "llm_stages": [
+      "free_fitting",
+      "template_combination",
+      "constrained_search"
+    ]
+  },
+  "free_fitting": {
+    "optimization_blueprint": {
+      "global_optimization_direction": "Focus on removing extraneous context to enhance clarity and ensure outputs are concise and directly relevant to the instruction.",
+      "key_improvements": [
+        "Eliminate the 'text' field from outputs to streamline responses.",
+        "Ensure that outputs are concise and directly address the instruction without unnecessary verbosity."
+      ],
+      "transformation_strategies": [
+        "Implement a filtering mechanism to remove the 'text' field from the output structure.",
+        "Establish guidelines for generating outputs that prioritize direct answers to instructions."
+      ],
+      "quality_focus": [
+        "Verify that outputs do not include unnecessary context or verbosity.",
+        "Ensure that all outputs meet the standard of being concise and relevant to the instruction."
+      ],
+      "summary": "The optimization blueprint emphasizes the removal of the 'text' field to improve output clarity and focus. Key strategies include filtering out extraneous information and ensuring outputs are concise. The overall goal is to enhance the quality of instruction-following tasks by delivering direct and relevant responses."
+    },
+    "stage": "free_fitting",
+    "design_method": "llm_driven"
+  },
+  "template_combination": {
+    "template_selection": {
+      "selected_templates": [
+        "structure_optimization",
+        "quality_validation"
+      ],
+      "selection_rationale": "The selected templates focus on optimizing the data structure to remove extraneous fields and validating the quality of outputs to ensure they are concise and relevant. Structure optimization directly addresses the need to eliminate the 'text' field, while quality validation ensures that the outputs meet the standards of clarity and conciseness outlined in the optimization blueprint.",
+      "template_combination_strategy": "sequential",
+      "pipeline_sketch": {
+        "steps": [
+          {
+            "step_id": "step_1",
+            "template_name": "structure_optimization",
+            "functional_description": "分析当前数据结构，识别优化点",
+            "expected_output": "结构优化方案",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_2",
+            "template_name": "structure_optimization",
+            "functional_description": "重组和优化数据结构",
+            "expected_output": "优化后的数据结构",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_3",
+            "template_name": "quality_validation",
+            "functional_description": "评估内容质量，从多个维度打分",
+            "expected_output": "质量评分和评估报告",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_4",
+            "template_name": "quality_validation",
+            "functional_description": "验证数据格式是否符合规范",
+            "expected_output": "格式验证结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          }
+        ],
+        "total_steps": 4,
+        "data_flow": "Data flows from the structure optimization step to the quality validation step, where the optimized data is assessed for quality and relevance.",
+        "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+        "stage": "template_combination"
+      },
+      "coverage_analysis": {
+        "optimization_direction_coverage": "The selected templates effectively cover the optimization direction by focusing on removing extraneous context and enhancing clarity.",
+        "key_improvements_coverage": "Both templates address the key improvements by eliminating the 'text' field and ensuring outputs are concise.",
+        "quality_focus_coverage": "The templates ensure that outputs are validated for quality, addressing the focus on clarity and relevance.",
+        "missing_capabilities": []
+      }
+    },
+    "pipeline_sketch": {
+      "steps": [
+        {
+          "step_id": "step_1",
+          "template_name": "structure_optimization",
+          "functional_description": "分析当前数据结构，识别优化点",
+          "expected_output": "结构优化方案",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_2",
+          "template_name": "structure_optimization",
+          "functional_description": "重组和优化数据结构",
+          "expected_output": "优化后的数据结构",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_3",
+          "template_name": "quality_validation",
+          "functional_description": "评估内容质量，从多个维度打分",
+          "expected_output": "质量评分和评估报告",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_4",
+          "template_name": "quality_validation",
+          "functional_description": "验证数据格式是否符合规范",
+          "expected_output": "格式验证结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        }
+      ],
+      "total_steps": 4,
+      "data_flow": "Data flows from the structure optimization step to the quality validation step, where the optimized data is assessed for quality and relevance.",
+      "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+      "stage": "template_combination"
+    },
+    "stage": "template_combination",
+    "design_method": "template_based"
+  },
+  "constrained_search": {
+    "final_pipeline": [
+      {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a2/raw_data/demo_raw.jsonl"
+        },
+        "description": "Read raw data from the specified JSONL file into the main record stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_2",
+        "operator": "remove_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "field_names": [
+            "text"
+          ]
+        },
+        "description": "Remove the 'text' field from the records to streamline the output structure.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_3",
+        "operator": "validate_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ],
+        "parameters": {
+          "schema_rules": {
+            "required_fields": [
+              "instruction",
+              "input",
+              "output"
+            ],
+            "field_types": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed.",
+        "mapped_from_abstract_step": "step_3",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_4",
+        "operator": "check_format",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ],
+        "parameters": {
+          "format_rules": {
+            "expected_format": "Ensure outputs are concise and directly address the instruction without unnecessary verbosity."
+          }
+        },
+        "description": "Check the format of the records to ensure they meet the specified quality standards.",
+        "mapped_from_abstract_step": "step_4",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_5",
+        "operator": "write_data",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a2/outputs/a2_processed.jsonl"
+        },
+        "description": "Write the processed records to the specified JSONL file.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      }
+    ],
+    "refinement_summary": {
+      "original_steps_count": 4,
+      "final_steps_count": 5,
+      "added_operators": [],
+      "modified_operators": [
+        "remove_field"
+      ],
+      "data_flow_verification": "Data flows from reading raw data to removing the 'text' field, validating the schema, checking format, and finally writing the processed data.",
+      "capability_coverage": "All required capabilities are covered, including reading, processing, validating, and writing data."
+    },
+    "capability_check": {
+      "needs_dynamic_addition": false,
+      "missing_capabilities": [],
+      "note": "open source: no dynamic operator injection"
+    },
+    "validation_result": {
+      "is_valid": true,
+      "validation_issues": [],
+      "checked_at": "2026-05-25T07:42:01.398451+00:00",
+      "dag_validation_meta": {
+        "preserved_issue_count": 0,
+        "added_issue_count": 0,
+        "sources": [
+          "orchestration",
+          "registry",
+          "dag_structure",
+          "io_contract",
+          "dag_graph_topology"
+        ]
+      },
+      "note": "workflow dag_validation：合并编排阶段校验 + 注册表/DAG 对齐 + 图论检查",
+      "structural_valid": true,
+      "llm_task_assessment": {
+        "satisfied": true,
+        "reasoning": "结构上，DAG的步骤顺序合理，能够有效地读取数据、移除多余字段、验证模式、检查格式并写入数据。语义上，所有步骤都符合理解中提到的目标，特别是移除'text'字段以简化输出结构。",
+        "recommend_new_operators": false,
+        "recommended_fixes": [],
+        "optimization_suggestions": [],
+        "next_steps_for_user": [
+          "运行管道以验证数据处理结果",
+          "检查输出文件以确保符合质量标准",
+          "如有必要，调整步骤以优化性能"
+        ],
+        "skipped": false
+      }
+    },
+    "operator_level_self_evolving": {
+      "triggered": false,
+      "added_operators": [],
+      "re_orchestrated": false,
+      "suggested_operators": []
+    },
+    "stage": "constrained_search",
+    "design_method": "constrained_optimization"
+  },
+  "final_pipeline": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a2/raw_data/demo_raw.jsonl"
+      },
+      "description": "Read raw data from the specified JSONL file into the main record stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "remove_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "field_names": [
+          "text"
+        ]
+      },
+      "description": "Remove the 'text' field from the records to streamline the output structure.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "validate_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": {
+          "required_fields": [
+            "instruction",
+            "input",
+            "output"
+          ],
+          "field_types": {
+            "instruction": "string",
+            "input": "string",
+            "output": "string"
+          }
+        }
+      },
+      "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed.",
+      "mapped_from_abstract_step": "step_3",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "check_format",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "report"
+      ],
+      "parameters": {
+        "format_rules": {
+          "expected_format": "Ensure outputs are concise and directly address the instruction without unnecessary verbosity."
+        }
+      },
+      "description": "Check the format of the records to ensure they meet the specified quality standards.",
+      "mapped_from_abstract_step": "step_4",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "write_data",
+      "input_keys": [
+        "records",
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a2/outputs/a2_processed.jsonl"
+      },
+      "description": "Write the processed records to the specified JSONL file.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "dag_validation": {
+    "checked_at": "2026-05-25T07:42:01.398451+00:00",
+    "is_valid": true,
+    "issue_count": 0,
+    "structural_valid": true,
+    "task_fit_satisfied": true,
+    "task_fit_skipped": false,
+    "recommend_new_operators": false,
+    "assessment_detail_path": "data/dag_assessment_results/a2.json",
+    "llm": {
+      "reasoning": "结构上，DAG的步骤顺序合理，能够有效地读取数据、移除多余字段、验证模式、检查格式并写入数据。语义上，所有步骤都符合理解中提到的目标，特别是移除'text'字段以简化输出结构。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "运行管道以验证数据处理结果",
+        "检查输出文件以确保符合质量标准",
+        "如有必要，调整步骤以优化性能"
+      ]
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "pipeline_id": "a2",
+  "step_index": 3,
+  "steps_completed": [
+    "understanding",
+    "orchestration",
+    "operator_evolution"
+  ],
+  "last_message": "orchestration: 已完成 → 评估通过，跳过算子进化，下一步 instantiate",
+  "updated_at": "2026-05-25T07:42:11.938115+00:00",
+  "dag_evolution_cycles": 0,
+  "understanding_revision": 3,
+  "orchestration_revision": 3,
+  "round": 3,
+  "quality_passed": false,
+  "ready_for_full_run": false,
+  "next_action": "advance",
+  "step_order": [
+    "understanding",
+    "orchestration",
+    "operator_evolution",
+    "instantiation",
+    "trial_run",
+    "quality_check",
+    "experience"
+  ],
+  "is_complete": false
+}

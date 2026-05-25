@@ -1,0 +1,636 @@
+{
+  "pipeline_id": "a",
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Read raw data from a JSONL file into the main record stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "remove_field",
+        "description": "Remove the 'text' field from raw records to align with seed structure.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "validate_schema",
+        "description": "Validate each record against required fields and types, emitting a structured report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "check_format",
+        "description": "Check format patterns and emit a human-readable report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "write_data",
+        "description": "Write processed records to a JSONL file.",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5"
+    ],
+    "total_nodes": 5,
+    "total_edges": 4
+  },
+  "pipeline_plan": [
+    {
+      "step": 1,
+      "operator": "read_data",
+      "description": "Read raw data from a JSONL file into the main record stream."
+    },
+    {
+      "step": 2,
+      "operator": "remove_field",
+      "description": "Remove the 'text' field from raw records to align with seed structure."
+    },
+    {
+      "step": 3,
+      "operator": "validate_schema",
+      "description": "Validate each record against required fields and types, emitting a structured report."
+    },
+    {
+      "step": 4,
+      "operator": "check_format",
+      "description": "Check format patterns and emit a human-readable report."
+    },
+    {
+      "step": 5,
+      "operator": "write_data",
+      "description": "Write processed records to a JSONL file."
+    }
+  ],
+  "source": "open_orchestrator_v1",
+  "meta": {
+    "created_at": "2026-05-23T13:30:20.606186+00:00",
+    "llm_stages": [
+      "free_fitting",
+      "template_combination",
+      "constrained_search"
+    ]
+  },
+  "free_fitting": {
+    "optimization_blueprint": {
+      "global_optimization_direction": "Transform raw data into seed data quality by streamlining outputs to focus solely on task completion, removing unnecessary context and ensuring clarity.",
+      "key_improvements": [
+        "Eliminate the 'text' field from raw records to align with the seed schema.",
+        "Ensure outputs are concise and directly address the instruction, avoiding verbosity."
+      ],
+      "transformation_strategies": [
+        "Implement a filtering step to remove the 'text' field from raw records.",
+        "Introduce a validation mechanism to check that outputs are succinct and relevant to the instruction."
+      ],
+      "quality_focus": [
+        "Outputs must be clear and concise, focusing solely on the instruction without extraneous information.",
+        "Maintain a consistent tone and structure in outputs to enhance clarity and usability."
+      ],
+      "summary": "The optimization blueprint emphasizes the need to streamline the transformation from raw to seed data by removing unnecessary fields and ensuring that outputs are direct and focused. Key strategies include filtering out the 'text' field and validating output clarity, which are essential for achieving high-quality training data."
+    },
+    "stage": "free_fitting",
+    "design_method": "llm_driven"
+  },
+  "template_combination": {
+    "template_selection": {
+      "selected_templates": [
+        "field_extraction",
+        "quality_validation",
+        "data_cleaning"
+      ],
+      "selection_rationale": "The selected templates directly address the optimization blueprint's goals of transforming raw data into seed data quality by focusing on removing unnecessary fields, ensuring clarity, and validating output quality. 'field_extraction' will help in eliminating the 'text' field, 'quality_validation' will ensure outputs are concise and relevant, and 'data_cleaning' will preprocess the data to remove noise and irrelevant information.",
+      "template_combination_strategy": "sequential",
+      "pipeline_sketch": {
+        "steps": [
+          {
+            "step_id": "step_1",
+            "template_name": "field_extraction",
+            "functional_description": "分析源内容，识别可提取的信息",
+            "expected_output": "提取策略和目标字段定义",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_2",
+            "template_name": "field_extraction",
+            "functional_description": "执行信息提取，生成结构化字段",
+            "expected_output": "提取出的结构化字段",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_3",
+            "template_name": "data_cleaning",
+            "functional_description": "识别需要清理的问题（噪声、无效值等）",
+            "expected_output": "清理策略",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_4",
+            "template_name": "data_cleaning",
+            "functional_description": "执行数据清理",
+            "expected_output": "清理后的数据",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_5",
+            "template_name": "quality_validation",
+            "functional_description": "评估内容质量，从多个维度打分",
+            "expected_output": "质量评分和评估报告",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_6",
+            "template_name": "quality_validation",
+            "functional_description": "验证数据格式是否符合规范",
+            "expected_output": "格式验证结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          }
+        ],
+        "total_steps": 6,
+        "data_flow": "Data flows from raw records to field extraction, then to data cleaning, and finally to quality validation, ensuring a streamlined transformation process.",
+        "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+        "stage": "template_combination"
+      },
+      "coverage_analysis": {
+        "optimization_direction_coverage": "The selected templates effectively cover the optimization direction by focusing on removing unnecessary fields and ensuring clarity in outputs.",
+        "key_improvements_coverage": "The templates address key improvements by eliminating the 'text' field and ensuring outputs are concise and relevant.",
+        "quality_focus_coverage": "The templates ensure that outputs are clear and concise, maintaining a consistent tone and structure.",
+        "missing_capabilities": []
+      }
+    },
+    "pipeline_sketch": {
+      "steps": [
+        {
+          "step_id": "step_1",
+          "template_name": "field_extraction",
+          "functional_description": "分析源内容，识别可提取的信息",
+          "expected_output": "提取策略和目标字段定义",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_2",
+          "template_name": "field_extraction",
+          "functional_description": "执行信息提取，生成结构化字段",
+          "expected_output": "提取出的结构化字段",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_3",
+          "template_name": "data_cleaning",
+          "functional_description": "识别需要清理的问题（噪声、无效值等）",
+          "expected_output": "清理策略",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_4",
+          "template_name": "data_cleaning",
+          "functional_description": "执行数据清理",
+          "expected_output": "清理后的数据",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_5",
+          "template_name": "quality_validation",
+          "functional_description": "评估内容质量，从多个维度打分",
+          "expected_output": "质量评分和评估报告",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_6",
+          "template_name": "quality_validation",
+          "functional_description": "验证数据格式是否符合规范",
+          "expected_output": "格式验证结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        }
+      ],
+      "total_steps": 6,
+      "data_flow": "Data flows from raw records to field extraction, then to data cleaning, and finally to quality validation, ensuring a streamlined transformation process.",
+      "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+      "stage": "template_combination"
+    },
+    "stage": "template_combination",
+    "design_method": "template_based"
+  },
+  "constrained_search": {
+    "final_pipeline": [
+      {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a/raw_data/demo_raw.jsonl"
+        },
+        "description": "Read raw data from a JSONL file into the main record stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_2",
+        "operator": "remove_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "field_names": [
+            "text"
+          ]
+        },
+        "description": "Remove the 'text' field from raw records to align with seed structure.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_3",
+        "operator": "validate_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ],
+        "parameters": {
+          "schema_rules": {
+            "required_fields": [
+              "instruction",
+              "input",
+              "output"
+            ],
+            "field_types": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        "description": "Validate each record against required fields and types, emitting a structured report.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_4",
+        "operator": "check_format",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ],
+        "parameters": {
+          "format_rules": {
+            "instruction": "string",
+            "input": "string",
+            "output": "string"
+          }
+        },
+        "description": "Check format patterns and emit a human-readable report.",
+        "mapped_from_abstract_step": "step_6",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_5",
+        "operator": "write_data",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a/outputs/a_processed.jsonl"
+        },
+        "description": "Write processed records to a JSONL file.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      }
+    ],
+    "refinement_summary": {
+      "original_steps_count": 6,
+      "final_steps_count": 5,
+      "added_operators": [],
+      "modified_operators": [
+        "remove_field",
+        "validate_schema",
+        "check_format"
+      ],
+      "data_flow_verification": "Data flows from reading raw records to removing unnecessary fields, validating schema, checking format, and finally writing the processed data.",
+      "capability_coverage": "All required capabilities are covered, including reading, processing, validating, and writing data."
+    },
+    "capability_check": {
+      "needs_dynamic_addition": false,
+      "missing_capabilities": [],
+      "note": "open source: no dynamic operator injection"
+    },
+    "validation_result": {
+      "is_valid": true,
+      "validation_issues": [],
+      "checked_at": "2026-05-23T13:30:20.608594+00:00",
+      "dag_validation_meta": {
+        "preserved_issue_count": 0,
+        "added_issue_count": 0,
+        "sources": [
+          "orchestration",
+          "registry",
+          "dag_structure",
+          "io_contract",
+          "dag_graph_topology"
+        ]
+      },
+      "note": "workflow dag_validation：合并编排阶段校验 + 注册表/DAG 对齐 + 图论检查",
+      "structural_valid": true,
+      "llm_task_assessment": {
+        "satisfied": true,
+        "reasoning": "结构/接线方面没有问题，所有步骤都能顺利连接并传递记录流。语义覆盖方面，管道步骤能够有效地移除多余的 'text' 字段，并进行格式和模式检查，确保输出符合种子记录的要求。",
+        "recommend_new_operators": false,
+        "recommended_fixes": [],
+        "optimization_suggestions": [],
+        "next_steps_for_user": [
+          "确认管道输出符合预期格式",
+          "运行管道以验证数据处理结果",
+          "根据需要调整输出路径或文件名"
+        ],
+        "skipped": false
+      }
+    },
+    "operator_level_self_evolving": {
+      "triggered": false,
+      "added_operators": [],
+      "re_orchestrated": false,
+      "suggested_operators": [],
+      "llm_proposed": false,
+      "skip_reason": "编排评估已通过，无需新增注册算子。"
+    },
+    "stage": "constrained_search",
+    "design_method": "constrained_optimization"
+  },
+  "final_pipeline": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/raw_data/demo_raw.jsonl"
+      },
+      "description": "Read raw data from a JSONL file into the main record stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "remove_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "field_names": [
+          "text"
+        ]
+      },
+      "description": "Remove the 'text' field from raw records to align with seed structure.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "validate_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": {
+          "required_fields": [
+            "instruction",
+            "input",
+            "output"
+          ],
+          "field_types": {
+            "instruction": "string",
+            "input": "string",
+            "output": "string"
+          }
+        }
+      },
+      "description": "Validate each record against required fields and types, emitting a structured report.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "check_format",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "report"
+      ],
+      "parameters": {
+        "format_rules": {
+          "instruction": "string",
+          "input": "string",
+          "output": "string"
+        }
+      },
+      "description": "Check format patterns and emit a human-readable report.",
+      "mapped_from_abstract_step": "step_6",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "write_data",
+      "input_keys": [
+        "records",
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/outputs/a_processed.jsonl"
+      },
+      "description": "Write processed records to a JSONL file.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "dag_validation": {
+    "checked_at": "2026-05-23T13:30:20.608594+00:00",
+    "is_valid": true,
+    "issue_count": 0,
+    "structural_valid": true,
+    "task_fit_satisfied": true,
+    "task_fit_skipped": false,
+    "recommend_new_operators": false,
+    "assessment_detail_path": "data/dag_assessment_results/a.json",
+    "llm": {
+      "reasoning": "结构/接线方面没有问题，所有步骤都能顺利连接并传递记录流。语义覆盖方面，管道步骤能够有效地移除多余的 'text' 字段，并进行格式和模式检查，确保输出符合种子记录的要求。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "确认管道输出符合预期格式",
+        "运行管道以验证数据处理结果",
+        "根据需要调整输出路径或文件名"
+      ]
+    }
+  },
+  "trial_run_check": {
+    "checked_at": "2026-05-23T13:30:46.549430+00:00",
+    "execution_ok": true,
+    "artifact": "data/trial_runs/a/trial_result.json",
+    "reflux_targets": [],
+    "pilot_overall_score": 75,
+    "pilot_recommendation": "evolve_pipeline",
+    "pilot_dimension_scores": {
+      "semantic": 70,
+      "format": 90,
+      "diversity": 60,
+      "info": 75,
+      "noise": 85,
+      "logic": 80
+    }
+  }
+}

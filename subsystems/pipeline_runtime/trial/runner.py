@@ -204,6 +204,7 @@ def run_pipeline_trial(
     context: dict[str, Any] = {
         "root": str(root.resolve()),
         "pipeline_id": pipeline_id,
+        "manifest_record": manifest_record if isinstance(manifest_record, dict) else {},
         "trial": True,
         "max_records": max_records,
         "max_input_records": max_records,

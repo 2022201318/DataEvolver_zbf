@@ -1,0 +1,52 @@
+{
+  "step_index": 3,
+  "step_id": "step_3",
+  "operator_name": "llm_generate_field",
+  "description": "Generate the 'output' field with patient-friendly instructions from the clinical notes.",
+  "input_keys": [
+    "records"
+  ],
+  "output_keys": [
+    "records"
+  ],
+  "parameters": {
+    "prompt_context_fields": [
+      "instruction",
+      "input"
+    ],
+    "target_field": "output",
+    "generation_spec": "Generate clear, patient-friendly instructions based on clinical notes, ensuring they are medically accurate and easy to understand."
+  },
+  "requires_llm": true,
+  "prompt_generated": true,
+  "relative_dir": "data/generated_pipelines/med_case_1/step_003",
+  "orchestration_step": {
+    "step_id": "step_3",
+    "operator": "llm_generate_field",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "parameters": {
+      "prompt_context_fields": [
+        "instruction",
+        "input"
+      ],
+      "target_field": "output",
+      "generation_spec": "Generate clear, patient-friendly instructions based on clinical notes, ensuring they are medically accurate and easy to understand."
+    },
+    "description": "Generate the 'output' field with patient-friendly instructions from the clinical notes.",
+    "mapped_from_abstract_step": "step_4",
+    "refinement_source": "operator_registry",
+    "meta": {
+      "prompt_generated": true,
+      "prompt_notes": [
+        "Focus on transforming clinical notes into patient-friendly language.",
+        "Ensure instructions are clear and detailed for patient understanding."
+      ]
+    }
+  },
+  "impl_kind": "builtin_delegate"
+}

@@ -1,0 +1,26 @@
+{
+  "evolved.fin_case_1.sort_rows": {
+    "description": "Sorts the output records to ensure a stable and consistent order before writing the data, enhancing data usability.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "quality",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.fin_case_1.deduplicate_records": {
+    "description": "Removes duplicate or invalid records from the dataset, ensuring the integrity and uniqueness of the output data.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "quality",
+    "source": "llm_operator_evolution"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "pipeline_id": "a1",
+  "step_index": 6,
+  "steps_completed": [
+    "understanding",
+    "orchestration",
+    "operator_evolution",
+    "instantiation",
+    "trial_run",
+    "quality_check"
+  ],
+  "last_message": "quality_check: not_passed → 下一步生成经验并回流下一轮",
+  "updated_at": "2026-05-24T05:20:00.551547+00:00",
+  "dag_evolution_cycles": 0,
+  "understanding_revision": 2,
+  "orchestration_revision": 3,
+  "round": 2,
+  "quality_passed": false,
+  "ready_for_full_run": false,
+  "next_action": "advance",
+  "step_order": [
+    "understanding",
+    "orchestration",
+    "operator_evolution",
+    "instantiation",
+    "trial_run",
+    "quality_check",
+    "experience"
+  ],
+  "is_complete": false
+}

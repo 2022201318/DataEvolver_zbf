@@ -12,6 +12,7 @@ from subsystems.workflow.runner import (
     load_workflow_state,
     reset_workflow_for_debug,
     rerun_workflow_from_step,
+    run_full_pipeline,
     run_pipeline_assessment_and_persist,
 )
 from subsystems.workflow.snapshots import build_experience_snapshot, build_quality_check_snapshot
@@ -26,5 +27,6 @@ __all__ = [
     "load_workflow_state",
     "reset_workflow_for_debug",
     "rerun_workflow_from_step",
+    "run_full_pipeline",
     "run_pipeline_assessment_and_persist",
 ]

@@ -1,0 +1,319 @@
+{
+  "pipeline_id": "a",
+  "source": "quality_snapshot_v1",
+  "has_differences": true,
+  "overall_assessment": "The pipeline output shows good structure and intent alignment, but lacks diversity and depth in responses.",
+  "critical_insights": [
+    "While the output is structurally sound, improvements in diversity and depth are needed.",
+    "Monitor for repetitive patterns in responses.",
+    "Maintain clarity while adding necessary details.",
+    "Encourage deeper exploration of topics in outputs.",
+    "Increase response variety to enhance engagement.",
+    "转化策略: Remove the 'text' field from raw records to streamline the output.",
+    "转化策略: Implement a validation step to ensure outputs are concise and directly address the instruction.",
+    "关键改进: The seed removes the 'text' field, which is present in raw, leading to a more focused output.",
+    "关键改进: Seed outputs are more concise and directly answer the instruction, contrasting with the verbose nature of raw outputs."
+  ],
+  "implicit_quality_requirements": {
+    "response_quality_gaps": [
+      "Lack of depth in some responses",
+      "Limited variety in output topics"
+    ],
+    "format_rigor_gaps": []
+  },
+  "provenance": {
+    "understanding_path": "data/understanding_results/a.json",
+    "orchestration_path": "data/orchestration_results/a.json",
+    "generated_pipeline_path": "data/generated_pipelines/a.json",
+    "has_generated_pipeline": true,
+    "orchestration_validation_ok": true,
+    "trial_run_path": "data/trial_runs/a/trial_result.json",
+    "trial_run_found": true,
+    "trial_execution_ok": true,
+    "pipeline_run_latest_path": "data/run_pipeline_results/a/latest.json",
+    "pipeline_run_latest": null
+  },
+  "trial_run": {
+    "present": true,
+    "execution_ok": true,
+    "schema_check": {
+      "seed_profile": {
+        "available": true,
+        "top_level_keys": [
+          "input",
+          "instruction",
+          "output"
+        ],
+        "path": "data/uploads/a/seed_data/demo_seed.jsonl"
+      },
+      "output_sample_keys": [
+        "_format_report",
+        "_validation_report",
+        "input",
+        "instruction",
+        "output"
+      ],
+      "missing_for_seed_top_keys": [],
+      "extra_vs_seed_top_keys": [],
+      "diagnostic_keys_in_output": [
+        "_format_report",
+        "_validation_report"
+      ]
+    },
+    "reflux_recommendation": {
+      "targets": [],
+      "reasons": []
+    },
+    "step_trace": [
+      {
+        "step_index": 1,
+        "operator": "read_data",
+        "ok": true,
+        "duration_ms": 11.57,
+        "n_records": 5,
+        "records_dump": "data/trial_runs/a/steps/step_001_read_data.jsonl"
+      },
+      {
+        "step_index": 2,
+        "operator": "remove_field",
+        "ok": true,
+        "duration_ms": 8.49,
+        "n_records": 5,
+        "records_dump": "data/trial_runs/a/steps/step_002_remove_field.jsonl"
+      },
+      {
+        "step_index": 3,
+        "operator": "validate_schema",
+        "ok": true,
+        "duration_ms": 3.83,
+        "n_records": 5,
+        "records_dump": "data/trial_runs/a/steps/step_003_validate_schema.jsonl"
+      },
+      {
+        "step_index": 4,
+        "operator": "check_format",
+        "ok": true,
+        "duration_ms": 12.63,
+        "n_records": 5,
+        "records_dump": "data/trial_runs/a/steps/step_004_check_format.jsonl"
+      },
+      {
+        "step_index": 5,
+        "operator": "write_data",
+        "ok": true,
+        "duration_ms": 4.71,
+        "n_records": 5,
+        "records_dump": "data/trial_runs/a/steps/step_005_write_data.jsonl"
+      }
+    ],
+    "data_samples": {
+      "seed": [
+        {
+          "instruction": "Given a dialog, create a question that requires a yes/no answer.",
+          "input": "John: I'm heading to the library to do some studying\nSue: That's great, you'll do well!",
+          "output": "Is John heading to the library to study?"
+        },
+        {
+          "instruction": "Write a script to determine whether the given number is even or odd.",
+          "input": "23",
+          "output": "#!/usr/bin/env python3\nn = 23\ntry:\n    n = int(n)\n    print(f\"{n} is even\" if n % 2 == 0 else f\"{n} is odd\")\nexcept ValueError:\n    print(\"Invalid input: not an integer\")"
+        },
+        {
+          "instruction": "Draft a letter of appreciation for the given recipient.",
+          "input": "Mr. John Smith",
+          "output": "Dear Mr. John Smith,\n\nI’m writing to express my sincere appreciation for your guidance during our Q4 analytics rollout. Your clear direction on the data quality checks, timely feedback on our dashboards, and steady mentorship helped the team reduce report turnaround time by 28% and avoid several costly errors.\n\nThank you again for your leadership and support.\n\nWarm regards,\n[Your Name]"
+        },
+        {
+          "instruction": "What is an example of structured data?",
+          "input": "",
+          "output": "Example: a relational table named \"orders\" with a fixed schema and constraints.\nSchema:\n- order_id INT PRIMARY KEY\n- customer_id INT REFERENCES customers(customer_id)\n- order_date DATE NOT NULL\n- total_amount NUMERIC(10,2) CHECK (total_amount >= 0)\nWhy structured: rows conform to typed columns, and constraints keep data consistent."
+        },
+        {
+          "instruction": "Perform a character analysis of Bilbo Baggins from \"The Hobbit.\"",
+          "input": "",
+          "output": "Bilbo begins as a comfort-focused hobbit yet develops practical courage and moral clarity. He solves problems through wit, chooses restraint when tempted by treasure, and demonstrates that heroism can be grounded in humility rather than force."
+        }
+      ],
+      "output": [
+        {
+          "instruction": "What are the advantages of using a Scrum Agile methodology?",
+          "input": "",
+          "output": "The advantages of using Scrum Agile include better communication, faster iteration, improved accountability, and easier adaptation to changing requirements.",
+          "_validation_report": {
+            "ok": true,
+            "missing_required": []
+          },
+          "_format_report": {
+            "checked": true,
+            "rules": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        {
+          "instruction": "Design an advertisement for a home security product.",
+          "input": "",
+          "output": "Stay secure with HomeShield. Our smart sensors and 24/7 monitoring protect your family and let you check your home from anywhere.",
+          "_validation_report": {
+            "ok": true,
+            "missing_required": []
+          },
+          "_format_report": {
+            "checked": true,
+            "rules": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        {
+          "instruction": "Explain the engineering design process.",
+          "input": "",
+          "output": "The engineering design process includes defining the problem, proposing solutions, building prototypes, testing, and iterating until requirements are met.",
+          "_validation_report": {
+            "ok": true,
+            "missing_required": []
+          },
+          "_format_report": {
+            "checked": true,
+            "rules": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        {
+          "instruction": "Given a block of text, come up with a catchy headline.",
+          "input": "The new coaching program helps you become a better leader and achieve higher professional success.",
+          "output": "Lead Better, Grow Faster: Coaching for Real Career Impact.",
+          "_validation_report": {
+            "ok": true,
+            "missing_required": []
+          },
+          "_format_report": {
+            "checked": true,
+            "rules": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        {
+          "instruction": "Edit the text to make the meaning more precise.",
+          "input": "The President announced an ambitious plan to cut taxes for all Americans.",
+          "output": "The President announced an ambitious proposal to reduce taxes for eligible American citizens and permanent residents.",
+          "_validation_report": {
+            "ok": true,
+            "missing_required": []
+          },
+          "_format_report": {
+            "checked": true,
+            "rules": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        }
+      ],
+      "note": "与前端 QualityCheck 页「Seed / 采样输出」对齐的截断样本；完整数据见全量执行产物。"
+    }
+  },
+  "llm_pilot_evaluation": {
+    "present": true,
+    "skipped_reason": null,
+    "dimension_scores": {
+      "semantic": 70,
+      "format": 90,
+      "diversity": 60,
+      "info": 75,
+      "noise": 85,
+      "logic": 80
+    },
+    "dimension_notes": {
+      "semantic": "Outputs align with task intent but lack depth.",
+      "format": "Well-structured JSON with required fields present.",
+      "diversity": "Some outputs are similar in nature, limiting variety.",
+      "info": "Responses are generally complete but could be more detailed.",
+      "noise": "Outputs are mostly clean with minimal filler.",
+      "logic": "Responses are coherent and logically structured."
+    },
+    "scores": {
+      "semantic": 0.7,
+      "format": 0.9,
+      "diversity": 0.6,
+      "info": 0.75,
+      "noise": 0.85,
+      "logic": 0.8
+    },
+    "overall_score": 75,
+    "recommendation": "evolve_pipeline",
+    "recommendation_rationale": "While the output is structurally sound, improvements in diversity and depth are needed.",
+    "judge_result": {
+      "has_differences": true,
+      "overall_assessment": "The pipeline output shows good structure and intent alignment, but lacks diversity and depth in responses.",
+      "critical_insights": [
+        "Increase response variety to enhance engagement.",
+        "Encourage deeper exploration of topics in outputs.",
+        "Maintain clarity while adding necessary details.",
+        "Monitor for repetitive patterns in responses."
+      ],
+      "implicit_quality_requirements": {
+        "response_quality_gaps": [
+          "Lack of depth in some responses",
+          "Limited variety in output topics"
+        ],
+        "format_rigor_gaps": []
+      }
+    },
+    "experience_bullets": [
+      "Ensure diverse output generation to avoid redundancy.",
+      "Focus on enhancing the depth of responses.",
+      "Maintain high standards for output clarity and relevance."
+    ]
+  },
+  "judge_result": {
+    "has_differences": true,
+    "overall_assessment": "The pipeline output shows good structure and intent alignment, but lacks diversity and depth in responses.",
+    "critical_insights": [
+      "Increase response variety to enhance engagement.",
+      "Encourage deeper exploration of topics in outputs.",
+      "Maintain clarity while adding necessary details.",
+      "Monitor for repetitive patterns in responses."
+    ],
+    "implicit_quality_requirements": {
+      "response_quality_gaps": [
+        "Lack of depth in some responses",
+        "Limited variety in output topics"
+      ],
+      "format_rigor_gaps": []
+    }
+  },
+  "pilot_overall_score": 75,
+  "pilot_recommendation": "evolve_pipeline",
+  "pilot_dimension_scores": {
+    "semantic": 70,
+    "format": 90,
+    "diversity": 60,
+    "info": 75,
+    "noise": 85,
+    "logic": 80
+  },
+  "sample_metrics_0_1": {
+    "semantic": 0.7,
+    "format": 0.9,
+    "diversity": 0.6,
+    "info": 0.75,
+    "noise": 0.85,
+    "logic": 0.8
+  },
+  "meta": {
+    "created_at": "2026-05-23T13:30:54.547529+00:00",
+    "note": "含试运行与可选 Pilot LLM 评估；judge_result 对齐前端 QualityCheck / JudgeResult"
+  }
+}

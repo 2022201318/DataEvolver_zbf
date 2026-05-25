@@ -10,6 +10,8 @@ from __future__ import annotations
 import importlib.metadata
 import json
 import os
+import re
+import shutil
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -35,6 +37,7 @@ from subsystems.workflow import (
     advance_workflow,
     load_workflow_state,
     rerun_workflow_from_step,
+    run_full_pipeline,
     run_pipeline_assessment_and_persist,
 )
 
@@ -70,13 +73,97 @@ def _resolve_root(root: Optional[Path]) -> Path:
     if not (r / "config").is_dir() or not (r / "data").is_dir():
         typer.secho(
             _tr(
-                "警告: 当前目录不像仓库根（需含 config/ 与 data/）。请 cd 到 多模态数据准备 仓库根、设置环境变量 DATAEVOLVER_ROOT，或使用 --root。",
+                "警告: 当前目录不像仓库根（需含 config/ 与 data/）。请 cd 到 DataEvolver 仓库根、设置环境变量 DATAEVOLVER_ROOT，或使用 --root。",
                 "Warning: current directory does not look like repo root (needs config/ and data/). Please cd to repo root, set DATAEVOLVER_ROOT, or use --root.",
             ),
             err=True,
             fg=typer.colors.YELLOW,
         )
     return r
+
+
+_PIPELINE_ID_RE = re.compile(r"^[a-zA-Z0-9_-]{1,128}$")
+
+
+def _safe_filename(name: str | None) -> str:
+    if not name:
+        return "upload.bin"
+    return Path(name).name
+
+
+def _upsert_manifest_record(root: Path, record: dict) -> None:
+    manifest = root / "data" / "manifest.jsonl"
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    kept: list[str] = []
+    if manifest.is_file():
+        for line in manifest.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if str(obj.get("pipeline_id") or "").strip() != str(record.get("pipeline_id")):
+                kept.append(json.dumps(obj, ensure_ascii=False))
+    kept.append(json.dumps(record, ensure_ascii=False))
+    manifest.write_text("\n".join(kept) + "\n", encoding="utf-8")
+
+
+def _do_run_full(
+    pipeline_id: str,
+    root: Optional[Path],
+    force: bool,
+    pipeline_run_execution_mode: str,
+    subprocess_fallback: bool,
+    subprocess_timeout: float,
+    *,
+    as_json: bool,
+) -> None:
+    r = _resolve_root(root)
+    cm = ConfigManager(project_root=r)
+    if pipeline_run_execution_mode not in ("in_process", "subprocess"):
+        raise typer.BadParameter(
+            _tr(
+                "pipeline_run_execution_mode 须为 in_process 或 subprocess",
+                "pipeline_run_execution_mode must be in_process or subprocess",
+            )
+        )
+    try:
+        out = run_full_pipeline(
+            r,
+            pipeline_id,
+            llm_config=cm.llm_config(),
+            on_usage=None,
+            pipeline_run_execution_mode=pipeline_run_execution_mode,  # type: ignore[arg-type]
+            pipeline_run_subprocess_fallback_in_process=subprocess_fallback,
+            pipeline_run_subprocess_timeout_sec=subprocess_timeout,
+            force=force,
+        )
+    except Exception as e:  # noqa: BLE001 - CLI should show readable error
+        if as_json:
+            typer.secho(
+                json.dumps(
+                    {"ok": False, "error": "pipeline_run_failed", "message": str(e)},
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                err=True,
+            )
+        else:
+            typer.secho(_tr(f"全量执行失败: {e}", f"Pipeline run failed: {e}"), err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    if as_json:
+        typer.echo(json.dumps(out, ensure_ascii=False, indent=2))
+    else:
+        detail = out.get("detail") if isinstance(out, dict) else {}
+        run_dir = (detail or {}).get("run_dir")
+        out_path = (detail or {}).get("output_jsonl")
+        count = (detail or {}).get("output_record_count")
+        typer.secho(_tr("全量执行完成。", "Pipeline run completed."), fg=typer.colors.GREEN)
+        typer.echo(f"run_dir: {run_dir}")
+        typer.echo(f"output_jsonl: {out_path}")
+        typer.echo(f"output_record_count: {count}")
 
 
 def _do_state(pipeline_id: str, root: Optional[Path], *, as_json: bool, verbose: bool = False) -> None:
@@ -196,6 +283,7 @@ def _do_advance_all(
             )
         )
     guard = 0
+    prev_sig: tuple | None = None
     while guard < max_steps:
         st = load_workflow_state(r, pipeline_id)
         if st.step_index >= len(STEP_ORDER):
@@ -254,6 +342,26 @@ def _do_advance_all(
             print_advance_human(pipeline_id, out, verbose=verbose, elapsed_sec=elapsed)
         if out.get("done"):
             return
+        st_after = load_workflow_state(r, pipeline_id)
+        detail = out.get("detail") if isinstance(out, dict) else {}
+        sig = (
+            out.get("step"),
+            (detail or {}).get("status") if isinstance(detail, dict) else None,
+            st_after.step_index,
+            st_after.round,
+            st_after.dag_evolution_cycles,
+        )
+        if prev_sig == sig:
+            msg = _tr(
+                "检测到状态未前进（连续两次相同结果），已停止 advance-all。请改用显式命令（如 orchestrate --force-reset-state）处理后再继续。",
+                "No progress detected (same result twice). Stopped advance-all. Use explicit commands (e.g. orchestrate --force-reset-state) before continuing.",
+            )
+            if as_json:
+                typer.secho(json.dumps({"ok": False, "stalled": True, "message": msg}, ensure_ascii=False), err=True)
+            else:
+                typer.secho(msg, err=True, fg=typer.colors.YELLOW)
+            raise typer.Exit(code=2)
+        prev_sig = sig
         guard += 1
     typer.secho(_tr("达到 max_steps 上限，未跑完。", "Reached max_steps; not finished."), err=True)
     raise typer.Exit(code=2)
@@ -443,14 +551,34 @@ def wf_rerun(
         print_rerun_human(out)
 
 
+@workflow_app.command("run-pipeline")
+def wf_run_pipeline(
+    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    root: _RootOpt = None,
+    force: Annotated[bool, typer.Option("--force", help="忽略 latest 成功记录并强制重跑")] = False,
+    pipeline_run_execution_mode: Annotated[str, typer.Option(help="执行模式：in_process 或 subprocess")] = "in_process",
+    subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
+    subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
+    as_json: Annotated[bool, typer.Option("--json")] = False,
+) -> None:
+    """执行 full run（不属于 workflow 中间推进步）。"""
+    _do_run_full(
+        pipeline_id,
+        root,
+        force,
+        pipeline_run_execution_mode,
+        subprocess_fallback,
+        subprocess_timeout,
+        as_json=as_json,
+    )
+
+
 _NAMED_STEPS: list[tuple[str, str, str]] = [
     ("understanding", "understand", "结构化理解（LLM）"),
     ("orchestration", "orchestrate", "算子编排三阶段（LLM）；完成后自动结构检查 + 模型评估 DAG"),
     ("operator_evolution", "evolve-operators", "算子进化：仅当编排内评估建议新增算子时生成粗粒度算子并写入注册表"),
     ("instantiation", "instantiate", "管线实例化"),
     ("trial_run", "trial", "试运行（采样）"),
-    ("pipeline_run", "run-pipeline", "全量执行（--subprocess-* 仅本步有效）"),
-    ("pipeline_run", "run", "全量执行（run-pipeline 的短别名；--subprocess-* 仅本步有效）"),
     ("quality_check", "quality-check", "质量快照"),
     ("experience", "experience", "经验快照"),
 ]
@@ -551,7 +679,7 @@ def wf_validate_dag_only(
 
 app = typer.Typer(
     no_args_is_help=True,
-    help="多模态数据准备 开源版 CLI。推荐：`dataevolver --help`（支持短命令别名与中英文输出）。",
+    help="DataEvolver 开源版 CLI。推荐：`dataevolver --help`（支持短命令别名与中英文输出）。",
 )
 
 
@@ -706,7 +834,6 @@ _TOP_STEP_ALIASES: list[tuple[str, str]] = [
     ("operator_evolution", "evolve-operators"),
     ("instantiation", "instantiate"),
     ("trial_run", "trial"),
-    ("pipeline_run", "run"),
     ("quality_check", "quality-check"),
     ("experience", "experience"),
 ]
@@ -746,6 +873,101 @@ def _register_top_step(step_key: str, cli_name: str) -> None:
 
 for _sk, _cn in _TOP_STEP_ALIASES:
     _register_top_step(_sk, _cn)
+
+
+@app.command("run")
+def cmd_run(
+    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    root: _RootOpt = None,
+    force: Annotated[bool, typer.Option("--force", help="忽略 latest 成功记录并强制重跑")] = False,
+    pipeline_run_execution_mode: Annotated[str, typer.Option(help="执行模式：in_process 或 subprocess")] = "in_process",
+    subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
+    subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
+    as_json: Annotated[bool, typer.Option("--json")] = False,
+) -> None:
+    """顶层 full run 短命令（等价 `dataevolver workflow run-pipeline <pipeline_id>`）。"""
+    _do_run_full(
+        pipeline_id,
+        root,
+        force,
+        pipeline_run_execution_mode,
+        subprocess_fallback,
+        subprocess_timeout,
+        as_json=as_json,
+    )
+
+
+@app.command("session-start")
+def cmd_session_start(
+    pipeline_id: Annotated[str, typer.Argument(help="会话 id，例如 demo_001")],
+    raw_file: Annotated[Path, typer.Option("--raw", exists=True, file_okay=True, dir_okay=False, help="原始数据文件路径")],
+    seed_file: Annotated[Path, typer.Option("--seed", exists=True, file_okay=True, dir_okay=False, help="种子数据文件路径")],
+    description_file: Annotated[
+        Path | None,
+        typer.Option("--description", exists=True, file_okay=True, dir_okay=False, help="可选任务描述文件"),
+    ] = None,
+    domain: Annotated[str, typer.Option("--domain")] = "",
+    task_type: Annotated[str, typer.Option("--task-type")] = "",
+    language: Annotated[str, typer.Option("--language")] = "",
+    root: _RootOpt = None,
+    as_json: Annotated[bool, typer.Option("--json")] = False,
+) -> None:
+    """CLI 创建会话并写入 manifest（等价前端 sessions/start）。"""
+    pid = pipeline_id.strip()
+    if not _PIPELINE_ID_RE.match(pid):
+        raise typer.BadParameter(
+            _tr(
+                "pipeline_id 无效：仅允许字母、数字、下划线、连字符，长度 1-128",
+                "Invalid pipeline_id: only letters, numbers, underscore and hyphen, length 1-128",
+            )
+        )
+    r = _resolve_root(root)
+    base = r / "data" / "uploads" / pid
+    raw_dest = base / "raw_data" / _safe_filename(raw_file.name)
+    seed_dest = base / "seed_data" / _safe_filename(seed_file.name)
+    desc_dest: Path | None = None
+    raw_dest.parent.mkdir(parents=True, exist_ok=True)
+    seed_dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(raw_file, raw_dest)
+    shutil.copy2(seed_file, seed_dest)
+    if description_file is not None:
+        desc_dest = base / "description" / _safe_filename(description_file.name)
+        desc_dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(description_file, desc_dest)
+
+    rec: dict[str, object] = {
+        "pipeline_id": pid,
+        "raw_data_files": [str(raw_dest.relative_to(r))],
+        "seed_data_files": [str(seed_dest.relative_to(r))],
+    }
+    if desc_dest is not None:
+        rec["description_data_files"] = [str(desc_dest.relative_to(r))]
+    if domain.strip():
+        rec["domain"] = domain.strip()
+    if task_type.strip():
+        rec["task_type"] = task_type.strip()
+    if language.strip():
+        rec["language"] = language.strip()
+    _upsert_manifest_record(r, rec)
+    out = {
+        "ok": True,
+        "pipeline_id": pid,
+        "manifest_record": rec,
+        "saved_paths": {
+            "raw": str(raw_dest.relative_to(r)),
+            "seed": str(seed_dest.relative_to(r)),
+            "description": str(desc_dest.relative_to(r)) if desc_dest is not None else None,
+        },
+    }
+    if as_json:
+        typer.echo(json.dumps(out, ensure_ascii=False, indent=2))
+    else:
+        typer.secho(_tr("会话创建完成。", "Session created."), fg=typer.colors.GREEN)
+        typer.echo(f"pipeline_id: {pid}")
+        typer.echo(f"raw: {out['saved_paths']['raw']}")
+        typer.echo(f"seed: {out['saved_paths']['seed']}")
+        if out["saved_paths"]["description"]:
+            typer.echo(f"description: {out['saved_paths']['description']}")
 
 
 @app.command("tokens")

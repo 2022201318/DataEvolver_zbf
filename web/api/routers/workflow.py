@@ -120,6 +120,48 @@ def get_artifact_history(
     }
 
 
+@router.get("/{pipeline_id}/artifact-history/file")
+def get_artifact_history_file(
+    request: Request,
+    pipeline_id: str,
+    path: str = Query(..., description="相对仓库根目录路径，如 data/artifact_history/<id>/rounds/r0001/orchestration.json"),
+) -> dict[str, Any]:
+    """
+    读取 artifact_history 下的某个 JSON 快照文件，供前端按轮次/迭代恢复历史 DAG 与经验。
+    仅允许访问当前 pipeline_id 的 `data/artifact_history/{id}/` 目录内文件。
+    """
+    root = request.app.state.config.root
+    pid = _pid(pipeline_id)
+    rel = path.strip().replace("\\", "/").lstrip("/")
+    if not rel:
+        raise HTTPException(status_code=400, detail="path 不能为空")
+    prefix = f"data/artifact_history/{pid}/"
+    if not rel.startswith(prefix):
+        raise HTTPException(status_code=400, detail="path 超出允许范围")
+    p = (root / rel).resolve()
+    allowed_root = (root / "data" / "artifact_history" / pid).resolve()
+    try:
+        p.relative_to(allowed_root)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="path 超出允许范围") from e
+    if p.suffix.lower() != ".json":
+        raise HTTPException(status_code=400, detail="仅支持读取 .json 快照文件")
+    if not p.is_file():
+        raise HTTPException(status_code=404, detail=f"文件不存在: {rel}")
+    try:
+        data = json.loads(p.read_text(encoding="utf-8", errors="replace"))
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=422, detail=f"JSON 解析失败: {rel}") from e
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=422, detail=f"文件内容不是 JSON object: {rel}")
+    return {
+        "ok": True,
+        "pipeline_id": pid,
+        "relative_path": rel,
+        "data": data,
+    }
+
+
 class RerunBody(BaseModel):
     """从指定步骤重新执行：级联删除该步及之后产物，并将 state 置为该步。"""
 

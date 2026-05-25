@@ -1,0 +1,204 @@
+{
+  "pipeline_id": "trigger_gap_1",
+  "domain": "The task involves multimodal data processing, specifically extracting information from images.",
+  "language": "en",
+  "language_label": "English",
+  "language_constraint": "en",
+  "language_consistency": true,
+  "user_declared_language": null,
+  "task_type": "image_summary",
+  "basic_information": {
+    "language": "English",
+    "file_format_analysis": {
+      "raw_data_format": "JSONL",
+      "seed_data_format": "JSONL",
+      "format_differences": "Both formats are JSONL, but seed records contain complete outputs while raw records have empty outputs.",
+      "nested_structure_notes": "No nested structures present in either raw or seed samples."
+    },
+    "seed_vs_raw_quality": {
+      "quality_improvements": [
+        "Seed provides complete output summaries in the `output` field, while raw has an empty `output` field."
+      ],
+      "content_differences": "Seed samples contain specific summaries derived from image content, while raw lacks any substantive output.",
+      "style_differences": "Seed outputs are structured summaries with clear monetary values and units, while raw outputs are empty and lack structure.",
+      "format_improvements": "Seed enforces a complete `output` field format that raw does not fulfill.",
+      "detail_level_comparison": "Seed outputs are detailed with specific amounts and descriptions, while raw outputs are absent.",
+      "nested_field_improvements": "No nested fields to compare."
+    },
+    "processing_targets": [
+      "Implement OCR capability to extract text from images.",
+      "Ensure that the `output` field is populated with meaningful summaries."
+    ],
+    "domain_characteristics": "The task involves multimodal data processing, specifically extracting information from images.",
+    "data_types": [],
+    "transformation_direction": "The transformation from raw to seed involves enhancing the output field with meaningful summaries derived from OCR processing of image content.",
+    "quality_standards": "Seed encodes completion of the `output` field with relevant summaries as a standard for quality."
+  },
+  "schema_analysis": {
+    "schema_stable": true,
+    "raw_fields": [
+      "instruction",
+      "input",
+      "output",
+      "text"
+    ],
+    "seed_fields": [
+      "instruction",
+      "input",
+      "output"
+    ],
+    "raw_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for the model.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "Path to the image file.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "Expected summary output.",
+        "nested_structure": "not applicable"
+      },
+      "text": {
+        "type": "string",
+        "meaning": "Additional notes or requirements.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "seed_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for the model.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "Path to the image file.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "Expected summary output.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "new_fields": [],
+    "missing_fields": [
+      "text"
+    ],
+    "nested_structure_changes": "No changes in nested structures as both raw and seed records are flat.",
+    "schema_constraint": "The seed schema requires a populated `output` field, which is missing in raw.",
+    "field_usage_guidance": {
+      "instruction": "Provide clear task instructions for the model.",
+      "input": "Specify the image path for processing.",
+      "output": "Ensure this field contains a meaningful summary derived from OCR."
+    }
+  },
+  "dataset_level_delta": {
+    "global_optimization_direction": "unstructured answer → tagged solution + auxiliary metadata",
+    "key_improvements": [
+      "The `output` field in seed provides detailed summaries, while raw has an empty `output` field.",
+      "Seed includes multiple records with varied instructions and outputs, while raw only has one record."
+    ],
+    "transformation_strategies": [
+      "Add OCR processing to populate the `output` field based on image content.",
+      "Remove the `text` field from seed as it is not utilized in outputs."
+    ],
+    "quality_focus": [
+      "Check that the `output` field is populated with meaningful summaries that reflect the content of the images."
+    ],
+    "summary": "The transition from raw to seed involves a significant enhancement in the `output` field, which is critical for fulfilling the task requirements. The raw data lacks substantive outputs, while the seed data provides detailed summaries that are essential for the image summary task. The absence of the `text` field in seed indicates a focus on concise output without additional notes.",
+    "concrete_field_and_schema_deltas": [
+      "seed adds path `output` that raw lacks, as raw has an empty `output` field."
+    ],
+    "value_pattern_contrasts": [
+      "Raw `output` is an empty string, while seed `output` contains structured summaries with specific monetary values."
+    ],
+    "seed_higher_bar_signals": [
+      "Seed outputs impose stricter expectations for completeness and relevance in the `output` field."
+    ],
+    "risks_if_ignored": [
+      "Downstream processes relying on the `output` field would fail to generate meaningful summaries, leading to incomplete task fulfillment."
+    ]
+  },
+  "content_slot_library": {},
+  "quality_rubrics": {},
+  "meta": {
+    "understanding_mode": "full_llm",
+    "saved_at": "2026-05-23T14:46:52.319694+00:00",
+    "llm_steps": [
+      "unified_profile"
+    ]
+  },
+  "orchestration_assessment_feedback": {
+    "updated_at": "2026-05-23T14:47:35.810066+00:00",
+    "last_assessment_passed": true,
+    "iteration": 0,
+    "latest": {
+      "passed": true,
+      "is_valid": true,
+      "assessed_at": "2026-05-23T14:47:29.416518+00:00"
+    },
+    "history": []
+  },
+  "pilot_run_feedback_history": [],
+  "pilot_run_feedback": {
+    "updated_at": "2026-05-23T14:51:37.591519+00:00",
+    "trial_artifact": "data/trial_runs/trigger_gap_1/trial_result.json",
+    "workflow_snapshot": {
+      "understanding_revision": 1,
+      "orchestration_revision": 1,
+      "dag_evolution_cycles": 0
+    },
+    "execution_ok": true,
+    "present": true,
+    "skipped_reason": null,
+    "overall_score": 70,
+    "recommendation": "evolve_pipeline",
+    "recommendation_rationale": "Outputs need refinement to match the concise style of seed data.",
+    "experience_bullets": [
+      "Ensure outputs align closely with seed expectations.",
+      "Prioritize clarity and conciseness in summaries.",
+      "Review output generation logic for consistency."
+    ],
+    "dimension_scores": {
+      "semantic": 60,
+      "format": 80,
+      "diversity": 70,
+      "info": 50,
+      "noise": 90,
+      "logic": 75
+    },
+    "dimension_notes": {
+      "semantic": "Outputs are verbose, straying from concise summaries.",
+      "format": "Output structure aligns well with seed format.",
+      "diversity": "Variety in outputs, but some redundancy in detail.",
+      "info": "Lacks key financial details present in seed outputs.",
+      "noise": "Outputs are mostly clean with minimal filler.",
+      "logic": "Generally coherent, but some outputs lack focus."
+    },
+    "scores": {
+      "semantic": 0.6,
+      "format": 0.8,
+      "diversity": 0.7,
+      "info": 0.5,
+      "noise": 0.9,
+      "logic": 0.75
+    },
+    "judge_summary": {
+      "overall_assessment": "The outputs provide detailed information but deviate from the concise format expected in the seed.",
+      "critical_insights": [
+        "Focus on concise summaries as per seed examples.",
+        "Reduce verbosity in output details.",
+        "Ensure key financial figures are highlighted.",
+        "Maintain clarity and relevance in summaries."
+      ]
+    },
+    "reflux_targets": [],
+    "reflux_reasons": []
+  }
+}

@@ -1,0 +1,13 @@
+Task goal:
+Prepare high-quality finance-oriented instruction tuning data.
+
+Expected output style:
+- concise and factual
+- numerically precise
+- no speculation
+- clear structure for checklists and summaries
+
+Quality constraints:
+- preserve key financial numbers
+- avoid adding unverified claims
+- prioritize clarity for business users

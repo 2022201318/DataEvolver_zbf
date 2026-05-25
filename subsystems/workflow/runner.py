@@ -1,5 +1,5 @@
 """
-将「推进一步」映射为可持久化的后端步骤，落盘路径与旧版 多模态数据准备 对齐。
+将「推进一步」映射为可持久化的后端步骤，落盘路径与旧版 DataEvolver 对齐。
 
 - **理解**：单次 LLM 完整 profile（`full_analyzer`）。
 - **编排**：三阶段 LLM（`pipeline_orchestration.orchestrator_open`，对齐旧版 `PipelineOrchestratorSimple`），写入 `data/orchestration_results/`。
@@ -35,12 +35,14 @@ from subsystems.pipeline_runtime import (
     write_trial_artifacts,
 )
 from subsystems.pipeline_runtime.pilot.flow import run_trial_with_optional_pilot_judge
+from subsystems.pipeline_session.manifest_io_paths import apply_manifest_file_paths_to_pipeline
 from subsystems.pipeline_session.manifest_store import get_latest_manifest_record
 from subsystems.structured_understanding import run_understanding
 from subsystems.observability.token_usage_ledger import append_token_event
 from subsystems.workflow.artifact_history import (
     archive_orchestration_before_overwrite,
     archive_understanding_before_overwrite,
+    snapshot_iteration_artifacts,
     snapshot_round_artifacts,
 )
 from subsystems.workflow.snapshots import build_experience_snapshot, build_quality_check_snapshot
@@ -248,7 +250,7 @@ def run_pipeline_assessment_and_persist(
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("编排结果 JSON 格式无效")
-    store = OperatorRegistryStore(root)
+    store = OperatorRegistryStore(root, pipeline_id=pipeline_id)
     base = merge_dag_validation(data, merged_registry=store.merged_raw(), checked_at=_iso())
     structural_valid = bool(base.get("is_valid"))
     structural_issues: list[Any] = list(base.get("validation_issues") or [])
@@ -441,13 +443,39 @@ def _step_orchestration(
             orchestration_revision=st_orch.orchestration_revision,
             understanding_revision=st_orch.understanding_revision,
             dag_evolution_cycles=st_orch.dag_evolution_cycles,
+            round=st_orch.round,
         )
-    if path.exists() and not force:
-        return {
-            "stage": "orchestration",
-            "status": "skipped",
-            "path": f"data/orchestration_results/{pipeline_id}.json",
-        }
+    if path.is_file() and not force:
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, TypeError):
+            existing = None
+        dag_invalid = False
+        if isinstance(existing, dict):
+            dv = existing.get("dag_validation")
+            if isinstance(dv, dict) and dv.get("is_valid") is False:
+                dag_invalid = True
+            cs = existing.get("constrained_search")
+            if isinstance(cs, dict):
+                vr = cs.get("validation_result")
+                if isinstance(vr, dict) and vr.get("is_valid") is False:
+                    dag_invalid = True
+        if dag_invalid and st_orch.orchestration_revision >= 1:
+            archive_orchestration_before_overwrite(
+                root,
+                pipeline_id,
+                orchestration_revision=st_orch.orchestration_revision,
+                understanding_revision=st_orch.understanding_revision,
+                dag_evolution_cycles=st_orch.dag_evolution_cycles,
+                round=st_orch.round,
+            )
+            path.unlink()
+        else:
+            return {
+                "stage": "orchestration",
+                "status": "skipped",
+                "path": f"data/orchestration_results/{pipeline_id}.json",
+            }
     u_path = root / "data" / "understanding_results" / f"{pipeline_id}.json"
     if not u_path.exists():
         raise FileNotFoundError("缺少理解结果，无法编排")
@@ -468,7 +496,14 @@ def _step_orchestration(
         llm_config,
         on_usage=on_usage,
     )
-    fp = orch_out["final_pipeline"]
+    fp = apply_manifest_file_paths_to_pipeline(
+        orch_out["final_pipeline"],
+        pipeline_id=pipeline_id,
+        manifest_record=record if isinstance(record, dict) else {},
+    )
+    cs = orch_out.get("constrained_search")
+    if isinstance(cs, dict):
+        cs["final_pipeline"] = fp
     payload: dict[str, Any] = {
         "pipeline_id": pipeline_id,
         "dag": orch_out["dag"],
@@ -561,12 +596,17 @@ def _step_operator_evolution(
         on_usage=on_usage,
     )
 
-    store = OperatorRegistryStore(root)
+    store = OperatorRegistryStore(root, pipeline_id=pipeline_id)
     added_names: list[str] = []
     llm_used = bool(proposed)
+    memory_update: dict[str, Any] | None = None
     if proposed:
-        store.upsert_user_operators(proposed)
-        added_names = list(proposed.keys())
+        memory_update = store.assimilate_evolved_operators(
+            proposed,
+            pipeline_id=pipeline_id,
+            assessment=llm_a if isinstance(llm_a, dict) else None,
+        )
+        added_names = list(memory_update.get("task_added") or [])
 
     if not proposed:
         ols["triggered"] = False
@@ -578,7 +618,13 @@ def _step_operator_evolution(
             "status": "completed",
             "added_operators": [],
             "llm_generated_operators": False,
-            "registry_path": "data/operator_registry_user.json",
+            "registry_path": store.user_path_relative,
+            "memory_update": {
+                "task_added": [],
+                "promoted_to_domain": [],
+                "promoted_to_general": [],
+                "domain_key": store.domain_key,
+            },
             "detail": ols["skip_reason"],
             "rewind_to_orchestration_soft": True,
         }
@@ -594,7 +640,14 @@ def _step_operator_evolution(
         "status": "completed",
         "added_operators": added_names,
         "llm_generated_operators": llm_used,
-        "registry_path": "data/operator_registry_user.json",
+        "registry_path": store.user_path_relative,
+        "memory_update": memory_update
+        or {
+            "task_added": added_names,
+            "promoted_to_domain": [],
+            "promoted_to_general": [],
+            "domain_key": store.domain_key,
+        },
         "rewind_to_orchestration": True,
     }
 
@@ -620,20 +673,27 @@ def _step_instantiation(
             "stage": "instantiation",
             "status": "skipped",
             "path": f"data/generated_pipelines/{pipeline_id}.json",
-            "detail": "删除主 JSON 及同名目录可强制重跑实例化",
+            "detail": "复用已有实例化产物（未调用 LLM）；删除主 JSON 及同名目录可强制重跑",
+            "reused": True,
+            "llm_codegen": False,
         }
     orch = root / "data" / "orchestration_results" / f"{pipeline_id}.json"
     if not orch.is_file():
         raise FileNotFoundError("缺少编排结果，无法实例化")
     payload = run_instantiation(root, pipeline_id, llm_config=llm_config, on_usage=on_usage)
+    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+    llm_steps = meta.get("llm_prompt_generated_steps") if isinstance(meta.get("llm_prompt_generated_steps"), list) else []
     return {
         "stage": "instantiation",
         "status": "completed",
         "path": f"data/generated_pipelines/{pipeline_id}.json",
-        "total_steps": payload.get("meta", {}).get("total_steps"),
+        "total_steps": meta.get("total_steps"),
         "source": payload.get("source"),
-        "codegen_warnings": payload.get("meta", {}).get("codegen_warnings") or [],
-        "entry_script": payload.get("meta", {}).get("entry_script"),
+        "codegen_warnings": meta.get("codegen_warnings") or [],
+        "entry_script": meta.get("entry_script"),
+        "llm_codegen": len(llm_steps) > 0,
+        "llm_prompt_generated_steps": llm_steps,
+        "reused": False,
     }
 
 
@@ -766,6 +826,39 @@ def _step_pipeline_run(
     }
 
 
+def run_full_pipeline(
+    root: Path,
+    pipeline_id: str,
+    *,
+    llm_config: dict[str, Any],
+    on_usage: Callable[..., None] | None = None,
+    pipeline_run_execution_mode: Literal["in_process", "subprocess"] = "in_process",
+    pipeline_run_subprocess_fallback_in_process: bool = True,
+    pipeline_run_subprocess_timeout_sec: float = 600.0,
+    force: bool = False,
+) -> dict[str, Any]:
+    """独立执行 full run（不依赖 workflow STEP_ORDER，供 CLI/API 直接调用）。"""
+    detail = _step_pipeline_run(
+        root,
+        pipeline_id,
+        llm_config,
+        on_usage,
+        execution_mode=pipeline_run_execution_mode,
+        subprocess_fallback_in_process=pipeline_run_subprocess_fallback_in_process,
+        subprocess_timeout_sec=pipeline_run_subprocess_timeout_sec,
+        force=force,
+    )
+    st = load_workflow_state(root, pipeline_id)
+    return {
+        "ok": True,
+        "pipeline_id": pipeline_id,
+        "step": "pipeline_run",
+        "detail": detail,
+        "state": st.to_dict(),
+        "invocation": "explicit",
+    }
+
+
 def _step_quality_check(root: Path, pipeline_id: str, *, force: bool = False) -> dict[str, Any]:
     path = root / "data" / "quality_check_results" / f"{pipeline_id}.json"
     if force and path.is_file():
@@ -809,6 +902,9 @@ def _step_experience(root: Path, pipeline_id: str, *, force: bool = False) -> di
         "status": "completed",
         "path": f"data/experiences/{pipeline_id}.json",
         "source": payload.get("source"),
+        "llm_used": False,
+        "source_kind": "rule_aggregation",
+        "detail": "经验由质检/试运行/Pilot 结果规则聚合生成，非 LLM 逐步调用",
     }
 
 
@@ -941,6 +1037,7 @@ def rerun_workflow_from_step(root: Path, pipeline_id: str, step_key: str) -> dic
             orchestration_revision=prev_state.orchestration_revision,
             understanding_revision=prev_state.understanding_revision,
             dag_evolution_cycles=prev_state.dag_evolution_cycles,
+            round=prev_state.round,
         )
     touched = cascade_clear_workflow_artifacts(root, pipeline_id, idx)
     state = WorkflowState(
@@ -1147,6 +1244,13 @@ def advance_workflow(
                 f"编排→进化闭环已超过 {MAX_DAG_EVOLUTION_ORCHESTRATION_CYCLES} 轮（当前 {state.dag_evolution_cycles}）。"
                 "请检查理解、注册表或手动调整后再 rerun。",
             )
+        snapshot_iteration_artifacts(
+            root,
+            pipeline_id,
+            round_no=max(1, state.round),
+            dag_evolution_cycles=state.dag_evolution_cycles,
+            reason="operator_evolution_rewind",
+        )
         cascade_clear_workflow_artifacts(root, pipeline_id, 1)
         state.steps_completed = ["understanding"]
         state.step_index = STEP_ORDER.index("orchestration")
@@ -1160,6 +1264,19 @@ def advance_workflow(
         state.quality_passed = False
         state.next_action = "advance"
         state.last_message = f"{key}: {detail.get('status', 'ok')} → 请重新 orchestrate（编排文件仍保留）"
+    elif (
+        key == "orchestration"
+        and detail.get("status") == "skipped"
+    ):
+        # 当前编排文件被复用时，保持在 orchestration，避免在 skipped/rewind 间循环跳步
+        state.steps_completed = ["understanding"]
+        state.step_index = STEP_ORDER.index("orchestration")
+        state.ready_for_full_run = False
+        state.quality_passed = False
+        state.next_action = "advance"
+        state.last_message = (
+            "orchestration: skipped（复用已有编排）；若需刷新请执行 orchestrate --force-reset-state"
+        )
     elif (
         key == "orchestration"
         and detail.get("status") == "completed"
@@ -1219,6 +1336,25 @@ def advance_workflow(
             state.step_index = len(STEP_ORDER)
             state.next_action = "run_full"
             state.last_message = "quality_check: passed → 可执行 run-full"
+    elif key == "instantiation":
+        idx_done = STEP_ORDER.index(key)
+        state.steps_completed = STEP_ORDER[: idx_done + 1]
+        state.step_index = idx_done + 1
+        state.quality_passed = False
+        state.ready_for_full_run = False
+        state.next_action = "advance"
+        if detail.get("reused"):
+            state.last_message = (
+                "instantiation: skipped — 复用已有产物（未调用 LLM）；删除 generated_pipelines 可强制重跑"
+            )
+        elif detail.get("llm_codegen"):
+            steps = detail.get("llm_prompt_generated_steps") or []
+            names = ", ".join(str(s) for s in steps) if steps else "是"
+            state.last_message = f"instantiation: completed — LLM 参与步骤: {names}"
+        else:
+            state.last_message = (
+                "instantiation: completed — 内置算子模板委托（本 DAG 无 requires_llm 算子或未触发 LLM 写码）"
+            )
     elif key == "experience":
         # 仅在 quality_check 未通过时进入：写经验后回流理解，开启下一轮
         snapshot_round_artifacts(
@@ -1227,6 +1363,13 @@ def advance_workflow(
             round_no=max(1, state.round),
             quality_passed=False,
         )
+        snapshot_iteration_artifacts(
+            root,
+            pipeline_id,
+            round_no=max(1, state.round),
+            dag_evolution_cycles=state.dag_evolution_cycles,
+            reason="round_rollover_after_experience",
+        )
         touched = _clear_for_next_round(root, pipeline_id)
         state.round = max(1, state.round) + 1
         state.quality_passed = False
@@ -1234,7 +1377,9 @@ def advance_workflow(
         state.steps_completed = []
         state.step_index = STEP_ORDER.index("understanding")
         state.next_action = "advance"
-        state.last_message = f"experience: completed → 回流下一轮（round={state.round}）"
+        state.last_message = (
+            f"experience: completed → 规则聚合（非 LLM）回流下一轮（round={state.round}）"
+        )
         if isinstance(detail, dict):
             detail["next_round_started"] = True
             detail["round"] = state.round

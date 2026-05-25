@@ -1,0 +1,47 @@
+{
+  "step_index": 4,
+  "step_id": "step_4",
+  "operator_name": "llm_score_quality",
+  "description": "Evaluate the quality of the generated 'output' field against a quality rubric.",
+  "input_keys": [
+    "records"
+  ],
+  "output_keys": [
+    "records",
+    "scores"
+  ],
+  "parameters": {
+    "field_name": "output",
+    "rubric": "Evaluate the quality of the 'output' field based on clarity, accuracy, and patient-friendliness."
+  },
+  "requires_llm": true,
+  "prompt_generated": true,
+  "relative_dir": "data/generated_pipelines/med_case_1/step_004",
+  "orchestration_step": {
+    "step_id": "step_4",
+    "operator": "llm_score_quality",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records",
+      "scores"
+    ],
+    "parameters": {
+      "field_name": "output",
+      "rubric": "Evaluate the quality of the 'output' field based on clarity, accuracy, and patient-friendliness."
+    },
+    "description": "Evaluate the quality of the generated 'output' field against a quality rubric.",
+    "mapped_from_abstract_step": "step_7",
+    "refinement_source": "operator_registry",
+    "meta": {
+      "prompt_generated": true,
+      "prompt_notes": [
+        "Assess the output for clarity and patient understanding.",
+        "Check for medical accuracy in the instructions provided.",
+        "Ensure the language is accessible and free of jargon."
+      ]
+    }
+  },
+  "impl_kind": "builtin_delegate"
+}

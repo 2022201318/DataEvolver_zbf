@@ -1,0 +1,715 @@
+{
+  "pipeline_id": "med_case_1",
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Read raw clinical notes from a JSONL file into the main record stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "remove_field",
+        "description": "Remove the 'text' field from the records to simplify the data structure.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "llm_generate_field",
+        "description": "Generate the 'output' field with patient-friendly instructions from the clinical notes.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "llm_score_quality",
+        "description": "Evaluate the quality of the generated 'output' field against a quality rubric.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "scores"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "check_format",
+        "description": "Validate that the format of the 'output' field meets the required standards.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ]
+      },
+      {
+        "node_id": "step_6",
+        "node_name": "write_data",
+        "description": "Write the processed records with populated 'output' field back to a JSONL file.",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_5",
+        "to_node": "step_6",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5",
+      "step_6"
+    ],
+    "total_nodes": 6,
+    "total_edges": 5
+  },
+  "pipeline_plan": [
+    {
+      "step": 1,
+      "operator": "read_data",
+      "description": "Read raw clinical notes from a JSONL file into the main record stream."
+    },
+    {
+      "step": 2,
+      "operator": "remove_field",
+      "description": "Remove the 'text' field from the records to simplify the data structure."
+    },
+    {
+      "step": 3,
+      "operator": "llm_generate_field",
+      "description": "Generate the 'output' field with patient-friendly instructions from the clinical notes."
+    },
+    {
+      "step": 4,
+      "operator": "llm_score_quality",
+      "description": "Evaluate the quality of the generated 'output' field against a quality rubric."
+    },
+    {
+      "step": 5,
+      "operator": "check_format",
+      "description": "Validate that the format of the 'output' field meets the required standards."
+    },
+    {
+      "step": 6,
+      "operator": "write_data",
+      "description": "Write the processed records with populated 'output' field back to a JSONL file."
+    }
+  ],
+  "source": "open_orchestrator_v1",
+  "meta": {
+    "created_at": "2026-05-23T14:13:23.735390+00:00",
+    "llm_stages": [
+      "free_fitting",
+      "template_combination",
+      "constrained_search"
+    ]
+  },
+  "free_fitting": {
+    "optimization_blueprint": {
+      "global_optimization_direction": "Transform the empty 'output' field in raw clinical notes into a populated, patient-friendly output that provides clear medical instructions, ensuring clarity and safety in communication.",
+      "key_improvements": [
+        "Populate the 'output' field with detailed, patient-friendly instructions derived from clinical notes.",
+        "Remove the 'text' field from the schema to simplify the data structure and focus on essential outputs.",
+        "Ensure that the output adheres to medical accuracy and is easily understandable by patients."
+      ],
+      "transformation_strategies": [
+        "Implement a process to analyze clinical notes and generate clear, patient-friendly language for the 'output' field.",
+        "Utilize natural language processing techniques to enhance the clarity and readability of the output instructions.",
+        "Establish guidelines for ensuring that the output meets quality standards for patient education."
+      ],
+      "quality_focus": [
+        "Ensure that the 'output' field is populated with medically accurate information.",
+        "Focus on using plain language that is accessible to patients, avoiding clinical jargon.",
+        "Incorporate safety reminders and clear instructions in the output to enhance patient understanding."
+      ],
+      "summary": "The optimization blueprint outlines the need to transform the raw clinical notes by populating the 'output' field with clear, patient-friendly instructions. Key improvements include simplifying the schema by removing unnecessary fields and ensuring that the output meets high standards of medical accuracy and clarity. The transformation strategies emphasize the use of natural language processing to enhance the quality of the output, ultimately aiming to improve patient education and safety."
+    },
+    "stage": "free_fitting",
+    "design_method": "llm_driven"
+  },
+  "template_combination": {
+    "template_selection": {
+      "selected_templates": [
+        "content_enhancement",
+        "structure_optimization",
+        "field_extraction",
+        "quality_validation"
+      ],
+      "selection_rationale": "These templates were selected because they directly address the transformation goals outlined in the optimization blueprint. 'content_enhancement' will ensure that the output field is populated with detailed, patient-friendly instructions. 'structure_optimization' will help simplify the data structure by removing unnecessary fields. 'field_extraction' will assist in extracting relevant information from clinical notes, and 'quality_validation' will ensure that the output adheres to medical accuracy and clarity.",
+      "template_combination_strategy": "sequential",
+      "pipeline_sketch": {
+        "steps": [
+          {
+            "step_id": "step_1",
+            "template_name": "structure_optimization",
+            "functional_description": "分析当前数据结构，识别优化点",
+            "expected_output": "结构优化方案",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_2",
+            "template_name": "structure_optimization",
+            "functional_description": "重组和优化数据结构",
+            "expected_output": "优化后的数据结构",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_3",
+            "template_name": "field_extraction",
+            "functional_description": "分析源内容，识别可提取的信息",
+            "expected_output": "提取策略和目标字段定义",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_4",
+            "template_name": "field_extraction",
+            "functional_description": "执行信息提取，生成结构化字段",
+            "expected_output": "提取出的结构化字段",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_5",
+            "template_name": "content_enhancement",
+            "functional_description": "分析内容现状，确定增强方向",
+            "expected_output": "增强策略和具体目标",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_6",
+            "template_name": "content_enhancement",
+            "functional_description": "执行内容增强，提升详细程度和结构化程度",
+            "expected_output": "增强后的内容",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_7",
+            "template_name": "quality_validation",
+            "functional_description": "评估内容质量，从多个维度打分",
+            "expected_output": "质量评分和评估报告",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_8",
+            "template_name": "quality_validation",
+            "functional_description": "验证数据格式是否符合规范",
+            "expected_output": "格式验证结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          }
+        ],
+        "total_steps": 8,
+        "data_flow": "Data flows from the initial raw clinical notes through structure optimization, then to field extraction, followed by content enhancement, and finally to quality validation.",
+        "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+        "stage": "template_combination"
+      },
+      "coverage_analysis": {
+        "optimization_direction_coverage": "The selected templates comprehensively cover the optimization direction by ensuring the output field is populated with clear, patient-friendly instructions.",
+        "key_improvements_coverage": "The templates address all key improvements, including simplifying the schema and enhancing the quality of the output.",
+        "quality_focus_coverage": "The templates ensure that the output is medically accurate and easily understandable by patients, incorporating safety reminders.",
+        "missing_capabilities": []
+      }
+    },
+    "pipeline_sketch": {
+      "steps": [
+        {
+          "step_id": "step_1",
+          "template_name": "structure_optimization",
+          "functional_description": "分析当前数据结构，识别优化点",
+          "expected_output": "结构优化方案",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_2",
+          "template_name": "structure_optimization",
+          "functional_description": "重组和优化数据结构",
+          "expected_output": "优化后的数据结构",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_3",
+          "template_name": "field_extraction",
+          "functional_description": "分析源内容，识别可提取的信息",
+          "expected_output": "提取策略和目标字段定义",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_4",
+          "template_name": "field_extraction",
+          "functional_description": "执行信息提取，生成结构化字段",
+          "expected_output": "提取出的结构化字段",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_5",
+          "template_name": "content_enhancement",
+          "functional_description": "分析内容现状，确定增强方向",
+          "expected_output": "增强策略和具体目标",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_6",
+          "template_name": "content_enhancement",
+          "functional_description": "执行内容增强，提升详细程度和结构化程度",
+          "expected_output": "增强后的内容",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_7",
+          "template_name": "quality_validation",
+          "functional_description": "评估内容质量，从多个维度打分",
+          "expected_output": "质量评分和评估报告",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_8",
+          "template_name": "quality_validation",
+          "functional_description": "验证数据格式是否符合规范",
+          "expected_output": "格式验证结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        }
+      ],
+      "total_steps": 8,
+      "data_flow": "Data flows from the initial raw clinical notes through structure optimization, then to field extraction, followed by content enhancement, and finally to quality validation.",
+      "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+      "stage": "template_combination"
+    },
+    "stage": "template_combination",
+    "design_method": "template_based"
+  },
+  "constrained_search": {
+    "final_pipeline": [
+      {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/med_case_1/raw_data/medical_raw.jsonl"
+        },
+        "description": "Read raw clinical notes from a JSONL file into the main record stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_2",
+        "operator": "remove_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "field_names": [
+            "text"
+          ]
+        },
+        "description": "Remove the 'text' field from the records to simplify the data structure.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_3",
+        "operator": "llm_generate_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "prompt_context_fields": [
+            "instruction",
+            "input"
+          ],
+          "target_field": "output",
+          "generation_spec": "Generate clear, patient-friendly instructions based on clinical notes."
+        },
+        "description": "Generate the 'output' field with patient-friendly instructions from the clinical notes.",
+        "mapped_from_abstract_step": "step_4",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_4",
+        "operator": "llm_score_quality",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "scores"
+        ],
+        "parameters": {
+          "field_name": "output",
+          "rubric": "Quality assessment for patient-friendly instructions."
+        },
+        "description": "Evaluate the quality of the generated 'output' field against a quality rubric.",
+        "mapped_from_abstract_step": "step_7",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_5",
+        "operator": "check_format",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ],
+        "parameters": {
+          "format_rules": "Ensure the output adheres to medical accuracy and is easily understandable."
+        },
+        "description": "Validate that the format of the 'output' field meets the required standards.",
+        "mapped_from_abstract_step": "step_8",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_6",
+        "operator": "write_data",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/med_case_1/outputs/med_case_1_processed.jsonl"
+        },
+        "description": "Write the processed records with populated 'output' field back to a JSONL file.",
+        "mapped_from_abstract_step": "step_6",
+        "refinement_source": "operator_registry"
+      }
+    ],
+    "refinement_summary": {
+      "original_steps_count": 8,
+      "final_steps_count": 6,
+      "added_operators": [
+        "llm_generate_field",
+        "llm_score_quality",
+        "check_format"
+      ],
+      "modified_operators": [
+        "remove_field"
+      ],
+      "data_flow_verification": "Data flows from reading raw data to removing unnecessary fields, generating the output, scoring its quality, checking format, and finally writing the data.",
+      "capability_coverage": "All required capabilities are covered, including reading, processing, and writing data."
+    },
+    "capability_check": {
+      "needs_dynamic_addition": false,
+      "missing_capabilities": [],
+      "note": "open source: no dynamic operator injection"
+    },
+    "validation_result": {
+      "is_valid": true,
+      "validation_issues": [],
+      "checked_at": "2026-05-23T14:13:23.737965+00:00",
+      "dag_validation_meta": {
+        "preserved_issue_count": 0,
+        "added_issue_count": 0,
+        "sources": [
+          "orchestration",
+          "registry",
+          "dag_structure",
+          "io_contract",
+          "dag_graph_topology"
+        ]
+      },
+      "note": "workflow dag_validation：合并编排阶段校验 + 注册表/DAG 对齐 + 图论检查",
+      "structural_valid": true,
+      "llm_task_assessment": {
+        "satisfied": true,
+        "reasoning": "结构/接线方面没有问题，所有步骤都能顺利连接。语义覆盖方面，DAG能够有效地将原始临床笔记转换为患者友好的指令，满足数据准备目标。",
+        "recommend_new_operators": false,
+        "recommended_fixes": [],
+        "optimization_suggestions": [],
+        "next_steps_for_user": [
+          "运行管道以验证数据处理结果",
+          "检查生成的输出字段是否符合质量标准",
+          "确保输出字段的格式符合要求"
+        ],
+        "skipped": false
+      }
+    },
+    "operator_level_self_evolving": {
+      "triggered": false,
+      "added_operators": [],
+      "re_orchestrated": false,
+      "suggested_operators": []
+    },
+    "stage": "constrained_search",
+    "design_method": "constrained_optimization"
+  },
+  "final_pipeline": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/med_case_1/raw_data/medical_raw.jsonl"
+      },
+      "description": "Read raw clinical notes from a JSONL file into the main record stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "remove_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "field_names": [
+          "text"
+        ]
+      },
+      "description": "Remove the 'text' field from the records to simplify the data structure.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "llm_generate_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "prompt_context_fields": [
+          "instruction",
+          "input"
+        ],
+        "target_field": "output",
+        "generation_spec": "Generate clear, patient-friendly instructions based on clinical notes."
+      },
+      "description": "Generate the 'output' field with patient-friendly instructions from the clinical notes.",
+      "mapped_from_abstract_step": "step_4",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "llm_score_quality",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "scores"
+      ],
+      "parameters": {
+        "field_name": "output",
+        "rubric": "Quality assessment for patient-friendly instructions."
+      },
+      "description": "Evaluate the quality of the generated 'output' field against a quality rubric.",
+      "mapped_from_abstract_step": "step_7",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "check_format",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "report"
+      ],
+      "parameters": {
+        "format_rules": "Ensure the output adheres to medical accuracy and is easily understandable."
+      },
+      "description": "Validate that the format of the 'output' field meets the required standards.",
+      "mapped_from_abstract_step": "step_8",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_6",
+      "operator": "write_data",
+      "input_keys": [
+        "records",
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/med_case_1/outputs/med_case_1_processed.jsonl"
+      },
+      "description": "Write the processed records with populated 'output' field back to a JSONL file.",
+      "mapped_from_abstract_step": "step_6",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "dag_validation": {
+    "checked_at": "2026-05-23T14:13:23.737965+00:00",
+    "is_valid": true,
+    "issue_count": 0,
+    "structural_valid": true,
+    "task_fit_satisfied": true,
+    "task_fit_skipped": false,
+    "recommend_new_operators": false,
+    "assessment_detail_path": "data/dag_assessment_results/med_case_1.json",
+    "llm": {
+      "reasoning": "结构/接线方面没有问题，所有步骤都能顺利连接。语义覆盖方面，DAG能够有效地将原始临床笔记转换为患者友好的指令，满足数据准备目标。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "运行管道以验证数据处理结果",
+        "检查生成的输出字段是否符合质量标准",
+        "确保输出字段的格式符合要求"
+      ]
+    }
+  },
+  "pipeline_run_summary": {
+    "updated_at": "2026-05-23T14:14:04.638023+00:00",
+    "status": "success",
+    "run_dir": "data/run_pipeline_results/med_case_1/20260523T141340Z",
+    "output_jsonl": "data/run_pipeline_results/med_case_1/20260523T141340Z/output.jsonl",
+    "output_record_count": 3,
+    "failed_step": null
+  }
+}

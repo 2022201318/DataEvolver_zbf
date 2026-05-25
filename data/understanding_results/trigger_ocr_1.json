@@ -1,0 +1,174 @@
+{
+  "pipeline_id": "trigger_ocr_1",
+  "domain": "The task involves multimodal data processing, specifically converting image data into structured JSON format.",
+  "language": "en",
+  "language_label": "English",
+  "language_constraint": "en",
+  "language_consistency": true,
+  "user_declared_language": null,
+  "task_type": "image_to_json",
+  "basic_information": {
+    "language": "English",
+    "file_format_analysis": {
+      "raw_data_format": "JSONL",
+      "seed_data_format": "JSON",
+      "format_differences": "Raw data is in JSONL format with each record as a separate line, while seed data is in a single JSON object format, allowing for structured nesting.",
+      "nested_structure_notes": "Seed data contains structured JSON objects in the output field, while raw data has an empty output field."
+    },
+    "seed_vs_raw_quality": {
+      "quality_improvements": [
+        "Seed provides structured output in JSON format, while raw has an empty output field."
+      ],
+      "content_differences": "Seed includes specific extracted fields like 'doc_type', 'vendor', and 'amount', which are absent in raw.",
+      "style_differences": "Seed uses structured JSON for output, while raw uses a plain string for output.",
+      "format_improvements": "Seed enforces a structured JSON format for the output field, which raw lacks.",
+      "detail_level_comparison": "Seed records contain detailed fields such as 'vendor', 'invoice_no', and 'amount', while raw records lack these details.",
+      "nested_field_improvements": "Seed introduces nested structures in the output field, such as arrays for indicators in lab reports, which are not present in raw."
+    },
+    "processing_targets": [
+      "Implement structured output generation for OCR results.",
+      "Ensure all extracted fields are included in the output."
+    ],
+    "domain_characteristics": "The task involves multimodal data processing, specifically converting image data into structured JSON format.",
+    "data_types": [
+      "string",
+      "number",
+      "array",
+      "object"
+    ],
+    "transformation_direction": "The transformation from raw to seed involves converting unstructured OCR instructions into structured JSON outputs with specific fields and values.",
+    "quality_standards": "Seed encodes completeness and correctness of extracted fields as 'done', ensuring no hallucinated fields are present."
+  },
+  "schema_analysis": {
+    "schema_stable": false,
+    "raw_fields": [
+      "instruction",
+      "input",
+      "output",
+      "text"
+    ],
+    "seed_fields": [
+      "instruction",
+      "input",
+      "output"
+    ],
+    "raw_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "The task instruction for the OCR process."
+      },
+      "input": {
+        "type": "string",
+        "meaning": "The path to the image file to be processed."
+      },
+      "output": {
+        "type": "string",
+        "meaning": "The expected output from the OCR process, currently empty in raw."
+      },
+      "text": {
+        "type": "string",
+        "meaning": "Additional instructions for the OCR process."
+      }
+    },
+    "seed_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "The task instruction for the OCR process."
+      },
+      "input": {
+        "type": "string",
+        "meaning": "The path to the image file to be processed."
+      },
+      "output": {
+        "type": "object",
+        "meaning": "The structured output from the OCR process, containing specific fields.",
+        "nested_structure": "object with keys: doc_type, vendor, invoice_no, amount, currency, date"
+      }
+    },
+    "new_fields": [
+      "doc_type",
+      "vendor",
+      "invoice_no",
+      "amount",
+      "currency",
+      "date"
+    ],
+    "missing_fields": [
+      "text"
+    ],
+    "nested_structure_changes": "The seed output field is a structured JSON object with specific keys, while the raw output field is an empty string.",
+    "schema_constraint": "Seed requires structured outputs with specific fields, while raw does not enforce this structure.",
+    "field_usage_guidance": {
+      "instruction": "Provide clear task instructions for OCR extraction.",
+      "input": "Specify the image path for processing.",
+      "output": "Ensure the output is a structured JSON object with required fields."
+    }
+  },
+  "dataset_level_delta": {
+    "global_optimization_direction": "unstructured answer → tagged solution + auxiliary metadata",
+    "key_improvements": [
+      "Seed adds field 'output' that contains structured JSON data, while raw has an empty string.",
+      "Seed introduces new fields like 'doc_type', 'vendor', and 'amount' that raw lacks."
+    ],
+    "transformation_strategies": [
+      "Transform the empty output field in raw to a structured JSON object in seed.",
+      "Add new fields to the output based on OCR results."
+    ],
+    "quality_focus": [
+      "Check that all required fields are present in the output JSON."
+    ],
+    "summary": "The transition from raw to seed involves a significant enhancement in the structure and detail of the output data. Raw data lacks the necessary fields and structured format required for effective OCR processing. Seed data introduces specific fields that capture essential information extracted from images, ensuring completeness and correctness. This structured approach allows for better downstream processing and validation.",
+    "concrete_field_and_schema_deltas": [
+      "Seed adds path 'output' that contains structured JSON data, while raw has an empty string.",
+      "Field 'output' in seed changes from string to object with keys: doc_type, vendor, invoice_no, amount, currency, date."
+    ],
+    "value_pattern_contrasts": [
+      "Raw output is an empty string, while seed output is a structured JSON object with multiple fields.",
+      "Raw lacks specific extracted values, whereas seed provides detailed values like 'vendor' and 'amount'."
+    ],
+    "seed_higher_bar_signals": [
+      "Seed imposes stricter expectations for output structure, requiring specific fields to be present."
+    ],
+    "risks_if_ignored": [
+      "Downstream processes may fail to extract meaningful information if the structured output is not implemented."
+    ]
+  },
+  "content_slot_library": {},
+  "quality_rubrics": {},
+  "meta": {
+    "understanding_mode": "full_llm",
+    "saved_at": "2026-05-23T14:42:27.706094+00:00",
+    "llm_steps": [
+      "unified_profile"
+    ]
+  },
+  "orchestration_assessment_feedback": {
+    "updated_at": "2026-05-23T14:43:34.454610+00:00",
+    "last_assessment_passed": false,
+    "iteration": 1,
+    "latest": {
+      "passed": false,
+      "is_valid": false,
+      "assessed_at": "2026-05-23T14:43:21.160061+00:00",
+      "structural_issue_count": 1,
+      "structural_issues_summary": [
+        "{\"type\": \"field_coverage\", \"description\": \"新字段可能未被管线输出键覆盖: ['doc_type', 'vendor', 'invoice_no', 'amount', 'currency', 'date']\", \"missing_fields\": [\"doc_type\", \"vendor\", \"invoice_no\", \"amount\", \"currency\", \"date\"]}"
+      ],
+      "task_fit_satisfied": false,
+      "task_fit_skipped": false,
+      "task_fit_reasoning": "结构上存在问题，管线输出键未覆盖所有新字段（如 'doc_type', 'vendor', 'invoice_no', 'amount', 'currency', 'date'），导致无法满足数据准备目标。语义上，虽然有生成结构化输出的步骤，但缺少必要的字段输出。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [
+        "重新编排以确保所有新字段在输出中被覆盖",
+        "调整某步输出键以包含缺失的字段"
+      ],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "检查管线步骤以确保所有新字段被正确生成",
+        "重新运行 orchestrate 修正环路与键",
+        "若仍缺语义能力再运行 evolve-operators"
+      ]
+    },
+    "history": []
+  }
+}

@@ -1,0 +1,11 @@
+Task goal:
+Generate output summaries from document screenshots.
+
+Mandatory rule:
+- The system must read content from image pixels (OCR), not from file names or prompt text.
+
+Output requirement:
+- Keep default single `output` field format.
+
+Assessment focus:
+- If OCR capability is missing, report capability gap and propose new operators.

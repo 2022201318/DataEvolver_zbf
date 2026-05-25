@@ -102,7 +102,7 @@ def run_instantiation(
         fp, pipeline_id=pipeline_id, manifest_record=mrec if isinstance(mrec, dict) else {}
     )
 
-    store = OperatorRegistryStore(root)
+    store = OperatorRegistryStore(root, pipeline_id=pipeline_id)
     registry = store.merged_raw()
     llm_cfg = llm_config if isinstance(llm_config, dict) else {}
     u_path = root / "data" / "understanding_results" / f"{pipeline_id}.json"

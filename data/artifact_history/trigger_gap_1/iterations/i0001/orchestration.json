@@ -1,0 +1,741 @@
+{
+  "pipeline_id": "trigger_gap_1",
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Read raw data from a JSONL file into the main record stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "llm_generate_field",
+        "description": "Generate the 'output' field by extracting meaningful summaries from the image content using OCR.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "validate_schema",
+        "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "check_format",
+        "description": "Check the format of the 'output' field to ensure it meets the required standards.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "remove_field",
+        "description": "Remove the unused 'text' field from the records to streamline the data structure.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_6",
+        "node_name": "write_data",
+        "description": "Write the processed records to a JSONL file.",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_5",
+        "to_node": "step_6",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5",
+      "step_6"
+    ],
+    "total_nodes": 6,
+    "total_edges": 5
+  },
+  "pipeline_plan": [
+    {
+      "step": 1,
+      "operator": "read_data",
+      "description": "Read raw data from a JSONL file into the main record stream."
+    },
+    {
+      "step": 2,
+      "operator": "llm_generate_field",
+      "description": "Generate the 'output' field by extracting meaningful summaries from the image content using OCR."
+    },
+    {
+      "step": 3,
+      "operator": "validate_schema",
+      "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed."
+    },
+    {
+      "step": 4,
+      "operator": "check_format",
+      "description": "Check the format of the 'output' field to ensure it meets the required standards."
+    },
+    {
+      "step": 5,
+      "operator": "remove_field",
+      "description": "Remove the unused 'text' field from the records to streamline the data structure."
+    },
+    {
+      "step": 6,
+      "operator": "write_data",
+      "description": "Write the processed records to a JSONL file."
+    }
+  ],
+  "source": "open_orchestrator_v1",
+  "meta": {
+    "created_at": "2026-05-23T14:47:29.413578+00:00",
+    "llm_stages": [
+      "free_fitting",
+      "template_combination",
+      "constrained_search"
+    ]
+  },
+  "free_fitting": {
+    "optimization_blueprint": {
+      "global_optimization_direction": "Transform unstructured answers into tagged solutions with auxiliary metadata by enhancing the output field through OCR processing and ensuring completeness of data records.",
+      "key_improvements": [
+        "Populate the `output` field with meaningful summaries derived from OCR processing of image content.",
+        "Ensure multiple records are generated with varied instructions and outputs to enhance dataset diversity."
+      ],
+      "transformation_strategies": [
+        "Implement OCR processing to extract text from images and populate the `output` field accordingly.",
+        "Remove the unused `text` field from the seed schema to streamline the data structure."
+      ],
+      "quality_focus": [
+        "Verify that the `output` field contains structured and relevant summaries that accurately reflect the content of the images.",
+        "Ensure completeness and relevance in the `output` field to meet the higher standards set by the seed data."
+      ],
+      "summary": "The optimization blueprint focuses on enhancing the `output` field through OCR processing to ensure meaningful summaries are generated. Key improvements include populating the `output` field and generating diverse records, while transformation strategies emphasize the removal of unused fields and the implementation of OCR capabilities. Quality focus areas highlight the need for structured and relevant outputs to meet the seed data standards."
+    },
+    "stage": "free_fitting",
+    "design_method": "llm_driven"
+  },
+  "template_combination": {
+    "template_selection": {
+      "selected_templates": [
+        "content_enhancement",
+        "field_extraction",
+        "structure_optimization",
+        "quality_validation"
+      ],
+      "selection_rationale": "These templates were selected because they directly address the core transformation goals outlined in the optimization blueprint. The 'content_enhancement' template will enhance the quality of the output field by generating meaningful summaries from OCR processing. The 'field_extraction' template will help in extracting structured fields from unstructured data, which is essential for populating the output field. The 'structure_optimization' template will streamline the data structure by removing unused fields, and the 'quality_validation' template will ensure that the output meets the required quality standards.",
+      "template_combination_strategy": "sequential",
+      "pipeline_sketch": {
+        "steps": [
+          {
+            "step_id": "step_1",
+            "template_name": "content_enhancement",
+            "functional_description": "分析内容现状，确定增强方向",
+            "expected_output": "增强策略和具体目标",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_2",
+            "template_name": "content_enhancement",
+            "functional_description": "执行内容增强，提升详细程度和结构化程度",
+            "expected_output": "增强后的内容",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_3",
+            "template_name": "field_extraction",
+            "functional_description": "分析源内容，识别可提取的信息",
+            "expected_output": "提取策略和目标字段定义",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_4",
+            "template_name": "field_extraction",
+            "functional_description": "执行信息提取，生成结构化字段",
+            "expected_output": "提取出的结构化字段",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_5",
+            "template_name": "structure_optimization",
+            "functional_description": "分析当前数据结构，识别优化点",
+            "expected_output": "结构优化方案",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_6",
+            "template_name": "structure_optimization",
+            "functional_description": "重组和优化数据结构",
+            "expected_output": "优化后的数据结构",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_7",
+            "template_name": "quality_validation",
+            "functional_description": "评估内容质量，从多个维度打分",
+            "expected_output": "质量评分和评估报告",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_8",
+            "template_name": "quality_validation",
+            "functional_description": "验证数据格式是否符合规范",
+            "expected_output": "格式验证结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          }
+        ],
+        "total_steps": 8,
+        "data_flow": "Data flows sequentially from content enhancement to field extraction, then to structure optimization, and finally to quality validation. Each step builds on the output of the previous step.",
+        "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+        "stage": "template_combination"
+      },
+      "coverage_analysis": {
+        "optimization_direction_coverage": "The selected templates comprehensively cover the optimization direction by enhancing the output field through OCR processing and ensuring structured data.",
+        "key_improvements_coverage": "The templates address key improvements by populating the output field with meaningful summaries and ensuring diverse records through structured extraction.",
+        "quality_focus_coverage": "Quality validation ensures that the output field contains structured and relevant summaries, meeting the higher standards set by the seed data.",
+        "missing_capabilities": []
+      }
+    },
+    "pipeline_sketch": {
+      "steps": [
+        {
+          "step_id": "step_1",
+          "template_name": "content_enhancement",
+          "functional_description": "分析内容现状，确定增强方向",
+          "expected_output": "增强策略和具体目标",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_2",
+          "template_name": "content_enhancement",
+          "functional_description": "执行内容增强，提升详细程度和结构化程度",
+          "expected_output": "增强后的内容",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_3",
+          "template_name": "field_extraction",
+          "functional_description": "分析源内容，识别可提取的信息",
+          "expected_output": "提取策略和目标字段定义",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_4",
+          "template_name": "field_extraction",
+          "functional_description": "执行信息提取，生成结构化字段",
+          "expected_output": "提取出的结构化字段",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_5",
+          "template_name": "structure_optimization",
+          "functional_description": "分析当前数据结构，识别优化点",
+          "expected_output": "结构优化方案",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_6",
+          "template_name": "structure_optimization",
+          "functional_description": "重组和优化数据结构",
+          "expected_output": "优化后的数据结构",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_7",
+          "template_name": "quality_validation",
+          "functional_description": "评估内容质量，从多个维度打分",
+          "expected_output": "质量评分和评估报告",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_8",
+          "template_name": "quality_validation",
+          "functional_description": "验证数据格式是否符合规范",
+          "expected_output": "格式验证结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        }
+      ],
+      "total_steps": 8,
+      "data_flow": "Data flows sequentially from content enhancement to field extraction, then to structure optimization, and finally to quality validation. Each step builds on the output of the previous step.",
+      "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+      "stage": "template_combination"
+    },
+    "stage": "template_combination",
+    "design_method": "template_based"
+  },
+  "constrained_search": {
+    "final_pipeline": [
+      {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/trigger_gap_1/raw_data/gap_raw.jsonl"
+        },
+        "description": "Read raw data from a JSONL file into the main record stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_2",
+        "operator": "llm_generate_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "prompt_context_fields": [
+            "input"
+          ],
+          "target_field": "output",
+          "generation_spec": "Generate a meaningful summary based on the image content."
+        },
+        "description": "Generate the 'output' field by extracting meaningful summaries from the image content using OCR.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_3",
+        "operator": "validate_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ],
+        "parameters": {
+          "schema_rules": {
+            "required_fields": [
+              "instruction",
+              "input",
+              "output"
+            ],
+            "field_types": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed.",
+        "mapped_from_abstract_step": "step_3",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_4",
+        "operator": "check_format",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ],
+        "parameters": {
+          "format_rules": {
+            "output": "Ensure the output field contains structured summaries."
+          }
+        },
+        "description": "Check the format of the 'output' field to ensure it meets the required standards.",
+        "mapped_from_abstract_step": "step_4",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_5",
+        "operator": "remove_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "field_names": [
+            "text"
+          ]
+        },
+        "description": "Remove the unused 'text' field from the records to streamline the data structure.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_6",
+        "operator": "write_data",
+        "input_keys": [
+          "records",
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/trigger_gap_1/outputs/trigger_gap_1_processed.jsonl"
+        },
+        "description": "Write the processed records to a JSONL file.",
+        "mapped_from_abstract_step": "step_6",
+        "refinement_source": "operator_registry"
+      }
+    ],
+    "refinement_summary": {
+      "original_steps_count": 8,
+      "final_steps_count": 6,
+      "added_operators": [
+        "llm_generate_field",
+        "validate_schema",
+        "check_format",
+        "remove_field"
+      ],
+      "modified_operators": [],
+      "data_flow_verification": "Data flows coherently from reading data to generating fields, validating schema, checking format, removing unused fields, and finally writing data.",
+      "capability_coverage": "All required capabilities are covered, including field generation, validation, format checking, and data writing."
+    },
+    "capability_check": {
+      "needs_dynamic_addition": false,
+      "missing_capabilities": [],
+      "note": "open source: no dynamic operator injection"
+    },
+    "validation_result": {
+      "is_valid": true,
+      "validation_issues": [],
+      "checked_at": "2026-05-23T14:47:29.416518+00:00",
+      "dag_validation_meta": {
+        "preserved_issue_count": 0,
+        "added_issue_count": 0,
+        "sources": [
+          "orchestration",
+          "registry",
+          "dag_structure",
+          "io_contract",
+          "dag_graph_topology"
+        ]
+      },
+      "note": "workflow dag_validation：合并编排阶段校验 + 注册表/DAG 对齐 + 图论检查",
+      "structural_valid": true,
+      "llm_task_assessment": {
+        "satisfied": true,
+        "reasoning": "结构上，DAG的步骤顺序合理，能够有效地从原始数据读取、生成输出字段、验证模式、检查格式、移除多余字段，最后写入数据。语义上，所有步骤都与任务要求相符，特别是生成输出字段的步骤符合从图像内容提取有意义摘要的目标。",
+        "recommend_new_operators": false,
+        "recommended_fixes": [],
+        "optimization_suggestions": [],
+        "next_steps_for_user": [
+          "确认所有步骤的输入输出键是否正确",
+          "运行管道以验证数据处理的完整性",
+          "检查生成的输出字段是否符合质量标准"
+        ],
+        "skipped": false
+      }
+    },
+    "operator_level_self_evolving": {
+      "triggered": false,
+      "added_operators": [],
+      "re_orchestrated": false,
+      "suggested_operators": []
+    },
+    "stage": "constrained_search",
+    "design_method": "constrained_optimization"
+  },
+  "final_pipeline": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/trigger_gap_1/raw_data/gap_raw.jsonl"
+      },
+      "description": "Read raw data from a JSONL file into the main record stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "llm_generate_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "prompt_context_fields": [
+          "input"
+        ],
+        "target_field": "output",
+        "generation_spec": "Generate a meaningful summary based on the image content."
+      },
+      "description": "Generate the 'output' field by extracting meaningful summaries from the image content using OCR.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "validate_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": {
+          "required_fields": [
+            "instruction",
+            "input",
+            "output"
+          ],
+          "field_types": {
+            "instruction": "string",
+            "input": "string",
+            "output": "string"
+          }
+        }
+      },
+      "description": "Validate the records against the required schema to ensure all necessary fields are present and correctly typed.",
+      "mapped_from_abstract_step": "step_3",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "check_format",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "report"
+      ],
+      "parameters": {
+        "format_rules": {
+          "output": "Ensure the output field contains structured summaries."
+        }
+      },
+      "description": "Check the format of the 'output' field to ensure it meets the required standards.",
+      "mapped_from_abstract_step": "step_4",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "remove_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "field_names": [
+          "text"
+        ]
+      },
+      "description": "Remove the unused 'text' field from the records to streamline the data structure.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_6",
+      "operator": "write_data",
+      "input_keys": [
+        "records",
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/trigger_gap_1/outputs/trigger_gap_1_processed.jsonl"
+      },
+      "description": "Write the processed records to a JSONL file.",
+      "mapped_from_abstract_step": "step_6",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "dag_validation": {
+    "checked_at": "2026-05-23T14:47:29.416518+00:00",
+    "is_valid": true,
+    "issue_count": 0,
+    "structural_valid": true,
+    "task_fit_satisfied": true,
+    "task_fit_skipped": false,
+    "recommend_new_operators": false,
+    "assessment_detail_path": "data/dag_assessment_results/trigger_gap_1.json",
+    "llm": {
+      "reasoning": "结构上，DAG的步骤顺序合理，能够有效地从原始数据读取、生成输出字段、验证模式、检查格式、移除多余字段，最后写入数据。语义上，所有步骤都与任务要求相符，特别是生成输出字段的步骤符合从图像内容提取有意义摘要的目标。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "确认所有步骤的输入输出键是否正确",
+        "运行管道以验证数据处理的完整性",
+        "检查生成的输出字段是否符合质量标准"
+      ]
+    }
+  },
+  "trial_run_check": {
+    "checked_at": "2026-05-23T14:51:27.914582+00:00",
+    "execution_ok": true,
+    "artifact": "data/trial_runs/trigger_gap_1/trial_result.json",
+    "reflux_targets": [],
+    "pilot_overall_score": 70,
+    "pilot_recommendation": "evolve_pipeline",
+    "pilot_dimension_scores": {
+      "semantic": 60,
+      "format": 80,
+      "diversity": 70,
+      "info": 50,
+      "noise": 90,
+      "logic": 75
+    }
+  }
+}

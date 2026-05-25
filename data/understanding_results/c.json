@@ -1,0 +1,161 @@
+{
+  "pipeline_id": "c",
+  "domain": "The dataset focuses on generating responses based on given instructions, typical in natural language processing tasks.",
+  "language": "en",
+  "language_label": "English",
+  "language_constraint": "en",
+  "language_consistency": true,
+  "user_declared_language": null,
+  "task_type": null,
+  "basic_information": {
+    "language": "English",
+    "file_format_analysis": {
+      "raw_data_format": "JSONL",
+      "seed_data_format": "JSONL",
+      "format_differences": "Both formats are JSONL, but the raw data includes an additional 'text' field that is absent in the seed data.",
+      "nested_structure_notes": "No nested structures are present in either raw or seed samples."
+    },
+    "seed_vs_raw_quality": {
+      "quality_improvements": [
+        "Seed removes the 'text' field, which contains unnecessary context, leading to a more focused dataset."
+      ],
+      "content_differences": "Raw data contains verbose context in the 'text' field, while seed data presents concise instructions and outputs.",
+      "style_differences": "Seed data maintains a clear and direct format without extraneous text, enhancing readability.",
+      "format_improvements": "Seed data enforces a streamlined structure by omitting the 'text' field, which is not present in raw.",
+      "detail_level_comparison": "Seed samples are more concise, focusing on essential components without additional context.",
+      "nested_field_improvements": "No nested fields are present in either dataset."
+    },
+    "processing_targets": [
+      "Remove the 'text' field from raw data to align with seed structure.",
+      "Ensure outputs are concise and directly related to the instruction."
+    ],
+    "domain_characteristics": "The dataset focuses on generating responses based on given instructions, typical in natural language processing tasks.",
+    "data_types": [
+      {
+        "field": "instruction",
+        "type": "string"
+      },
+      {
+        "field": "input",
+        "type": "string"
+      },
+      {
+        "field": "output",
+        "type": "string"
+      }
+    ],
+    "transformation_direction": "The transformation from raw to seed involves removing unnecessary verbosity by eliminating the 'text' field, resulting in a more streamlined and focused dataset that emphasizes the core instruction and output.",
+    "quality_standards": "Seed data is considered 'done' when it contains only the essential fields: instruction, input, and output, without any extraneous information."
+  },
+  "schema_analysis": {
+    "schema_stable": true,
+    "raw_fields": [
+      "instruction",
+      "input",
+      "output",
+      "text"
+    ],
+    "seed_fields": [
+      "instruction",
+      "input",
+      "output"
+    ],
+    "raw_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "The task to be completed.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "The input data for the task.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "The expected output for the given instruction and input.",
+        "nested_structure": "not applicable"
+      },
+      "text": {
+        "type": "string",
+        "meaning": "Verbose context that describes the task.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "seed_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "The task to be completed.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "The input data for the task.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "The expected output for the given instruction and input.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "new_fields": [],
+    "missing_fields": [
+      "text"
+    ],
+    "nested_structure_changes": "The raw data includes a 'text' field that is not present in the seed data, simplifying the structure.",
+    "schema_constraint": "The seed schema is more constrained, focusing only on the essential fields.",
+    "field_usage_guidance": {
+      "instruction": "Provide clear and actionable tasks.",
+      "input": "Include relevant data for the task.",
+      "output": "Ensure outputs are concise and directly related to the instruction."
+    }
+  },
+  "dataset_level_delta": {
+    "global_optimization_direction": "Removal of extraneous context to focus on essential task components.",
+    "key_improvements": [
+      "The seed removes the 'text' field, which is present in raw, leading to a more streamlined dataset.",
+      "Seed samples provide direct responses without additional context, enhancing clarity."
+    ],
+    "transformation_strategies": [
+      "Remove the 'text' field from raw records to align with seed structure.",
+      "Standardize output formats to ensure consistency across samples."
+    ],
+    "quality_focus": [
+      "Check that outputs are concise and directly related to the instruction, as seen in seed samples."
+    ],
+    "summary": "The transition from raw to seed data involves a significant reduction in verbosity by eliminating the 'text' field, which contains unnecessary context. This results in a more streamlined dataset that focuses on the essential components of instruction, input, and output. The seed samples demonstrate a clear and concise format that enhances usability for downstream applications.",
+    "concrete_field_and_schema_deltas": [
+      "Seed removes the 'text' field that raw includes."
+    ],
+    "value_pattern_contrasts": [
+      "Raw sample includes a lengthy 'text' field, while seed samples are concise and focused on instruction, input, and output."
+    ],
+    "seed_higher_bar_signals": [
+      "Seed data imposes stricter expectations for conciseness and relevance in outputs."
+    ],
+    "risks_if_ignored": [
+      "Downstream processes may produce verbose outputs that do not align with the streamlined format required for effective processing."
+    ]
+  },
+  "content_slot_library": {},
+  "quality_rubrics": {},
+  "meta": {
+    "understanding_mode": "full_llm",
+    "saved_at": "2026-05-23T13:27:48.684553+00:00",
+    "llm_steps": [
+      "unified_profile"
+    ]
+  },
+  "orchestration_assessment_feedback": {
+    "updated_at": "2026-05-23T13:28:50.234537+00:00",
+    "last_assessment_passed": true,
+    "iteration": 0,
+    "latest": {
+      "passed": true,
+      "is_valid": true,
+      "assessed_at": "2026-05-23T13:28:44.944419+00:00"
+    },
+    "history": []
+  }
+}

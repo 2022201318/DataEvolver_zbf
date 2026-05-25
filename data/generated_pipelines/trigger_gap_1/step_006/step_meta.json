@@ -1,0 +1,41 @@
+{
+  "step_index": 6,
+  "step_id": "step_6",
+  "operator_name": "remove_field",
+  "description": "Remove the unnecessary text field from the records to streamline the output.",
+  "input_keys": [
+    "records",
+    "field_names"
+  ],
+  "output_keys": [
+    "records"
+  ],
+  "parameters": {
+    "field_names": [
+      "text"
+    ]
+  },
+  "requires_llm": false,
+  "prompt_generated": false,
+  "relative_dir": "data/generated_pipelines/trigger_gap_1/step_006",
+  "orchestration_step": {
+    "step_id": "step_6",
+    "operator": "remove_field",
+    "input_keys": [
+      "records",
+      "field_names"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "parameters": {
+      "field_names": [
+        "text"
+      ]
+    },
+    "description": "Remove the unnecessary text field from the records to streamline the output.",
+    "mapped_from_abstract_step": "step_6",
+    "refinement_source": "operator_registry"
+  },
+  "impl_kind": "builtin_delegate"
+}

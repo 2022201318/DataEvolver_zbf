@@ -117,5 +117,29 @@
     "requires_llm": true,
     "category": "semantic",
     "source": "llm_operator_evolution"
+  },
+  "evolved.a.align_input_keys": {
+    "description": "This operator ensures that all steps in the pipeline have valid input keys sourced from previous outputs, thereby maintaining data flow integrity and effectiveness.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "requires_llm": false,
+    "category": "structure",
+    "source": "llm_operator_evolution"
+  },
+  "evolved.a.generate_schema_rules": {
+    "description": "This operator generates the necessary schema rules based on the provided input records, ensuring that all required fields are accounted for and properly formatted.",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "schema_rules"
+    ],
+    "requires_llm": true,
+    "category": "semantic",
+    "source": "llm_operator_evolution"
   }
 }

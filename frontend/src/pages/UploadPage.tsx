@@ -282,7 +282,7 @@ export function UploadPage() {
       <section>
         <p className="section-label">数据理解 (Stage 1)</p>
         <p className="text-sm text-[var(--text-dim)] mb-3">
-          多模态数据准备 会分析 Raw 与 Seed 的差异，提取数据画像与质量指标，为后续 DAG 编排提供依据。
+          DataEvolver 会分析 Raw 与 Seed 的差异，提取数据画像与质量指标，为后续 DAG 编排提供依据。
         </p>
         <div className="flex items-center gap-4 mb-4">
           <button

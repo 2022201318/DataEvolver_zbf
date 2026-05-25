@@ -3,51 +3,28 @@
  */
 import type { WorkflowRoundSnapshot, WorkflowStateResponse, WorkflowTokensResponse } from '../api/client'
 import type { DagResult, JudgeResult, UnderstandingResult } from '../types'
+import type {
+  CanvasDagTab,
+  CanvasEvolutionRow,
+  CanvasInstantiationCard,
+  IterationHistoryArtifact,
+  LiveArtifactsForCanvas,
+  OrchestrationArchiveArtifact,
+  RoundHistoryArtifact,
+} from './canvasRowTypes'
+import { buildFrozenRoundRow, buildRowUiFromArtifacts } from './buildRoundRowHelpers'
+import { buildOrchestrationDagTabs } from './buildOrchestrationDagTabs'
 
-
-export type CanvasMetric = { sec: number; tokens: number }
-
-export type CanvasDagTab = {
-  id: number
-  title: string
-  status: 'passed' | 'failed'
-  summary: string
-  metrics: CanvasMetric
-  nodes: string[]
-  /** 单轮完整 DAG（有则画布分页优先展示） */
-  dag?: DagResult | null
-}
-
-export type CanvasInstantiationCard = {
-  id: string
-  name: string
-  summary: string
-  code: string
-  metrics: CanvasMetric
-}
-
-export type CanvasEvolutionRow = {
-  id: number
-  understandingDone: boolean
-  understandingMetrics?: CanvasMetric
-  dagTabs: CanvasDagTab[]
-  activeDagTabId?: number
-  instantiationCards: CanvasInstantiationCard[]
-  sampleScore?: number
-  sampleMetrics?: CanvasMetric
-  experience?: string
-  experienceMetrics?: CanvasMetric
-  needNext: boolean
-  completed: boolean
-}
-
-export interface LiveArtifactsForCanvas {
-  understanding: UnderstandingResult | null
-  dag: DagResult | null
-  orchestrationValidation: { is_valid: boolean; validation_issues: string[] } | null
-  judge: JudgeResult | null
-  experienceBullets: string[]
-}
+export type {
+  CanvasDagTab,
+  CanvasEvolutionRow,
+  CanvasInstantiationCard,
+  CanvasMetric,
+  IterationHistoryArtifact,
+  LiveArtifactsForCanvas,
+  OrchestrationArchiveArtifact,
+  RoundHistoryArtifact,
+} from './canvasRowTypes'
 
 function parseDagFromApi(dag: unknown): DagResult | null {
   if (!dag || typeof dag !== 'object') return null
@@ -174,11 +151,17 @@ export function buildEvolutionRowsFromPipeline(
     understanding: UnderstandingResult | null
     dagResponse: Record<string, unknown> | null
     instantiationSteps: Record<string, unknown>[] | null
+    instantiationMeta?: Record<string, unknown> | null
     quality: Record<string, unknown> | null
     trial: Record<string, unknown> | null
     experience: Record<string, unknown> | null
     tokens: WorkflowTokensResponse | null
     history: { round_snapshots?: WorkflowRoundSnapshot[]; entries?: Array<Record<string, unknown>> } | null
+    historyArtifacts?: {
+      rounds: RoundHistoryArtifact[]
+      iterations: IterationHistoryArtifact[]
+      orchestrationArchives: OrchestrationArchiveArtifact[]
+    } | null
     lastAdvanceMessage: string
     language: 'zh' | 'en'
   }
@@ -234,40 +217,17 @@ export function buildEvolutionRowsFromPipeline(
     opts.experience && opts.experience.experience_text != null ? String(opts.experience.experience_text) : ''
   const experienceBullets = expText ? [expText] : []
 
-  const dagTabs: CanvasDagTab[] = []
-  let tabId = 0
-  if (orchestrationDone) {
-    tabId++
-    dagTabs.push({
-      id: tabId,
-      title: isZh ? '编排' : 'Orchestration',
-      status: 'passed',
-      summary: isZh ? '编排结果已写入 data/orchestration_results' : 'Orchestration saved to disk',
-      metrics: { sec: 0, tokens: tokensForSteps(opts.tokens, ['orchestration']) },
-      nodes: dagParsed?.execution_order ?? [],
-      // 关键：把 DAG 快照固化在当前轮 tab，避免进入下一轮后因全局 dag 为空导致上一轮 DAG 消失。
-      dag: dagParsed ?? undefined,
-    })
-  }
-  if (hasOrchestrationValidation) {
-    const ok = dagVal?.is_valid !== false
-    tabId++
-    dagTabs.push({
-      id: tabId,
-      title: isZh ? 'DAG 校验' : 'DAG validation',
-      status: ok ? 'passed' : 'failed',
-      summary: ok
-        ? isZh
-          ? '注册表契约与 DAG 一致性校验通过'
-          : 'Registry + DAG validation passed'
-        : isZh
-          ? `校验未通过（问题数: ${dagVal?.issue_count ?? '—'}）`
-          : `Validation failed (issues: ${dagVal?.issue_count ?? '—'})`,
-      metrics: { sec: 0, tokens: tokensForSteps(opts.tokens, ['orchestration']) },
-      nodes: dagParsed?.execution_order ?? [],
-      dag: dagParsed ?? undefined,
-    })
-  }
+  const tabBundle = buildOrchestrationDagTabs({
+    roundId,
+    isZh,
+    orchestrationArchives: opts.historyArtifacts?.orchestrationArchives ?? [],
+    liveOrchestration: orchestrationDone && opts.dagResponse ? opts.dagResponse : null,
+    liveOrchestrationRevision:
+      typeof st.orchestration_revision === 'number' ? st.orchestration_revision : undefined,
+    tokens: opts.tokens,
+  })
+  const dagTabs: CanvasDagTab[] = [...tabBundle.dagTabs]
+  let tabId = dagTabs.length
   const evoTokens = tokensForSteps(opts.tokens, ['operator_evolution'])
   const skipEvoByMessage =
     opts.lastAdvanceMessage.includes('跳过算子进化') ||
@@ -293,6 +253,25 @@ export function buildEvolutionRowsFromPipeline(
 
   const instCards: CanvasInstantiationCard[] = []
   const instTokens = tokensForSteps(opts.tokens, ['instantiation'])
+  const instMetaRaw = opts.instantiationMeta && typeof opts.instantiationMeta === 'object' ? opts.instantiationMeta : null
+  const llmStepSet = new Set(
+    Array.isArray(instMetaRaw?.llm_prompt_generated_steps)
+      ? instMetaRaw!.llm_prompt_generated_steps.map(String)
+      : []
+  )
+  const instSkipped =
+    opts.lastAdvanceMessage.includes('instantiation: skipped') ||
+    opts.lastAdvanceMessage.includes('复用已有实例化')
+  const instantiationMeta =
+    instMetaRaw || instSkipped || completed.has('instantiation')
+      ? {
+          reused: instSkipped,
+          llm_codegen: llmStepSet.size > 0,
+          llm_steps: llmStepSet.size ? [...llmStepSet] : undefined,
+          note: typeof instMetaRaw?.note === 'string' ? instMetaRaw.note : undefined,
+          source: typeof instMetaRaw?.source === 'string' ? instMetaRaw.source : undefined,
+        }
+      : undefined
   if (opts.instantiationSteps?.length) {
     opts.instantiationSteps.forEach((s, i) => {
       const op = String(s.operator_name ?? s.operator ?? `step_${i + 1}`)
@@ -302,6 +281,7 @@ export function buildEvolutionRowsFromPipeline(
         summary: String(s.intermediate_summary ?? s.description ?? ''),
         code: String(s.code ?? ''),
         metrics: { sec: 0, tokens: Math.round(instTokens / Math.max(1, opts.instantiationSteps?.length ?? 1)) },
+        llmGenerated: llmStepSet.has(op),
       })
     })
   }
@@ -313,6 +293,20 @@ export function buildEvolutionRowsFromPipeline(
   // 注意：artifacts.experience 不是按轮次隔离的，直接用会把上一轮经验误显示到当前轮。
   // 仅在兼容旧后端（无 workflow step_order）时回退到 artifacts。
   const experienceDone = completed.has('experience') || (compatibilityMode && artifacts.experience)
+  const expSource = opts.experience?.source
+  const experienceMeta =
+    experienceDone && opts.experience
+      ? {
+          llm_used: false,
+          source_kind: typeof expSource === 'string' ? expSource : 'rule_aggregation',
+          detail:
+            typeof opts.experience.detail === 'string'
+              ? opts.experience.detail
+              : opts.language === 'zh'
+                ? '经验由质检/试运行/Pilot 结果规则聚合生成，非 LLM 逐步调用'
+                : 'Experience is rule-aggregated from QC/trial/Pilot, not LLM step-by-step',
+        }
+      : undefined
 
   if (qualityDone && typeof qualityScore === 'number') {
     sampleScore = Math.max(0, Math.min(100, Math.round(qualityScore)))
@@ -354,6 +348,7 @@ export function buildEvolutionRowsFromPipeline(
         trialRec === 'apply_full'))
   const canRunFullByJudge = readyForFullRun || st.is_complete || (trialDone && noNeedPipelineEvolution && !needPipelineEvolution)
 
+  let preferredActiveDagTabId = tabBundle.activeDagTabId
   const row: CanvasEvolutionRow = {
     id: roundId,
     understandingDone: completed.has('understanding') || artifacts.understanding,
@@ -362,16 +357,25 @@ export function buildEvolutionRowsFromPipeline(
         ? { sec: 0, tokens: understandingTokens }
         : undefined,
     dagTabs,
-    activeDagTabId: dagTabs.length ? dagTabs[dagTabs.length - 1].id : undefined,
+    activeDagTabId: preferredActiveDagTabId ?? (dagTabs.length ? dagTabs[dagTabs.length - 1].id : undefined),
     instantiationCards: instCards,
+    instantiationMeta,
     sampleScore,
     sampleMetrics:
       sampleScore !== undefined ? { sec: 0, tokens: trialTokens + qualityTokens } : trialDone ? { sec: 0, tokens: trialTokens } : undefined,
     // 经验卡片仅在“本轮 experience 步骤完成”后展示，避免把上一轮经验误显示到当前轮。
     experience: experienceDone ? expText || undefined : undefined,
     experienceMetrics: experienceDone ? { sec: 0, tokens: experienceTokens } : undefined,
+    experienceMeta,
     needNext: !canRunFullByJudge && trialDone && needPipelineEvolution,
     completed: canRunFullByJudge,
+    rowUi: buildRowUiFromArtifacts({
+      understanding: opts.understanding as Record<string, unknown> | null,
+      orchestration: opts.dagResponse,
+      quality_check: opts.quality,
+      trial: opts.trial,
+      experience: opts.experience,
+    }),
   }
 
   const historyRows: CanvasEvolutionRow[] = []
@@ -383,56 +387,27 @@ export function buildEvolutionRowsFromPipeline(
           .map((e) => e as unknown as WorkflowRoundSnapshot)
       : []
   const snaps = snapsPrimary.length ? snapsPrimary : snapsFallback
+  const roundArtifactByRound = new Map<number, RoundHistoryArtifact>()
+  ;(opts.historyArtifacts?.rounds ?? []).forEach((a) => {
+    const k = Math.max(1, Math.round(a.round))
+    if (!roundArtifactByRound.has(k)) roundArtifactByRound.set(k, a)
+  })
+  const archives = opts.historyArtifacts?.orchestrationArchives ?? []
+  const iterations = opts.historyArtifacts?.iterations ?? []
   snaps.forEach((s) => {
     const round = toNumber(s.round)
     if (typeof round !== 'number' || !Number.isFinite(round) || round < 1) return
     const rid = Math.max(1, Math.round(round))
     // 历史只显示“当前轮之前”的轮次，避免 round=1 时误出现多行。
     if (rid >= roundId) return
-    const summary = s.summary && typeof s.summary === 'object' ? s.summary : {}
-    const uDone = Boolean((summary as Record<string, unknown>).understanding_done)
-    const dagNodeCount = Math.max(0, Math.round(toNumber((summary as Record<string, unknown>).dag_node_count) ?? 0))
-    const instStepCount = Math.max(0, Math.round(toNumber((summary as Record<string, unknown>).instantiation_steps) ?? 0))
-    const score = toNumber((summary as Record<string, unknown>).sample_score)
-    const exp = (summary as Record<string, unknown>).experience_text
-    const expText = typeof exp === 'string' ? exp : ''
-
-    const dagTabs: CanvasDagTab[] =
-      dagNodeCount > 0
-        ? [
-            {
-              id: 1,
-              title: isZh ? '编排(历史)' : 'Orchestration (history)',
-              status: 'passed',
-              summary: isZh ? `已归档 DAG 节点数: ${dagNodeCount}` : `Archived DAG nodes: ${dagNodeCount}`,
-              metrics: { sec: 0, tokens: 0 },
-              nodes: [],
-            },
-          ]
-        : []
-    const instantiationCards: CanvasInstantiationCard[] = Array.from({ length: instStepCount }).map((_, i) => ({
-      id: `hist-r${rid}-inst-${i + 1}`,
-      name: isZh ? `历史实例化步骤 ${i + 1}` : `Historical Instantiation ${i + 1}`,
-      summary: isZh ? '由轮次快照恢复' : 'Recovered from round snapshot',
-      code: '',
-      metrics: { sec: 0, tokens: 0 },
-    }))
-    const qualityPassedSnap = toBool(s.quality_passed)
-    historyRows.push({
-      id: rid,
-      understandingDone: uDone,
-      understandingMetrics: uDone ? { sec: 0, tokens: 0 } : undefined,
-      dagTabs,
-      activeDagTabId: dagTabs[0]?.id,
-      instantiationCards,
-      sampleScore: typeof score === 'number' ? Math.max(0, Math.min(100, Math.round(score))) : undefined,
-      sampleMetrics: typeof score === 'number' ? { sec: 0, tokens: 0 } : undefined,
-      experience: expText || undefined,
-      experienceMetrics: expText ? { sec: 0, tokens: 0 } : undefined,
-      // 历史轮次若当时未通过，则应显示回流到下一轮（橙线）。
-      needNext: qualityPassedSnap === false,
-      completed: true,
-    })
+    const roundArtifact = roundArtifactByRound.get(rid)
+    historyRows.push(
+      buildFrozenRoundRow(rid, roundArtifact, s, {
+        isZh,
+        orchestrationArchives: archives,
+        iterations,
+      })
+    )
   })
 
   const byRound = new Map<number, CanvasEvolutionRow>()

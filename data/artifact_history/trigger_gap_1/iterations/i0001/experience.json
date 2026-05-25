@@ -1,0 +1,18 @@
+{
+  "pipeline_id": "trigger_gap_1",
+  "experience_text": "编排 DAG 校验通过。 试运行：采样数据已沿实例化桩执行完成。 Pilot 经验: Ensure outputs align closely with seed expectations. Pilot 经验: Prioritize clarity and conciseness in summaries. Pilot 经验: Review output generation logic for consistency. Pilot 建议下一步: evolve_pipeline — Outputs need refinement to match the concise style of seed data. The outputs provide detailed information but deviate from the concise format expected in the seed. 数据集级摘要: The transition from raw to seed involves a significant enhancement in the `output` field, which is critical for fulfilling the task requirements. The raw data lacks substantive outputs, while the seed data provides detailed summaries that are essential for the image summary task. The absence of the `text` field in seed indicates a focus on concise output without additional notes.",
+  "reflux_targets": [
+    "orchestration",
+    "understanding"
+  ],
+  "source": "experience_snapshot_v1",
+  "meta": {
+    "created_at": "2026-05-23T14:51:38.027634+00:00",
+    "inputs": {
+      "quality_check_path": "data/quality_check_results/trigger_gap_1.json",
+      "quality_check_found": true,
+      "trial_run_path": "data/trial_runs/trigger_gap_1/trial_result.json",
+      "trial_run_found": true
+    }
+  }
+}

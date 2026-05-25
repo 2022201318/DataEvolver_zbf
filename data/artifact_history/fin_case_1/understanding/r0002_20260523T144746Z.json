@@ -1,0 +1,148 @@
+{
+  "pipeline_id": "fin_case_1",
+  "domain": "The domain is finance, requiring precision and clarity in data presentation.",
+  "language": "en",
+  "language_label": "English",
+  "language_constraint": "en",
+  "language_consistency": true,
+  "user_declared_language": null,
+  "task_type": "instruction_tuning",
+  "basic_information": {
+    "language": "English",
+    "file_format_analysis": {
+      "raw_data_format": "JSONL",
+      "seed_data_format": "JSONL",
+      "format_differences": "Both formats are JSONL, but seed data has removed the 'text' field present in raw data, focusing on concise outputs.",
+      "nested_structure_notes": "No nested structures are present in either raw or seed samples."
+    },
+    "seed_vs_raw_quality": {
+      "quality_improvements": [
+        "Seed output field provides a concise summary of financial data, while raw output is verbose and less structured."
+      ],
+      "content_differences": "Seed outputs are more focused and actionable, providing clear financial highlights compared to the raw verbose drafts.",
+      "style_differences": "Seed uses a more formal tone and structured format, such as bullet points in checklists, which is absent in raw.",
+      "format_improvements": "Seed enforces a clear structure in outputs, eliminating unnecessary verbosity found in raw outputs.",
+      "detail_level_comparison": "Seed outputs are typically shorter and more direct, focusing on key financial metrics without excessive detail.",
+      "nested_field_improvements": "No nested fields to compare."
+    },
+    "processing_targets": [
+      "Transform raw outputs to concise summaries in seed format.",
+      "Remove unnecessary fields like 'text' to streamline data."
+    ],
+    "domain_characteristics": "The domain is finance, requiring precision and clarity in data presentation.",
+    "data_types": [],
+    "transformation_direction": "The transformation from raw to seed involves condensing verbose financial updates into clear, actionable insights, removing unnecessary fields and enhancing clarity.",
+    "quality_standards": "Seed data is considered 'done' when it presents concise, actionable financial insights without unverified claims."
+  },
+  "schema_analysis": {
+    "schema_stable": true,
+    "raw_fields": [
+      "instruction",
+      "input",
+      "output",
+      "text"
+    ],
+    "seed_fields": [
+      "instruction",
+      "input",
+      "output"
+    ],
+    "raw_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for the model.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "The input text that needs to be processed.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "The model's output based on the input.",
+        "nested_structure": "not applicable"
+      },
+      "text": {
+        "type": "string",
+        "meaning": "A verbose draft of the output.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "seed_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for the model.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "The input text that needs to be processed.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "The model's output based on the input.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "new_fields": [],
+    "missing_fields": [
+      "text"
+    ],
+    "nested_structure_changes": "The seed schema has removed the 'text' field, simplifying the structure and focusing on the essential fields.",
+    "schema_constraint": "The seed schema enforces a more concise output format, which is critical for clarity in financial communication.",
+    "field_usage_guidance": {
+      "instruction": "Provide clear and actionable instructions for the model.",
+      "input": "Ensure inputs are concise and relevant to the task.",
+      "output": "Outputs should be direct and focused on key financial insights."
+    }
+  },
+  "dataset_level_delta": {
+    "global_optimization_direction": "Removal of verbose fields to enhance clarity and focus on actionable insights.",
+    "key_improvements": [
+      "The seed removes the 'text' field, which was present in raw, leading to a more streamlined output.",
+      "Seed outputs are more concise, e.g., the raw output is verbose while the seed output summarizes key points effectively."
+    ],
+    "transformation_strategies": [
+      "Remove the 'text' field from the schema to prevent unnecessary verbosity.",
+      "Transform raw outputs into concise summaries that highlight key financial metrics."
+    ],
+    "quality_focus": [
+      "Check that outputs in seed format are concise and actionable, without unnecessary details."
+    ],
+    "summary": "The transition from raw to seed data involves significant simplification by removing the 'text' field, which allows for a more focused presentation of financial insights. Seed outputs are structured to provide clear, actionable information, enhancing usability for business users. This change is critical for maintaining clarity and precision in financial communication.",
+    "concrete_field_and_schema_deltas": [
+      "Seed removes path 'text' that raw has, simplifying the schema."
+    ],
+    "value_pattern_contrasts": [
+      "Raw output is verbose: 'Investor update draft: Q2 revenue reached 12.4 million dollars...' vs. Seed output: 'Q2 highlights: revenue rose to $12.4M...'"
+    ],
+    "seed_higher_bar_signals": [
+      "Seed outputs impose stricter expectations for conciseness and clarity, which are not present in raw outputs."
+    ],
+    "risks_if_ignored": [
+      "Downstream processes may produce verbose and unclear outputs, leading to miscommunication in financial reporting."
+    ]
+  },
+  "content_slot_library": {},
+  "quality_rubrics": {},
+  "meta": {
+    "understanding_mode": "full_llm",
+    "saved_at": "2026-05-23T14:08:07.649003+00:00",
+    "llm_steps": [
+      "unified_profile"
+    ]
+  },
+  "orchestration_assessment_feedback": {
+    "updated_at": "2026-05-23T14:08:58.746545+00:00",
+    "last_assessment_passed": true,
+    "iteration": 0,
+    "latest": {
+      "passed": true,
+      "is_valid": true,
+      "assessed_at": "2026-05-23T14:08:52.178179+00:00"
+    },
+    "history": []
+  }
+}

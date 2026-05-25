@@ -4,7 +4,7 @@
     "file": "logs/dataevolver.log"
   },
   "api": {
-    "title": "多模态数据准备 API",
+    "title": "DataEvolver API",
     "version": "0.1.0",
     "cors_origins": [
       "http://localhost:5173",
@@ -17,8 +17,8 @@
     "temperature": 0.1,
     "max_tokens": 8000,
     "max_workers": 100,
-    "api_url": "https://your-proxy.example.com/v1",
-    "api_key": ""
+    "api_url": "https://svip.xty.app/v1",
+    "api_key": "sk-g38Zw0RP6nknkmM0M38x4tWdBtu0pLovCRuauwvlyA739YDT"
   },
   "processing": {
     "batch_size": 100,

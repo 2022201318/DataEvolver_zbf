@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from subsystems.pipeline_runtime.execution.records_io import load_records_from_rel_path, write_records_jsonl
+from subsystems.pipeline_session.manifest_io_paths import resolve_io_file_path
 
 OpFn = Callable[[list[dict[str, Any]], dict[str, Any], dict[str, Any]], list[dict[str, Any]]]
 
@@ -20,25 +21,27 @@ def _params(step: dict[str, Any]) -> dict[str, Any]:
 
 def op_read_data(records: list[dict[str, Any]], step: dict[str, Any], ctx: dict[str, Any]) -> list[dict[str, Any]]:
     root = Path(ctx["root"])
-    rel = _params(step).get("file_path")
-    if rel is None or (isinstance(rel, str) and not str(rel).strip()):
-        raise ValueError(
-            "read_data 缺少有效的 parameters.file_path；请重新执行 instantiate（将从 manifest 自动补全路径）"
-            "或在编排中为 read_data 填写 file_path。"
-        )
+    rel = resolve_io_file_path(
+        _params(step).get("file_path"),
+        op="read_data",
+        pipeline_id=str(ctx.get("pipeline_id") or ""),
+        manifest_record=ctx.get("manifest_record") if isinstance(ctx.get("manifest_record"), dict) else None,
+        root=root,
+    )
     max_r = ctx.get("max_input_records")
-    return load_records_from_rel_path(root, str(rel).strip(), max_rows=max_r)
+    return load_records_from_rel_path(root, rel, max_rows=max_r)
 
 
 def op_write_data(records: list[dict[str, Any]], step: dict[str, Any], ctx: dict[str, Any]) -> list[dict[str, Any]]:
     root = Path(ctx["root"])
-    rel = _params(step).get("file_path")
-    if rel is None or (isinstance(rel, str) and not str(rel).strip()):
-        raise ValueError(
-            "write_data 缺少有效的 parameters.file_path；请重新执行 instantiate（将从 manifest 约定路径补全）"
-            "或在编排中为 write_data 填写 file_path。"
-        )
-    write_records_jsonl(root, str(rel).strip(), records)
+    rel = resolve_io_file_path(
+        _params(step).get("file_path"),
+        op="write_data",
+        pipeline_id=str(ctx.get("pipeline_id") or ""),
+        manifest_record=ctx.get("manifest_record") if isinstance(ctx.get("manifest_record"), dict) else None,
+        root=root,
+    )
+    write_records_jsonl(root, rel, records)
     return records
 
 

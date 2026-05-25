@@ -34,7 +34,7 @@ export interface StartSessionResponse {
 /** 与 `GET /api/operators/` 响应中 `operators[]` 项对齐 */
 export interface ApiOperatorEntry {
   name: string
-  source: 'base' | 'user'
+  source: 'base' | 'general' | 'domain' | 'task' | 'legacy_user' | 'user'
   /** Stable id: io | structure | control | semantic | quality | bridge */
   category_id: string
   category_label: string
@@ -60,9 +60,27 @@ export interface OperatorCategoryMeta {
 export interface OperatorsListResponse {
   operators: ApiOperatorEntry[]
   categories: Record<string, OperatorCategoryMeta>
-  counts: { merged: number; base: number; user: number }
-  user_operator_names: string[]
-  paths: { base: string; user: string; categories: string }
+  counts: {
+    merged: number
+    base: number
+    general?: number
+    domain?: number
+    task?: number
+    legacy_user?: number
+    user?: number
+  }
+  task_operator_names?: string[]
+  domain_operator_names?: string[]
+  general_operator_names?: string[]
+  legacy_user_operator_names?: string[]
+  user_operator_names?: string[]
+  paths: {
+    base: string
+    general?: string | null
+    domain?: string | null
+    user: string
+    categories: string
+  }
 }
 
 /**

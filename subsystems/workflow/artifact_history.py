@@ -67,6 +67,7 @@ def archive_orchestration_before_overwrite(
     orchestration_revision: int,
     understanding_revision: int = 0,
     dag_evolution_cycles: int = 0,
+    round: int = 1,
 ) -> str | None:
     src = root / "data" / "orchestration_results" / f"{pipeline_id}.json"
     if not src.is_file() or orchestration_revision < 1:
@@ -83,6 +84,7 @@ def archive_orchestration_before_overwrite(
         pipeline_id,
         {
             "kind": "orchestration",
+            "round": max(1, int(round)),
             "understanding_revision": understanding_revision,
             "orchestration_revision": orchestration_revision,
             "dag_evolution_cycles": dag_evolution_cycles,
@@ -160,5 +162,64 @@ def snapshot_round_artifacts(
     _append_index(root, pipeline_id, line)
     rp = base / "rounds.jsonl"
     with rp.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(line, ensure_ascii=False) + "\n")
+    return line
+
+
+def snapshot_iteration_artifacts(
+    root: Path,
+    pipeline_id: str,
+    *,
+    round_no: int,
+    dag_evolution_cycles: int,
+    reason: str,
+) -> dict[str, Any]:
+    """
+    在进入下一次编排/轮次前，保存一份“迭代级”中间产物快照。
+    目录：data/artifact_history/{pipeline_id}/iterations/iXXXX/
+    """
+    base = root / "data" / "artifact_history" / pipeline_id
+    it_dir = base / "iterations"
+    it_dir.mkdir(parents=True, exist_ok=True)
+
+    max_idx = 0
+    for d in it_dir.iterdir():
+        if not d.is_dir():
+            continue
+        name = d.name
+        if name.startswith("i") and name[1:].isdigit():
+            max_idx = max(max_idx, int(name[1:]))
+    idx = max_idx + 1
+    cur = it_dir / f"i{idx:04d}"
+    cur.mkdir(parents=True, exist_ok=True)
+
+    src_map = {
+        "understanding": root / "data" / "understanding_results" / f"{pipeline_id}.json",
+        "orchestration": root / "data" / "orchestration_results" / f"{pipeline_id}.json",
+        "dag_assessment": root / "data" / "dag_assessment_results" / f"{pipeline_id}.json",
+        "instantiation": root / "data" / "generated_pipelines" / f"{pipeline_id}.json",
+        "quality_check": root / "data" / "quality_check_results" / f"{pipeline_id}.json",
+        "experience": root / "data" / "experiences" / f"{pipeline_id}.json",
+    }
+    copied: dict[str, str] = {}
+    for key, src in src_map.items():
+        if not src.is_file():
+            continue
+        dest = cur / f"{key}.json"
+        dest.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+        copied[key] = str(dest.relative_to(root))
+
+    line = {
+        "kind": "iteration_snapshot",
+        "iteration": idx,
+        "round": max(1, int(round_no)),
+        "dag_evolution_cycles": max(0, int(dag_evolution_cycles)),
+        "reason": reason,
+        "archived_at": datetime.now(timezone.utc).isoformat(),
+        "paths": copied,
+    }
+    _append_index(root, pipeline_id, line)
+    ip = base / "iterations.jsonl"
+    with ip.open("a", encoding="utf-8") as f:
         f.write(json.dumps(line, ensure_ascii=False) + "\n")
     return line

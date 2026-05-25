@@ -1,0 +1,722 @@
+{
+  "pipeline_id": "fin_case_1",
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Load raw data from a JSONL file into the processing stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "llm_expand_content",
+        "description": "Enhance the output field to improve clarity and detail.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "llm_generate_field",
+        "description": "Generate the output field if it does not exist in the raw data.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "check_format",
+        "description": "Validate the format of the output field to ensure it meets standards.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "validate_schema",
+        "description": "Validate the records against the required schema to ensure completeness.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ]
+      },
+      {
+        "node_id": "step_6",
+        "node_name": "write_data",
+        "description": "Write the processed records to a JSONL file.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_5",
+        "to_node": "step_6",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5",
+      "step_6"
+    ],
+    "total_nodes": 6,
+    "total_edges": 5
+  },
+  "pipeline_plan": [
+    {
+      "step": 1,
+      "operator": "read_data",
+      "description": "Load raw data from a JSONL file into the processing stream."
+    },
+    {
+      "step": 2,
+      "operator": "llm_expand_content",
+      "description": "Enhance the output field to improve clarity and detail."
+    },
+    {
+      "step": 3,
+      "operator": "llm_generate_field",
+      "description": "Generate the output field if it does not exist in the raw data."
+    },
+    {
+      "step": 4,
+      "operator": "check_format",
+      "description": "Validate the format of the output field to ensure it meets standards."
+    },
+    {
+      "step": 5,
+      "operator": "validate_schema",
+      "description": "Validate the records against the required schema to ensure completeness."
+    },
+    {
+      "step": 6,
+      "operator": "write_data",
+      "description": "Write the processed records to a JSONL file."
+    }
+  ],
+  "source": "open_orchestrator_v1",
+  "meta": {
+    "created_at": "2026-05-23T14:07:00.163591+00:00",
+    "llm_stages": [
+      "free_fitting",
+      "template_combination",
+      "constrained_search"
+    ]
+  },
+  "free_fitting": {
+    "optimization_blueprint": {
+      "global_optimization_direction": "Transform unstructured answers into a tagged solution with auxiliary metadata, ensuring clarity and completeness in the output field.",
+      "key_improvements": [
+        "Ensure the output field is populated in all records to enhance clarity and completeness.",
+        "Streamline the response format by removing the 'text' field from the output structure."
+      ],
+      "transformation_strategies": [
+        "Implement a mandatory output field that must be populated in all records to enforce completeness.",
+        "Standardize output formats to match seed examples, ensuring concise and structured responses."
+      ],
+      "quality_focus": [
+        "Verify that all outputs are concise, clearly formatted, and aligned with seed data quality standards.",
+        "Ensure that the output field contains actionable insights and is free from ambiguity."
+      ],
+      "summary": "The optimization blueprint focuses on enhancing the output clarity and structure by enforcing a populated output field and removing unnecessary fields. The strategies aim to standardize the output format and ensure that all responses are concise and actionable, aligning with the quality standards expected in the finance domain."
+    },
+    "stage": "free_fitting",
+    "design_method": "llm_driven"
+  },
+  "template_combination": {
+    "template_selection": {
+      "selected_templates": [
+        "content_enhancement",
+        "field_extraction",
+        "format_normalization",
+        "quality_validation"
+      ],
+      "selection_rationale": "These templates were selected because they directly address the transformation goals outlined in the optimization blueprint. 'content_enhancement' will improve the quality and structure of the output, 'field_extraction' will ensure that the necessary fields are populated, 'format_normalization' will standardize the output format, and 'quality_validation' will verify that the outputs meet the required quality standards.",
+      "template_combination_strategy": "sequential",
+      "pipeline_sketch": {
+        "steps": [
+          {
+            "step_id": "step_1",
+            "template_name": "content_enhancement",
+            "functional_description": "分析内容现状，确定增强方向",
+            "expected_output": "增强策略和具体目标",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_2",
+            "template_name": "content_enhancement",
+            "functional_description": "执行内容增强，提升详细程度和结构化程度",
+            "expected_output": "增强后的内容",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_3",
+            "template_name": "field_extraction",
+            "functional_description": "分析源内容，识别可提取的信息",
+            "expected_output": "提取策略和目标字段定义",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_4",
+            "template_name": "field_extraction",
+            "functional_description": "执行信息提取，生成结构化字段",
+            "expected_output": "提取出的结构化字段",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_5",
+            "template_name": "format_normalization",
+            "functional_description": "分析当前格式，识别不一致之处",
+            "expected_output": "标准化方案",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_6",
+            "template_name": "format_normalization",
+            "functional_description": "执行格式标准化",
+            "expected_output": "标准化后的数据",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_7",
+            "template_name": "quality_validation",
+            "functional_description": "评估内容质量，从多个维度打分",
+            "expected_output": "质量评分和评估报告",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_8",
+            "template_name": "quality_validation",
+            "functional_description": "验证数据格式是否符合规范",
+            "expected_output": "格式验证结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          }
+        ],
+        "total_steps": 8,
+        "data_flow": "Data flows sequentially from content enhancement to field extraction, then to format normalization, and finally to quality validation. Each step builds on the output of the previous step to ensure a coherent transformation process.",
+        "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+        "stage": "template_combination"
+      },
+      "coverage_analysis": {
+        "optimization_direction_coverage": "The selected templates comprehensively cover the optimization direction by enhancing content quality, ensuring completeness, and standardizing formats.",
+        "key_improvements_coverage": "The templates directly address the key improvements by enforcing a populated output field and streamlining the response format.",
+        "quality_focus_coverage": "The templates ensure that outputs are concise, clearly formatted, and aligned with seed data quality standards.",
+        "missing_capabilities": []
+      }
+    },
+    "pipeline_sketch": {
+      "steps": [
+        {
+          "step_id": "step_1",
+          "template_name": "content_enhancement",
+          "functional_description": "分析内容现状，确定增强方向",
+          "expected_output": "增强策略和具体目标",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_2",
+          "template_name": "content_enhancement",
+          "functional_description": "执行内容增强，提升详细程度和结构化程度",
+          "expected_output": "增强后的内容",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_3",
+          "template_name": "field_extraction",
+          "functional_description": "分析源内容，识别可提取的信息",
+          "expected_output": "提取策略和目标字段定义",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_4",
+          "template_name": "field_extraction",
+          "functional_description": "执行信息提取，生成结构化字段",
+          "expected_output": "提取出的结构化字段",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_5",
+          "template_name": "format_normalization",
+          "functional_description": "分析当前格式，识别不一致之处",
+          "expected_output": "标准化方案",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_6",
+          "template_name": "format_normalization",
+          "functional_description": "执行格式标准化",
+          "expected_output": "标准化后的数据",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_7",
+          "template_name": "quality_validation",
+          "functional_description": "评估内容质量，从多个维度打分",
+          "expected_output": "质量评分和评估报告",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_8",
+          "template_name": "quality_validation",
+          "functional_description": "验证数据格式是否符合规范",
+          "expected_output": "格式验证结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        }
+      ],
+      "total_steps": 8,
+      "data_flow": "Data flows sequentially from content enhancement to field extraction, then to format normalization, and finally to quality validation. Each step builds on the output of the previous step to ensure a coherent transformation process.",
+      "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+      "stage": "template_combination"
+    },
+    "stage": "template_combination",
+    "design_method": "template_based"
+  },
+  "constrained_search": {
+    "final_pipeline": [
+      {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "path/to/raw_data.jsonl"
+        },
+        "description": "Load raw data from a JSONL file into the processing stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_2",
+        "operator": "llm_expand_content",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "field_name": "output",
+          "expansion_spec": "Enhance the output field for clarity and detail."
+        },
+        "description": "Enhance the output field to improve clarity and detail.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_3",
+        "operator": "llm_generate_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "prompt_context_fields": [
+            "instruction",
+            "input"
+          ],
+          "target_field": "output",
+          "generation_spec": "Generate a concise and clear output based on the instruction and input."
+        },
+        "description": "Generate the output field if it does not exist in the raw data.",
+        "mapped_from_abstract_step": "step_3",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_4",
+        "operator": "check_format",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "report"
+        ],
+        "parameters": {
+          "format_rules": "Ensure the output field is formatted correctly."
+        },
+        "description": "Validate the format of the output field to ensure it meets standards.",
+        "mapped_from_abstract_step": "step_4",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_5",
+        "operator": "validate_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ],
+        "parameters": {
+          "schema_rules": "Check that all required fields are present and correctly formatted."
+        },
+        "description": "Validate the records against the required schema to ensure completeness.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_6",
+        "operator": "write_data",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "path/to/processed_data.jsonl"
+        },
+        "description": "Write the processed records to a JSONL file.",
+        "mapped_from_abstract_step": "step_6",
+        "refinement_source": "operator_registry"
+      }
+    ],
+    "refinement_summary": {
+      "original_steps_count": 8,
+      "final_steps_count": 6,
+      "added_operators": [
+        "llm_expand_content",
+        "llm_generate_field",
+        "check_format",
+        "validate_schema"
+      ],
+      "modified_operators": [
+        "read_data",
+        "write_data"
+      ],
+      "data_flow_verification": "Data flows coherently from reading raw data to writing processed data.",
+      "capability_coverage": "All required capabilities are covered, including field generation and validation."
+    },
+    "capability_check": {
+      "needs_dynamic_addition": false,
+      "missing_capabilities": [],
+      "note": "open source: no dynamic operator injection"
+    },
+    "validation_result": {
+      "is_valid": false,
+      "validation_issues": [],
+      "checked_at": "2026-05-23T14:07:00.166255+00:00",
+      "dag_validation_meta": {
+        "preserved_issue_count": 0,
+        "added_issue_count": 0,
+        "sources": [
+          "orchestration",
+          "registry",
+          "dag_structure",
+          "io_contract",
+          "dag_graph_topology"
+        ]
+      },
+      "note": "workflow dag_validation：合并编排阶段校验 + 注册表/DAG 对齐 + 图论检查",
+      "structural_valid": true,
+      "llm_task_assessment": {
+        "satisfied": false,
+        "reasoning": "结构上没有问题，但语义覆盖不足。虽然管道步骤可以读取数据并生成输出字段，但缺少对输出字段的强制填充，导致无法确保所有记录都有输出字段，无法满足任务要求的完整性标准。",
+        "recommend_new_operators": false,
+        "recommended_fixes": [
+          "调整某步输出键以确保输出字段被填充",
+          "在生成输出字段后添加一个步骤以确保输出字段的存在"
+        ],
+        "optimization_suggestions": [],
+        "next_steps_for_user": [
+          "重新运行 orchestrate 修正输出字段的生成与验证",
+          "确保所有记录都有输出字段"
+        ],
+        "skipped": false
+      }
+    },
+    "operator_level_self_evolving": {
+      "triggered": false,
+      "added_operators": [],
+      "re_orchestrated": false,
+      "suggested_operators": []
+    },
+    "stage": "constrained_search",
+    "design_method": "constrained_optimization"
+  },
+  "final_pipeline": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "path/to/raw_data.jsonl"
+      },
+      "description": "Load raw data from a JSONL file into the processing stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "llm_expand_content",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "field_name": "output",
+        "expansion_spec": "Enhance the output field for clarity and detail."
+      },
+      "description": "Enhance the output field to improve clarity and detail.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "llm_generate_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "prompt_context_fields": [
+          "instruction",
+          "input"
+        ],
+        "target_field": "output",
+        "generation_spec": "Generate a concise and clear output based on the instruction and input."
+      },
+      "description": "Generate the output field if it does not exist in the raw data.",
+      "mapped_from_abstract_step": "step_3",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "check_format",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "report"
+      ],
+      "parameters": {
+        "format_rules": "Ensure the output field is formatted correctly."
+      },
+      "description": "Validate the format of the output field to ensure it meets standards.",
+      "mapped_from_abstract_step": "step_4",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "validate_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": "Check that all required fields are present and correctly formatted."
+      },
+      "description": "Validate the records against the required schema to ensure completeness.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_6",
+      "operator": "write_data",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "path/to/processed_data.jsonl"
+      },
+      "description": "Write the processed records to a JSONL file.",
+      "mapped_from_abstract_step": "step_6",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "dag_validation": {
+    "checked_at": "2026-05-23T14:07:00.166255+00:00",
+    "is_valid": false,
+    "issue_count": 0,
+    "structural_valid": true,
+    "task_fit_satisfied": false,
+    "task_fit_skipped": false,
+    "recommend_new_operators": false,
+    "assessment_detail_path": "data/dag_assessment_results/fin_case_1.json",
+    "llm": {
+      "reasoning": "结构上没有问题，但语义覆盖不足。虽然管道步骤可以读取数据并生成输出字段，但缺少对输出字段的强制填充，导致无法确保所有记录都有输出字段，无法满足任务要求的完整性标准。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [
+        "调整某步输出键以确保输出字段被填充",
+        "在生成输出字段后添加一个步骤以确保输出字段的存在"
+      ],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "重新运行 orchestrate 修正输出字段的生成与验证",
+        "确保所有记录都有输出字段"
+      ]
+    }
+  },
+  "trial_run_check": {
+    "checked_at": "2026-05-23T14:07:27.936257+00:00",
+    "execution_ok": false,
+    "artifact": "data/trial_runs/fin_case_1/trial_result.json",
+    "reflux_targets": [
+      "instantiation",
+      "orchestration"
+    ],
+    "pilot_overall_score": 10,
+    "pilot_recommendation": "fix_execution",
+    "pilot_dimension_scores": {
+      "semantic": 10,
+      "format": 0,
+      "diversity": 0,
+      "info": 0,
+      "noise": 0,
+      "logic": 0
+    }
+  }
+}

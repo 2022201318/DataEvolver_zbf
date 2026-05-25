@@ -1,4 +1,4 @@
-# 多模态数据准备
+# DataEvolver
 
 <p align="center">
   <b>Automatic Data Preparation for Large Language Models via Multi-Level Self-Evolving</b><br/>
@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="assets/多模态数据准备.pdf">📄 Paper</a> |
+  <a href="assets/DataEvolver.pdf">📄 Paper</a> |
   <a href="#-demo-video">🎬 Demo</a> |
   <a href="#-framework-overview">🧠 Framework</a> |
   <a href="#-main-results">📊 Results</a> |
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/多模态数据准备.png" width="85%" alt="多模态数据准备 overview figure"/>
+  <img src="assets/DataEvolver.png" width="85%" alt="DataEvolver overview figure"/>
 </p>
 
 ---
@@ -24,20 +24,20 @@
 Training data quality is one of the key bottlenecks in LLM post-training.  
 In practical scenarios, raw data is often noisy, structurally inconsistent, redundant, or not directly suitable for supervised fine-tuning.
 
-**多模态数据准备** is a system for **automatic data preparation**.  
+**DataEvolver** is a system for **automatic data preparation**.  
 Given:
 
 - **raw data**
 - a small set of **high-quality seed examples**
 - an optional **task description**
 
-多模态数据准备 automatically constructs and iteratively improves a data preparation pipeline, then produces **high-quality, training-ready data** aligned with the seed specification.
+DataEvolver automatically constructs and iteratively improves a data preparation pipeline, then produces **high-quality, training-ready data** aligned with the seed specification.
 
-Unlike fixed data recipes or one-shot pipeline synthesis, 多模态数据准备 is designed as a **self-evolving system**: it not only generates pipelines, but also checks, repairs, instantiates, trials, evaluates, and refines them through feedback.
+Unlike fixed data recipes or one-shot pipeline synthesis, DataEvolver is designed as a **self-evolving system**: it not only generates pipelines, but also checks, repairs, instantiates, trials, evaluates, and refines them through feedback.
 
 ---
 
-## 🔥 Why 多模态数据准备
+## 🔥 Why DataEvolver
 
 Most existing solutions for LLM data preparation fall into two categories:
 
@@ -47,7 +47,7 @@ Most existing solutions for LLM data preparation fall into two categories:
 2. **One-shot pipeline synthesis**  
    More flexible, but often unstable in executability and output quality.
 
-多模态数据准备 targets a harder but more practical setting:
+DataEvolver targets a harder but more practical setting:
 
 > **Can we automatically build a high-quality data preparation pipeline from raw data and only a small set of seed examples?**
 
@@ -56,7 +56,7 @@ This requires jointly optimizing:
 - **executability** (the pipeline must run correctly)
 - **quality alignment** (outputs must match the target profile implied by seeds)
 
-多模态数据准备 addresses both through **multi-level self-evolving**.
+DataEvolver addresses both through **multi-level self-evolving**.
 
 ---
 
@@ -64,7 +64,7 @@ This requires jointly optimizing:
 
 ### 1) Seed-guided understanding
 
-Instead of requiring users to describe every data transformation manually, 多模态数据准备 learns the target profile directly from seed examples and sampled raw data, including:
+Instead of requiring users to describe every data transformation manually, DataEvolver learns the target profile directly from seed examples and sampled raw data, including:
 
 - field structure and output format
 - style and quality constraints
@@ -73,12 +73,12 @@ Instead of requiring users to describe every data transformation manually, 多�
 ### 2) Operator-level self-evolving
 
 A one-shot long pipeline is often logically fragile.  
-多模态数据准备 builds and validates a DAG, detects issues (dependency gaps, interface mismatch, ordering conflicts), and can repair the DAG or synthesize new operators when needed.
+DataEvolver builds and validates a DAG, detects issues (dependency gaps, interface mismatch, ordering conflicts), and can repair the DAG or synthesize new operators when needed.
 
 ### 3) Pipeline-level self-evolving
 
 Even executable pipelines may still produce low-quality outputs.  
-多模态数据准备 runs trial execution, compares trial outputs against seed quality, summarizes discrepancy as **experience**, and uses it to refine the next round.
+DataEvolver runs trial execution, compares trial outputs against seed quality, summarizes discrepancy as **experience**, and uses it to refine the next round.
 
 This pushes the system from:
 
@@ -89,11 +89,11 @@ This pushes the system from:
 ## 🧠 Framework Overview
 
 <p align="center">
-  <img src="assets/ill.png" width="95%" alt="多模态数据准备 framework: understanding, orchestration, instantiation, trial and quality feedback"/>
+  <img src="assets/ill.png" width="95%" alt="DataEvolver framework: understanding, orchestration, instantiation, trial and quality feedback"/>
 </p>
 
 **Figure explanation.**
-多模态数据准备 takes raw data, seed data, and optional user descriptions as input, then runs four major stages:
+DataEvolver takes raw data, seed data, and optional user descriptions as input, then runs four major stages:
 
 1. **Understanding**: infer a structured target profile from seeds and sampled raw data.
 2. **Logic orchestration**: generate a logical pipeline DAG from operator library and constraints.
@@ -106,7 +106,7 @@ Core loop:
 understanding -> orchestration -> operator_evolution -> instantiation -> trial_run -> quality_check -> experience
 ```
 
-When quality is sufficient, 多模态数据准备 applies the refined pipeline to full data execution.
+When quality is sufficient, DataEvolver applies the refined pipeline to full data execution.
 
 ---
 
@@ -117,7 +117,7 @@ When quality is sufficient, 多模态数据准备 applies the refined pipeline t
 ![Main Experiment Results](assets/main_exp.png)
 
 **What this figure shows.**
-Across 7 benchmarks from 4 task categories (instruction following, multiple-choice QA, math reasoning, text-to-SQL), 多模态数据准备 consistently improves training data quality and downstream model performance.
+Across 7 benchmarks from 4 task categories (instruction following, multiple-choice QA, math reasoning, text-to-SQL), DataEvolver consistently improves training data quality and downstream model performance.
 On average, it brings **about 12% relative gain** on downstream outcomes compared with weaker data preparation settings.
 
 ### Comparison against strong baselines
@@ -125,8 +125,8 @@ On average, it brings **about 12% relative gain** on downstream outcomes compare
 ![Comparison Results](assets/compare.png)
 
 **What this figure shows.**
-多模态数据准备 outperforms both vanilla SFT on raw/original data and strong data-preparation baselines.
-A key takeaway is that better prepared data can partially compensate for data scale: in several settings, fewer 多模态数据准备-produced samples approach or exceed larger but weaker-prepared alternatives.
+DataEvolver outperforms both vanilla SFT on raw/original data and strong data-preparation baselines.
+A key takeaway is that better prepared data can partially compensate for data scale: in several settings, fewer DataEvolver-produced samples approach or exceed larger but weaker-prepared alternatives.
 
 ### Why the system works: multi-level self-evolving matters
 
@@ -143,7 +143,7 @@ This validates the need to jointly optimize **executability + quality alignment*
 
 ### Data quality and efficiency
 
-多模态数据准备 improves prepared data quality (training-readiness, seed alignment, consistency, and redundancy reduction) while also reducing preparation overhead.
+DataEvolver improves prepared data quality (training-readiness, seed alignment, consistency, and redundancy reduction) while also reducing preparation overhead.
 It lowers amortized token cost in data preparation by **about 40% on average**.
 
 ### Case study
@@ -152,20 +152,20 @@ It lowers amortized token cost in data preparation by **about 40% on average**.
   <img src="assets/case.png" width="95%" alt="Case study: pipeline evolution and refinement"/>
 </p>
 
-The case study shows how 多模态数据准备 evolves from an initial logical plan to a refined executable pipeline, and how trial feedback is translated into better constraints and better data in later rounds.
+The case study shows how DataEvolver evolves from an initial logical plan to a refined executable pipeline, and how trial feedback is translated into better constraints and better data in later rounds.
 
 ---
 
 ## 🎬 Demo Video
 
 - **GitHub Release (recommended; small download for a clean clone)**:  
-  [Download `多模态数据准备_Demo_small.mov`](https://github.com/Akanezora0/多模态数据准备/releases/download/demo-2026-04-18/多模态数据准备_Demo_small.mov)
+  [Download `DataEvolver_Demo_small.mov`](https://github.com/Akanezora0/DataEvolver/releases/download/demo-2026-04-18/DataEvolver_Demo_small.mov)
 
 ---
 
 ## 🖥️ System Interfaces
 
-多模态数据准备 supports three aligned interfaces:
+DataEvolver supports three aligned interfaces:
 
 - **Web UI**: visualize DAG, inspect stages/artifacts, and control workflow interactively.
 - **CLI**: reproducible experiments, scripted runs, and debugging.
@@ -181,7 +181,10 @@ All interfaces share the same workflow semantics and state-driven execution logi
 
 ```bash
 cd <repo-dir>
+# Linux/macOS/Git-Bash
 bash setup_env.sh
+# Windows PowerShell
+# powershell -ExecutionPolicy Bypass -File .\setup_env.ps1
 ```
 
 This script automatically:
@@ -208,7 +211,10 @@ Fill provider, base URL, model, and API key.
 Backend:
 
 ```bash
+# Linux/macOS
 source .venv/bin/activate
+# Windows (Git Bash)
+# source .venv/Scripts/activate
 python run_server.py --reload
 ```
 
@@ -259,7 +265,8 @@ run_full
 Check help and state:
 
 ```bash
-source .venv/bin/activate
+# Linux/macOS: source .venv/bin/activate
+# Windows (Git Bash): source .venv/Scripts/activate
 dataevolver --help
 dataevolver state my_pipeline
 ```
@@ -330,7 +337,7 @@ http://127.0.0.1:8000/docs
 ## 🧩 Project Structure
 
 ```text
-多模态数据准备/
+DataEvolver/
 ├── core/                 # config / path / llm / log / token services
 ├── subsystems/           # main workflow subsystems
 ├── web/                  # FastAPI app and routers
@@ -339,14 +346,15 @@ http://127.0.0.1:8000/docs
 ├── config/               # runtime configs and templates
 ├── data/                 # runtime artifacts and workflow states
 ├── assets/               # paper figures, tables, demo media
-└── setup_env.sh          # one-command environment bootstrap
+├── setup_env.sh          # one-command bootstrap (Linux/macOS/Git-Bash)
+└── setup_env.ps1         # one-command bootstrap (Windows PowerShell)
 ```
 
 ---
 
 ## 📌 Current Scope
 
-多模态数据准备 currently focuses on **text data preparation for LLM training**.
+DataEvolver currently focuses on **text data preparation for LLM training**.
 The current release mainly targets:
 
 - instruction tuning data

@@ -1,0 +1,18 @@
+{
+  "pipeline_id": "a",
+  "experience_text": "编排 DAG 校验通过。 试运行：采样数据已沿实例化桩执行完成。 Pilot 经验: Ensure task alignment with seed instructions. Pilot 经验: Focus on enhancing output depth and variety. Pilot 经验: Maintain a clean output format with minimal noise. Pilot 建议下一步: evolve_pipeline — Quality and alignment with seed tasks need improvement before full run. The pipeline output shows promise but diverges from seed expectations in task alignment and depth. 数据集级摘要: The transition from raw to seed data involves a significant reduction in verbosity by eliminating the 'text' field. This change enhances clarity and focus in the outputs, allowing for more direct responses to instructions. The seed format emphasizes essential fields, contrasting with the raw format's tendency to include extraneous information. This shift is crucial for maintaining the quality and",
+  "reflux_targets": [
+    "orchestration",
+    "understanding"
+  ],
+  "source": "experience_snapshot_v1",
+  "meta": {
+    "created_at": "2026-05-23T13:32:15.041509+00:00",
+    "inputs": {
+      "quality_check_path": "data/quality_check_results/a.json",
+      "quality_check_found": true,
+      "trial_run_path": "data/trial_runs/a/trial_result.json",
+      "trial_run_found": true
+    }
+  }
+}

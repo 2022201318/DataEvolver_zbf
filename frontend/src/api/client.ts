@@ -197,9 +197,12 @@ export async function fetchUnderstandingResult(pipelineId: string): Promise<{ ok
   }
 }
 
-/** 合并后的算子池（系统 + 用户/进化），见 `docs/FRONTEND_API.md` */
-export async function fetchOperators(): Promise<OperatorsListResponse> {
-  const url = `${getApiBaseUrl()}/api/operators/`
+/** 合并后的算子池（base + general；有 pipeline_id 时再含 domain/task），见 `docs/FRONTEND_API.md` */
+export async function fetchOperators(pipelineId?: string | null): Promise<OperatorsListResponse> {
+  const q = new URLSearchParams()
+  if (pipelineId && pipelineId.trim()) q.set('pipeline_id', pipelineId.trim())
+  const qs = q.toString()
+  const url = `${getApiBaseUrl()}/api/operators/${qs ? `?${qs}` : ''}`
   const res = await fetch(url)
   const text = await res.text()
   if (!res.ok) {
@@ -218,7 +221,7 @@ export function mapApiOperatorsToPoolItems(entries: ApiOperatorEntry[], lang: 'z
     id: e.name,
     name: e.name,
     description: e.description,
-    source: e.source === 'user' ? 'evolved' : 'base',
+    source: e.source === 'base' ? 'base' : 'evolved',
     category: lang === 'zh' && e.category_label_zh ? e.category_label_zh : e.category_label,
     category_id: e.category_id,
     input_keys: e.input_keys ? [...e.input_keys] : [],
@@ -226,6 +229,13 @@ export function mapApiOperatorsToPoolItems(entries: ApiOperatorEntry[], lang: 'z
     requires_llm: e.requires_llm,
     card_variant: e.card_variant,
   }))
+}
+
+export interface WorkflowHistoryFileResponse {
+  ok: boolean
+  pipeline_id: string
+  relative_path: string
+  data: Record<string, unknown>
 }
 
 // --- Workflow：分步推进（与 `docs/FRONTEND_API.md` 一致）---
@@ -390,6 +400,25 @@ export async function fetchArtifactHistory(
   }
   try {
     return JSON.parse(text) as WorkflowArtifactHistoryResponse
+  } catch {
+    throw new ApiError(res.status, 'Invalid JSON response', text)
+  }
+}
+
+export async function fetchArtifactHistoryFile(
+  pipelineId: string,
+  relativePath: string
+): Promise<WorkflowHistoryFileResponse> {
+  const q = new URLSearchParams()
+  q.set('path', relativePath)
+  const url = `${getApiBaseUrl()}/api/workflow/${encodeURIComponent(pipelineId)}/artifact-history/file?${q.toString()}`
+  const res = await fetch(url)
+  const text = await res.text()
+  if (!res.ok) {
+    throw new ApiError(res.status, `Request failed: ${res.status}`, text)
+  }
+  try {
+    return JSON.parse(text) as WorkflowHistoryFileResponse
   } catch {
     throw new ApiError(res.status, 'Invalid JSON response', text)
   }

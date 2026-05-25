@@ -1,0 +1,29 @@
+{
+  "pipeline_id": "c",
+  "step_index": 4,
+  "steps_completed": [
+    "understanding",
+    "orchestration",
+    "operator_evolution",
+    "instantiation"
+  ],
+  "last_message": "instantiation: completed",
+  "updated_at": "2026-05-23T13:28:50.526438+00:00",
+  "dag_evolution_cycles": 0,
+  "understanding_revision": 2,
+  "orchestration_revision": 3,
+  "round": 2,
+  "quality_passed": false,
+  "ready_for_full_run": false,
+  "next_action": "advance",
+  "step_order": [
+    "understanding",
+    "orchestration",
+    "operator_evolution",
+    "instantiation",
+    "trial_run",
+    "quality_check",
+    "experience"
+  ],
+  "is_complete": false
+}

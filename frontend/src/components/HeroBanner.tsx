@@ -1,4 +1,4 @@
-/** 突出 多模态数据准备 特点的 Hero 区：双轨自进化、原始→智能进化→高质量输出 */
+/** 突出 DataEvolver 特点的 Hero 区：双轨自进化、原始→智能进化→高质量输出 */
 
 export function HeroBanner() {
   return (

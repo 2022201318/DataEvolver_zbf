@@ -1,0 +1,37 @@
+{
+  "step_index": 5,
+  "step_id": "step_5",
+  "operator_name": "check_format",
+  "description": "Validate that the format of the 'output' field meets the required standards.",
+  "input_keys": [
+    "records"
+  ],
+  "output_keys": [
+    "records",
+    "report"
+  ],
+  "parameters": {
+    "format_rules": "Ensure the output adheres to medical accuracy and is easily understandable."
+  },
+  "requires_llm": false,
+  "prompt_generated": false,
+  "relative_dir": "data/generated_pipelines/med_case_1/step_005",
+  "orchestration_step": {
+    "step_id": "step_5",
+    "operator": "check_format",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records",
+      "report"
+    ],
+    "parameters": {
+      "format_rules": "Ensure the output adheres to medical accuracy and is easily understandable."
+    },
+    "description": "Validate that the format of the 'output' field meets the required standards.",
+    "mapped_from_abstract_step": "step_8",
+    "refinement_source": "operator_registry"
+  },
+  "impl_kind": "builtin_delegate"
+}

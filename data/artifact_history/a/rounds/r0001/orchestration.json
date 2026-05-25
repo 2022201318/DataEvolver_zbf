@@ -1,0 +1,998 @@
+{
+  "pipeline_id": "a",
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Read raw data from the specified file path into the main record stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "normalize_schema",
+        "description": "Normalize the schema of the records to align with the target schema.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "deduplicate",
+        "description": "Remove duplicate records based on the specified key fields.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "validate_schema",
+        "description": "Validate each record against the required schema and emit a structured report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "check_format",
+        "description": "Check the format of the records against specified rules and generate a report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "format_report"
+        ]
+      },
+      {
+        "node_id": "step_6",
+        "node_name": "llm_generate_field",
+        "description": "Generate a new field based on the context fields and specified generation criteria.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_7",
+        "node_name": "llm_extract_structure",
+        "description": "Extract structured information from the specified source field.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_8",
+        "node_name": "llm_check_consistency",
+        "description": "Check logical consistency across specified fields and output any issues in a report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "consistency_report"
+        ]
+      },
+      {
+        "node_id": "step_9",
+        "node_name": "write_data",
+        "description": "Write the processed records to the specified output file path.",
+        "input_keys": [
+          "records",
+          "output_file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_5",
+        "to_node": "step_6",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_6",
+        "to_node": "step_7",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_7",
+        "to_node": "step_8",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_8",
+        "to_node": "step_9",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5",
+      "step_6",
+      "step_7",
+      "step_8",
+      "step_9"
+    ],
+    "total_nodes": 9,
+    "total_edges": 8
+  },
+  "pipeline_plan": [
+    {
+      "step": 1,
+      "operator": "read_data",
+      "description": "Read raw data from the specified file path into the main record stream."
+    },
+    {
+      "step": 2,
+      "operator": "normalize_schema",
+      "description": "Normalize the schema of the records to align with the target schema."
+    },
+    {
+      "step": 3,
+      "operator": "deduplicate",
+      "description": "Remove duplicate records based on the specified key fields."
+    },
+    {
+      "step": 4,
+      "operator": "validate_schema",
+      "description": "Validate each record against the required schema and emit a structured report."
+    },
+    {
+      "step": 5,
+      "operator": "check_format",
+      "description": "Check the format of the records against specified rules and generate a report."
+    },
+    {
+      "step": 6,
+      "operator": "llm_generate_field",
+      "description": "Generate a new field based on the context fields and specified generation criteria."
+    },
+    {
+      "step": 7,
+      "operator": "llm_extract_structure",
+      "description": "Extract structured information from the specified source field."
+    },
+    {
+      "step": 8,
+      "operator": "llm_check_consistency",
+      "description": "Check logical consistency across specified fields and output any issues in a report."
+    },
+    {
+      "step": 9,
+      "operator": "write_data",
+      "description": "Write the processed records to the specified output file path."
+    }
+  ],
+  "source": "open_orchestrator_v1",
+  "meta": {
+    "created_at": "2026-05-23T13:07:32.246707+00:00",
+    "llm_stages": [
+      "free_fitting",
+      "template_combination",
+      "constrained_search"
+    ]
+  },
+  "free_fitting": {
+    "optimization_blueprint": {
+      "global_optimization_direction": "Align raw data with seed data quality by addressing schema normalization, data flow integrity, and ensuring all transformation steps have valid input sources.",
+      "key_improvements": [
+        "Establish clear input sources for all transformation steps to ensure data flow integrity.",
+        "Normalize schema to match target seed data requirements.",
+        "Implement deduplication strategies to eliminate redundant records.",
+        "Enhance validation processes to ensure schema compliance and data quality.",
+        "Define clear format rules to check data consistency and correctness.",
+        "Utilize LLM capabilities for generating and extracting fields based on defined specifications."
+      ],
+      "transformation_strategies": [
+        "Develop a comprehensive schema normalization process to align raw data with seed data structures.",
+        "Create a filtering mechanism to remove irrelevant or low-quality records based on defined predicates.",
+        "Implement a deduplication step that identifies and removes duplicate entries based on key fields.",
+        "Establish validation rules that ensure all data adheres to the expected schema and quality standards.",
+        "Incorporate format checking to validate data against specified format rules.",
+        "Leverage LLM for generating new fields and extracting structured information from existing data."
+      ],
+      "quality_focus": [
+        "Ensure all transformation steps have valid and traceable input sources.",
+        "Maintain schema consistency throughout the data transformation process.",
+        "Focus on data integrity by validating records against defined rules.",
+        "Prioritize the elimination of redundancy in the dataset.",
+        "Enhance the overall quality of the output data to meet seed data standards."
+      ],
+      "summary": "This optimization blueprint outlines the necessary steps to transform raw data into high-quality seed data. Key improvements focus on ensuring all transformation steps have valid input sources, normalizing schemas, and implementing robust validation and deduplication strategies. The next steps involve selecting appropriate templates and designing a pipeline that adheres to these strategies."
+    },
+    "stage": "free_fitting",
+    "design_method": "llm_driven"
+  },
+  "template_combination": {
+    "template_selection": {
+      "selected_templates": [
+        "format_normalization",
+        "data_cleaning",
+        "quality_validation",
+        "extract_and_validate",
+        "consistency_check"
+      ],
+      "selection_rationale": "These templates were selected because they directly address the key improvements and transformation strategies outlined in the optimization blueprint. Specifically, they focus on schema normalization, data integrity, deduplication, validation, and consistency checks, which are critical for aligning raw data with seed data quality.",
+      "template_combination_strategy": "sequential",
+      "pipeline_sketch": {
+        "steps": [
+          {
+            "step_id": "step_1",
+            "template_name": "format_normalization",
+            "functional_description": "分析当前格式，识别不一致之处",
+            "expected_output": "标准化方案",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_2",
+            "template_name": "format_normalization",
+            "functional_description": "执行格式标准化",
+            "expected_output": "标准化后的数据",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_3",
+            "template_name": "data_cleaning",
+            "functional_description": "识别需要清理的问题（噪声、无效值等）",
+            "expected_output": "清理策略",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_4",
+            "template_name": "data_cleaning",
+            "functional_description": "执行数据清理",
+            "expected_output": "清理后的数据",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_5",
+            "template_name": "quality_validation",
+            "functional_description": "评估内容质量，从多个维度打分",
+            "expected_output": "质量评分和评估报告",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_6",
+            "template_name": "quality_validation",
+            "functional_description": "验证数据格式是否符合规范",
+            "expected_output": "格式验证结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_7",
+            "template_name": "extract_and_validate",
+            "functional_description": "从源内容中提取结构化信息",
+            "expected_output": "提取出的信息",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_8",
+            "template_name": "extract_and_validate",
+            "functional_description": "验证提取信息与源内容的一致性",
+            "expected_output": "验证结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_9",
+            "template_name": "consistency_check",
+            "functional_description": "识别需要检查一致性的字段对",
+            "expected_output": "一致性检查策略",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_10",
+            "template_name": "consistency_check",
+            "functional_description": "执行一致性检查，验证字段关联",
+            "expected_output": "一致性检查结果",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          }
+        ],
+        "total_steps": 10,
+        "data_flow": "Data flows sequentially from format normalization to data cleaning, followed by quality validation, extraction and validation, and finally consistency checking. Each step takes the output of the previous step as its input, ensuring a coherent data transformation process.",
+        "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+        "stage": "template_combination"
+      },
+      "coverage_analysis": {
+        "optimization_direction_coverage": "The selected templates comprehensively cover the optimization direction by ensuring schema normalization, data integrity, and valid input sources for each transformation step.",
+        "key_improvements_coverage": "The templates address all key improvements, including schema normalization, deduplication, validation, and format consistency.",
+        "quality_focus_coverage": "The templates focus on maintaining schema consistency, validating records, and enhancing overall data quality.",
+        "missing_capabilities": []
+      }
+    },
+    "pipeline_sketch": {
+      "steps": [
+        {
+          "step_id": "step_1",
+          "template_name": "format_normalization",
+          "functional_description": "分析当前格式，识别不一致之处",
+          "expected_output": "标准化方案",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_2",
+          "template_name": "format_normalization",
+          "functional_description": "执行格式标准化",
+          "expected_output": "标准化后的数据",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_3",
+          "template_name": "data_cleaning",
+          "functional_description": "识别需要清理的问题（噪声、无效值等）",
+          "expected_output": "清理策略",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_4",
+          "template_name": "data_cleaning",
+          "functional_description": "执行数据清理",
+          "expected_output": "清理后的数据",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_5",
+          "template_name": "quality_validation",
+          "functional_description": "评估内容质量，从多个维度打分",
+          "expected_output": "质量评分和评估报告",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_6",
+          "template_name": "quality_validation",
+          "functional_description": "验证数据格式是否符合规范",
+          "expected_output": "格式验证结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_7",
+          "template_name": "extract_and_validate",
+          "functional_description": "从源内容中提取结构化信息",
+          "expected_output": "提取出的信息",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_8",
+          "template_name": "extract_and_validate",
+          "functional_description": "验证提取信息与源内容的一致性",
+          "expected_output": "验证结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_9",
+          "template_name": "consistency_check",
+          "functional_description": "识别需要检查一致性的字段对",
+          "expected_output": "一致性检查策略",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_10",
+          "template_name": "consistency_check",
+          "functional_description": "执行一致性检查，验证字段关联",
+          "expected_output": "一致性检查结果",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        }
+      ],
+      "total_steps": 10,
+      "data_flow": "Data flows sequentially from format normalization to data cleaning, followed by quality validation, extraction and validation, and finally consistency checking. Each step takes the output of the previous step as its input, ensuring a coherent data transformation process.",
+      "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+      "stage": "template_combination"
+    },
+    "stage": "template_combination",
+    "design_method": "template_based"
+  },
+  "constrained_search": {
+    "final_pipeline": [
+      {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a/raw_data/demo_raw.jsonl"
+        },
+        "description": "Read raw data from the specified file path into the main record stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_2",
+        "operator": "normalize_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "target_schema": "desired_schema"
+        },
+        "description": "Normalize the schema of the records to align with the target schema.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_3",
+        "operator": "deduplicate",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "key_fields": [
+            "unique_identifier"
+          ]
+        },
+        "description": "Remove duplicate records based on the specified key fields.",
+        "mapped_from_abstract_step": "step_3",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_4",
+        "operator": "validate_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ],
+        "parameters": {
+          "schema_rules": "schema_rules"
+        },
+        "description": "Validate each record against the required schema and emit a structured report.",
+        "mapped_from_abstract_step": "step_4",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_5",
+        "operator": "check_format",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "format_report"
+        ],
+        "parameters": {
+          "format_rules": "format_rules"
+        },
+        "description": "Check the format of the records against specified rules and generate a report.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_6",
+        "operator": "llm_generate_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "prompt_context_fields": [
+            "context_field"
+          ],
+          "target_field": "new_field",
+          "generation_spec": "specification_for_generation"
+        },
+        "description": "Generate a new field based on the context fields and specified generation criteria.",
+        "mapped_from_abstract_step": "step_6",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_7",
+        "operator": "llm_extract_structure",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "source_field": "source_field",
+          "extraction_spec": "extraction_spec"
+        },
+        "description": "Extract structured information from the specified source field.",
+        "mapped_from_abstract_step": "step_7",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_8",
+        "operator": "llm_check_consistency",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "consistency_report"
+        ],
+        "parameters": {
+          "field_group": [
+            "field1",
+            "field2"
+          ],
+          "constraints": "consistency_constraints"
+        },
+        "description": "Check logical consistency across specified fields and output any issues in a report.",
+        "mapped_from_abstract_step": "step_8",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_9",
+        "operator": "write_data",
+        "input_keys": [
+          "records",
+          "output_file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a/outputs/a_processed.jsonl"
+        },
+        "description": "Write the processed records to the specified output file path.",
+        "mapped_from_abstract_step": "step_9",
+        "refinement_source": "operator_registry"
+      }
+    ],
+    "refinement_summary": {
+      "original_steps_count": 10,
+      "final_steps_count": 9,
+      "added_operators": [
+        "normalize_schema",
+        "deduplicate",
+        "validate_schema",
+        "check_format",
+        "llm_generate_field",
+        "llm_extract_structure",
+        "llm_check_consistency"
+      ],
+      "modified_operators": [],
+      "data_flow_verification": "Data flow is coherent with each step's output feeding into the next step's input.",
+      "capability_coverage": "All required capabilities are covered with no missing operators."
+    },
+    "capability_check": {
+      "needs_dynamic_addition": false,
+      "missing_capabilities": [],
+      "note": "open source: no dynamic operator injection"
+    },
+    "validation_result": {
+      "is_valid": false,
+      "validation_issues": [
+        {
+          "type": "data_flow",
+          "step_id": "step_9",
+          "operator": "write_data",
+          "description": "步骤输入键无来源: ['output_file_path']",
+          "missing_inputs": [
+            "output_file_path"
+          ]
+        },
+        {
+          "type": "registry_io",
+          "step_id": "step_5",
+          "operator": "check_format",
+          "description": "步骤 output_keys 缺少注册表声明的输出键 `report`",
+          "missing_output_key": "report"
+        },
+        {
+          "type": "registry_io",
+          "step_id": "step_8",
+          "operator": "llm_check_consistency",
+          "description": "步骤 output_keys 缺少注册表声明的输出键 `report`",
+          "missing_output_key": "report"
+        }
+      ],
+      "checked_at": "2026-05-23T13:07:32.250089+00:00",
+      "dag_validation_meta": {
+        "preserved_issue_count": 1,
+        "added_issue_count": 2,
+        "sources": [
+          "orchestration",
+          "registry",
+          "dag_structure",
+          "io_contract",
+          "dag_graph_topology"
+        ]
+      },
+      "note": "workflow dag_validation：合并编排阶段校验 + 注册表/DAG 对齐 + 图论检查",
+      "structural_valid": false,
+      "llm_task_assessment": {
+        "satisfied": false,
+        "reasoning": "结构问题导致数据流不完整，步骤输入键 'output_file_path' 无来源，且步骤输出键缺少注册表声明的输出键 'report'，这影响了整个管道的有效性。语义覆盖方面，虽然大部分步骤的功能是合理的，但由于结构问题，无法保证最终输出的完整性和有效性。",
+        "recommend_new_operators": false,
+        "recommended_fixes": [
+          "重新编排以确保 'output_file_path' 有来源",
+          "调整步骤 4 和步骤 5 的输出键以包含 'report'"
+        ],
+        "optimization_suggestions": [],
+        "next_steps_for_user": [
+          "重新运行 orchestrate 修正结构问题",
+          "确保所有步骤的输入输出键正确匹配",
+          "验证管道的语义覆盖是否满足任务需求"
+        ],
+        "skipped": false
+      }
+    },
+    "operator_level_self_evolving": {
+      "triggered": true,
+      "added_operators": [],
+      "re_orchestrated": false,
+      "suggested_operators": [
+        "data_converter"
+      ]
+    },
+    "stage": "constrained_search",
+    "design_method": "constrained_optimization"
+  },
+  "final_pipeline": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/raw_data/demo_raw.jsonl"
+      },
+      "description": "Read raw data from the specified file path into the main record stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "normalize_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "target_schema": "desired_schema"
+      },
+      "description": "Normalize the schema of the records to align with the target schema.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "deduplicate",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "key_fields": [
+          "unique_identifier"
+        ]
+      },
+      "description": "Remove duplicate records based on the specified key fields.",
+      "mapped_from_abstract_step": "step_3",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "validate_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": "schema_rules"
+      },
+      "description": "Validate each record against the required schema and emit a structured report.",
+      "mapped_from_abstract_step": "step_4",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "check_format",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "format_report"
+      ],
+      "parameters": {
+        "format_rules": "format_rules"
+      },
+      "description": "Check the format of the records against specified rules and generate a report.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_6",
+      "operator": "llm_generate_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "prompt_context_fields": [
+          "context_field"
+        ],
+        "target_field": "new_field",
+        "generation_spec": "specification_for_generation"
+      },
+      "description": "Generate a new field based on the context fields and specified generation criteria.",
+      "mapped_from_abstract_step": "step_6",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_7",
+      "operator": "llm_extract_structure",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "source_field": "source_field",
+        "extraction_spec": "extraction_spec"
+      },
+      "description": "Extract structured information from the specified source field.",
+      "mapped_from_abstract_step": "step_7",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_8",
+      "operator": "llm_check_consistency",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "consistency_report"
+      ],
+      "parameters": {
+        "field_group": [
+          "field1",
+          "field2"
+        ],
+        "constraints": "consistency_constraints"
+      },
+      "description": "Check logical consistency across specified fields and output any issues in a report.",
+      "mapped_from_abstract_step": "step_8",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_9",
+      "operator": "write_data",
+      "input_keys": [
+        "records",
+        "output_file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/outputs/a_processed.jsonl"
+      },
+      "description": "Write the processed records to the specified output file path.",
+      "mapped_from_abstract_step": "step_9",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "dag_validation": {
+    "checked_at": "2026-05-23T13:07:32.250089+00:00",
+    "is_valid": false,
+    "issue_count": 3,
+    "structural_valid": false,
+    "task_fit_satisfied": false,
+    "task_fit_skipped": false,
+    "recommend_new_operators": false,
+    "assessment_detail_path": "data/dag_assessment_results/a.json",
+    "llm": {
+      "reasoning": "结构问题导致数据流不完整，步骤输入键 'output_file_path' 无来源，且步骤输出键缺少注册表声明的输出键 'report'，这影响了整个管道的有效性。语义覆盖方面，虽然大部分步骤的功能是合理的，但由于结构问题，无法保证最终输出的完整性和有效性。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [
+        "重新编排以确保 'output_file_path' 有来源",
+        "调整步骤 4 和步骤 5 的输出键以包含 'report'"
+      ],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "重新运行 orchestrate 修正结构问题",
+        "确保所有步骤的输入输出键正确匹配",
+        "验证管道的语义覆盖是否满足任务需求"
+      ]
+    }
+  },
+  "trial_run_check": {
+    "checked_at": "2026-05-23T13:07:58.352084+00:00",
+    "execution_ok": true,
+    "artifact": "data/trial_runs/a/trial_result.json",
+    "reflux_targets": [],
+    "pilot_overall_score": 52,
+    "pilot_recommendation": "evolve_pipeline",
+    "pilot_dimension_scores": {
+      "semantic": 60,
+      "format": 70,
+      "diversity": 50,
+      "info": 65,
+      "noise": 40,
+      "logic": 30
+    }
+  }
+}

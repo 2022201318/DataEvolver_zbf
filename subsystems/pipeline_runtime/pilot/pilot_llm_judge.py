@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 _DIMS = ("semantic", "format", "diversity", "info", "noise", "logic")
 
-PILOT_JUDGE_SYSTEM = """You are a data-pipeline quality judge for 多模态数据准备 pilot runs.
+PILOT_JUDGE_SYSTEM = """You are a data-pipeline quality judge for DataEvolver pilot runs.
 You compare **seed** reference records vs **pipeline output** records on a small sample.
 Output **only one JSON object** (no markdown).
 

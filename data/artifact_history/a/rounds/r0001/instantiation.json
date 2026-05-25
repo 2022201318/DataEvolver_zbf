@@ -1,0 +1,806 @@
+{
+  "pipeline_id": "a",
+  "source": "instantiation_v2",
+  "meta": {
+    "created_at": "2026-05-23T13:07:50.172910+00:00",
+    "orchestration_path": "data/orchestration_results/a.json",
+    "understanding_path": "data/understanding_results/a.json",
+    "total_steps": 9,
+    "codegen_warnings": [],
+    "llm_prompt_generated_steps": [
+      6,
+      7,
+      8
+    ],
+    "entry_script": "data/generated_pipelines/a/run_pipeline.py",
+    "note": "内置算子使用 handler 委托实现；自定义算子可 LLM 生成或透传桩。推荐运行 entry_script --mode pilot 做采样+LLM 评估后再 full。"
+  },
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Read raw data from the specified file path into the main record stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "normalize_schema",
+        "description": "Normalize the schema of the records to align with the target schema.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "deduplicate",
+        "description": "Remove duplicate records based on the specified key fields.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "validate_schema",
+        "description": "Validate each record against the required schema and emit a structured report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "check_format",
+        "description": "Check the format of the records against specified rules and generate a report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "format_report"
+        ]
+      },
+      {
+        "node_id": "step_6",
+        "node_name": "llm_generate_field",
+        "description": "Generate a new field based on the context fields and specified generation criteria.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_7",
+        "node_name": "llm_extract_structure",
+        "description": "Extract structured information from the specified source field.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_8",
+        "node_name": "llm_check_consistency",
+        "description": "Check logical consistency across specified fields and output any issues in a report.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "consistency_report"
+        ]
+      },
+      {
+        "node_id": "step_9",
+        "node_name": "write_data",
+        "description": "Write the processed records to the specified output file path.",
+        "input_keys": [
+          "records",
+          "output_file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_5",
+        "to_node": "step_6",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_6",
+        "to_node": "step_7",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_7",
+        "to_node": "step_8",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_8",
+        "to_node": "step_9",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5",
+      "step_6",
+      "step_7",
+      "step_8",
+      "step_9"
+    ],
+    "total_nodes": 9,
+    "total_edges": 8
+  },
+  "final_pipeline_snapshot": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/raw_data/demo_raw.jsonl"
+      },
+      "description": "Read raw data from the specified file path into the main record stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "normalize_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "target_schema": "desired_schema"
+      },
+      "description": "Normalize the schema of the records to align with the target schema.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "deduplicate",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "key_fields": [
+          "unique_identifier"
+        ]
+      },
+      "description": "Remove duplicate records based on the specified key fields.",
+      "mapped_from_abstract_step": "step_3",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "validate_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": "schema_rules"
+      },
+      "description": "Validate each record against the required schema and emit a structured report.",
+      "mapped_from_abstract_step": "step_4",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "check_format",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "format_report"
+      ],
+      "parameters": {
+        "format_rules": "format_rules"
+      },
+      "description": "Check the format of the records against specified rules and generate a report.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_6",
+      "operator": "llm_generate_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "prompt_context_fields": [
+          "context_field"
+        ],
+        "target_field": "new_field",
+        "generation_spec": "Generate a new field based on the provided context field, ensuring the output aligns with the specified criteria."
+      },
+      "description": "Generate a new field based on the context fields and specified generation criteria.",
+      "mapped_from_abstract_step": "step_6",
+      "refinement_source": "operator_registry",
+      "meta": {
+        "prompt_generated": true
+      }
+    },
+    {
+      "step_id": "step_7",
+      "operator": "llm_extract_structure",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "source_field": "source_field",
+        "extraction_spec": "Extract structured fields from the unstructured text in the source field."
+      },
+      "description": "Extract structured information from the specified source field.",
+      "mapped_from_abstract_step": "step_7",
+      "refinement_source": "operator_registry",
+      "meta": {
+        "prompt_generated": true,
+        "prompt_notes": [
+          "Ensure extraction is focused on structured fields.",
+          "Use the specified source field for extraction."
+        ]
+      }
+    },
+    {
+      "step_id": "step_8",
+      "operator": "llm_check_consistency",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "consistency_report"
+      ],
+      "parameters": {
+        "field_group": [
+          "field1",
+          "field2"
+        ],
+        "constraints": "Check for logical consistency between field1 and field2, and report any discrepancies."
+      },
+      "description": "Check logical consistency across specified fields and output any issues in a report.",
+      "mapped_from_abstract_step": "step_8",
+      "refinement_source": "operator_registry",
+      "meta": {
+        "prompt_generated": true,
+        "prompt_notes": [
+          "Ensure the report highlights specific inconsistencies.",
+          "Focus on the relationship between field1 and field2."
+        ]
+      }
+    },
+    {
+      "step_id": "step_9",
+      "operator": "write_data",
+      "input_keys": [
+        "records",
+        "output_file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/outputs/a_processed.jsonl"
+      },
+      "description": "Write the processed records to the specified output file path.",
+      "mapped_from_abstract_step": "step_9",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "steps": [
+    {
+      "step_index": 1,
+      "step_id": "step_1",
+      "operator_name": "read_data",
+      "description": "Read raw data from the specified file path into the main record stream.",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/raw_data/demo_raw.jsonl"
+      },
+      "requires_llm": false,
+      "prompt_generated": false,
+      "relative_dir": "data/generated_pipelines/a/step_001",
+      "orchestration_step": {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a/raw_data/demo_raw.jsonl"
+        },
+        "description": "Read raw data from the specified file path into the main record stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `read_data`；编排说明: Read raw data from the specified file path into the main record stream.；注册表: Read a JSONL (or supported) file into the main record stream.",
+      "artifact_dir": "data/generated_pipelines/a/step_001"
+    },
+    {
+      "step_index": 2,
+      "step_id": "step_2",
+      "operator_name": "normalize_schema",
+      "description": "Normalize the schema of the records to align with the target schema.",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "target_schema": "desired_schema"
+      },
+      "requires_llm": false,
+      "prompt_generated": false,
+      "relative_dir": "data/generated_pipelines/a/step_002",
+      "orchestration_step": {
+        "step_id": "step_2",
+        "operator": "normalize_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "target_schema": "desired_schema"
+        },
+        "description": "Normalize the schema of the records to align with the target schema.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `normalize_schema`；编排说明: Normalize the schema of the records to align with the target schema.；注册表: Align records to a target schema: defaults, coercion, nested shape alignment.",
+      "artifact_dir": "data/generated_pipelines/a/step_002"
+    },
+    {
+      "step_index": 3,
+      "step_id": "step_3",
+      "operator_name": "deduplicate",
+      "description": "Remove duplicate records based on the specified key fields.",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "key_fields": [
+          "unique_identifier"
+        ]
+      },
+      "requires_llm": false,
+      "prompt_generated": false,
+      "relative_dir": "data/generated_pipelines/a/step_003",
+      "orchestration_step": {
+        "step_id": "step_3",
+        "operator": "deduplicate",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "key_fields": [
+            "unique_identifier"
+          ]
+        },
+        "description": "Remove duplicate records based on the specified key fields.",
+        "mapped_from_abstract_step": "step_3",
+        "refinement_source": "operator_registry"
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `deduplicate`；编排说明: Remove duplicate records based on the specified key fields.；注册表: Remove duplicate records by key fields or full-row identity.",
+      "artifact_dir": "data/generated_pipelines/a/step_003"
+    },
+    {
+      "step_index": 4,
+      "step_id": "step_4",
+      "operator_name": "validate_schema",
+      "description": "Validate each record against the required schema and emit a structured report.",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": "schema_rules"
+      },
+      "requires_llm": false,
+      "prompt_generated": false,
+      "relative_dir": "data/generated_pipelines/a/step_004",
+      "orchestration_step": {
+        "step_id": "step_4",
+        "operator": "validate_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ],
+        "parameters": {
+          "schema_rules": "schema_rules"
+        },
+        "description": "Validate each record against the required schema and emit a structured report.",
+        "mapped_from_abstract_step": "step_4",
+        "refinement_source": "operator_registry"
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `validate_schema`；编排说明: Validate each record against the required schema and emit a structured report.；注册表: Validate each record against required fields, types, and constraints; emit a structured report.",
+      "artifact_dir": "data/generated_pipelines/a/step_004"
+    },
+    {
+      "step_index": 5,
+      "step_id": "step_5",
+      "operator_name": "check_format",
+      "description": "Check the format of the records against specified rules and generate a report.",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "format_report"
+      ],
+      "parameters": {
+        "format_rules": "format_rules"
+      },
+      "requires_llm": false,
+      "prompt_generated": false,
+      "relative_dir": "data/generated_pipelines/a/step_005",
+      "orchestration_step": {
+        "step_id": "step_5",
+        "operator": "check_format",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "format_report"
+        ],
+        "parameters": {
+          "format_rules": "format_rules"
+        },
+        "description": "Check the format of the records against specified rules and generate a report.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `check_format`；编排说明: Check the format of the records against specified rules and generate a report.；注册表: Check format patterns (tags, sections, regex) and emit a human-readable report.",
+      "artifact_dir": "data/generated_pipelines/a/step_005"
+    },
+    {
+      "step_index": 6,
+      "step_id": "step_6",
+      "operator_name": "llm_generate_field",
+      "description": "Generate a new field based on the context fields and specified generation criteria.",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "prompt_context_fields": [
+          "context_field"
+        ],
+        "target_field": "new_field",
+        "generation_spec": "Generate a new field based on the provided context field, ensuring the output aligns with the specified criteria."
+      },
+      "requires_llm": true,
+      "prompt_generated": true,
+      "relative_dir": "data/generated_pipelines/a/step_006",
+      "orchestration_step": {
+        "step_id": "step_6",
+        "operator": "llm_generate_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "prompt_context_fields": [
+            "context_field"
+          ],
+          "target_field": "new_field",
+          "generation_spec": "Generate a new field based on the provided context field, ensuring the output aligns with the specified criteria."
+        },
+        "description": "Generate a new field based on the context fields and specified generation criteria.",
+        "mapped_from_abstract_step": "step_6",
+        "refinement_source": "operator_registry",
+        "meta": {
+          "prompt_generated": true
+        }
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `llm_generate_field`；编排说明: Generate a new field based on the context fields and specified generation criteria.；注册表: Generate a new field from context fields and a generation spec (answers, SQL, instructions, etc.).；需要 LLM（执行期接线）",
+      "artifact_dir": "data/generated_pipelines/a/step_006"
+    },
+    {
+      "step_index": 7,
+      "step_id": "step_7",
+      "operator_name": "llm_extract_structure",
+      "description": "Extract structured information from the specified source field.",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "source_field": "source_field",
+        "extraction_spec": "Extract structured fields from the unstructured text in the source field."
+      },
+      "requires_llm": true,
+      "prompt_generated": true,
+      "relative_dir": "data/generated_pipelines/a/step_007",
+      "orchestration_step": {
+        "step_id": "step_7",
+        "operator": "llm_extract_structure",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "source_field": "source_field",
+          "extraction_spec": "Extract structured fields from the unstructured text in the source field."
+        },
+        "description": "Extract structured information from the specified source field.",
+        "mapped_from_abstract_step": "step_7",
+        "refinement_source": "operator_registry",
+        "meta": {
+          "prompt_generated": true,
+          "prompt_notes": [
+            "Ensure extraction is focused on structured fields.",
+            "Use the specified source field for extraction."
+          ]
+        }
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `llm_extract_structure`；编排说明: Extract structured information from the specified source field.；注册表: Extract structured fields from unstructured text in a source field.；需要 LLM（执行期接线）",
+      "artifact_dir": "data/generated_pipelines/a/step_007"
+    },
+    {
+      "step_index": 8,
+      "step_id": "step_8",
+      "operator_name": "llm_check_consistency",
+      "description": "Check logical consistency across specified fields and output any issues in a report.",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "consistency_report"
+      ],
+      "parameters": {
+        "field_group": [
+          "field1",
+          "field2"
+        ],
+        "constraints": "Check for logical consistency between field1 and field2, and report any discrepancies."
+      },
+      "requires_llm": true,
+      "prompt_generated": true,
+      "relative_dir": "data/generated_pipelines/a/step_008",
+      "orchestration_step": {
+        "step_id": "step_8",
+        "operator": "llm_check_consistency",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "consistency_report"
+        ],
+        "parameters": {
+          "field_group": [
+            "field1",
+            "field2"
+          ],
+          "constraints": "Check for logical consistency between field1 and field2, and report any discrepancies."
+        },
+        "description": "Check logical consistency across specified fields and output any issues in a report.",
+        "mapped_from_abstract_step": "step_8",
+        "refinement_source": "operator_registry",
+        "meta": {
+          "prompt_generated": true,
+          "prompt_notes": [
+            "Ensure the report highlights specific inconsistencies.",
+            "Focus on the relationship between field1 and field2."
+          ]
+        }
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `llm_check_consistency`；编排说明: Check logical consistency across specified fields and output any issues in a report.；注册表: Check logical consistency across multiple fields; output issues in a report.；需要 LLM（执行期接线）",
+      "artifact_dir": "data/generated_pipelines/a/step_008"
+    },
+    {
+      "step_index": 9,
+      "step_id": "step_9",
+      "operator_name": "write_data",
+      "description": "Write the processed records to the specified output file path.",
+      "input_keys": [
+        "records",
+        "output_file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/a/outputs/a_processed.jsonl"
+      },
+      "requires_llm": false,
+      "prompt_generated": false,
+      "relative_dir": "data/generated_pipelines/a/step_009",
+      "orchestration_step": {
+        "step_id": "step_9",
+        "operator": "write_data",
+        "input_keys": [
+          "records",
+          "output_file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/a/outputs/a_processed.jsonl"
+        },
+        "description": "Write the processed records to the specified output file path.",
+        "mapped_from_abstract_step": "step_9",
+        "refinement_source": "operator_registry"
+      },
+      "impl_kind": "builtin_delegate",
+      "code": "# -*- coding: utf-8 -*-\n# DataEvolver: built-in operator — delegates to the same Python handlers as `execute_generated_pipeline`.\n# Not a passthrough stub; trial/subprocess 与本文件一致。\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _step_dict() -> dict[str, Any]:\n    meta_p = Path(__file__).resolve().parent / \"step_meta.json\"\n    meta = json.loads(meta_p.read_text(encoding=\"utf-8\"))\n    s = meta.get(\"orchestration_step\")\n    if not isinstance(s, dict):\n        raise RuntimeError(\"step_meta.json missing orchestration_step\")\n    return s\n\n\ndef run(records: list[dict[str, Any]] | None, context: dict[str, Any] | None) -> list[dict[str, Any]]:\n    from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY\n    from subsystems.pipeline_runtime.execution.handlers_llm import LLM_REGISTRY\n\n    handlers: dict[str, Any] = {**DETERMINISTIC_REGISTRY, **LLM_REGISTRY}\n    step = _step_dict()\n    op = str(step.get(\"operator\") or \"\")\n    fn = handlers.get(op)\n    if fn is None:\n        raise RuntimeError(f\"no built-in handler for operator {op!r}\")\n    return fn(records or [], step, context or {})\n\n\ndef describe() -> str:\n    s = _step_dict()\n    return str(s.get(\"operator\", \"?\")) + \": \" + str(s.get(\"description\", \"\"))[:200]\n",
+      "intermediate_summary": "步骤算子 `write_data`；编排说明: Write the processed records to the specified output file path.；注册表: Write records to JSONL and pass the same stream through for downstream steps.",
+      "artifact_dir": "data/generated_pipelines/a/step_009"
+    }
+  ],
+  "control_script_outline": "# Pipeline a — 实例化包（operator_stub.py + step_meta.json）\n\n# 1. read_data  [builtin_delegate]  ->  data/generated_pipelines/a/step_001\n# 2. normalize_schema  [builtin_delegate]  ->  data/generated_pipelines/a/step_002\n# 3. deduplicate  [builtin_delegate]  ->  data/generated_pipelines/a/step_003\n# 4. validate_schema  [builtin_delegate]  ->  data/generated_pipelines/a/step_004\n# 5. check_format  [builtin_delegate]  ->  data/generated_pipelines/a/step_005\n# 6. llm_generate_field  [builtin_delegate]  ->  data/generated_pipelines/a/step_006\n# 7. llm_extract_structure  [builtin_delegate]  ->  data/generated_pipelines/a/step_007\n# 8. llm_check_consistency  [builtin_delegate]  ->  data/generated_pipelines/a/step_008\n# 9. write_data  [builtin_delegate]  ->  data/generated_pipelines/a/step_009\n\n# 内置算子: operator_stub 委托 DETERMINISTIC_REGISTRY / LLM_REGISTRY（与 run-pipeline 一致）。\n# 自定义算子: 可能为 LLM 生成代码或透传桩；trial 需 context['llm_config'] 才能跑通 LLM 步。"
+}

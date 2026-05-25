@@ -1,0 +1,19 @@
+{
+  "pipeline_id": "a",
+  "experience_text": "编排 DAG 校验未通过，下一轮应优先修复数据流或算子选择。 试运行：采样数据已沿实例化桩执行完成。 Pilot 经验: Ensure core output structure aligns with seed requirements. Pilot 经验: Focus on enhancing the depth of responses. Pilot 经验: Address logical consistency issues in outputs. Pilot 建议下一步: evolve_pipeline — Quality and schema alignment need improvement before full run. The output shows some alignment with the seed but contains inconsistencies and lacks depth.",
+  "reflux_targets": [
+    "orchestration",
+    "operator_evolution",
+    "understanding"
+  ],
+  "source": "experience_snapshot_v1",
+  "meta": {
+    "created_at": "2026-05-23T13:08:07.538625+00:00",
+    "inputs": {
+      "quality_check_path": "data/quality_check_results/a.json",
+      "quality_check_found": true,
+      "trial_run_path": "data/trial_runs/a/trial_result.json",
+      "trial_run_found": true
+    }
+  }
+}

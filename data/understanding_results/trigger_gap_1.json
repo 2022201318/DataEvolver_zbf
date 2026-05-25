@@ -1,0 +1,163 @@
+{
+  "pipeline_id": "trigger_gap_1",
+  "domain": "The domain is multimodal, requiring integration of image processing and text summarization.",
+  "language": "en",
+  "language_label": "English",
+  "language_constraint": "en",
+  "language_consistency": true,
+  "user_declared_language": null,
+  "task_type": "image_summary",
+  "basic_information": {
+    "language": "English",
+    "file_format_analysis": {
+      "raw_data_format": "JSONL",
+      "seed_data_format": "JSON",
+      "format_differences": "Raw data is in JSONL format with each record as a separate line, while seed data is in a single JSON array format.",
+      "nested_structure_notes": "Both raw and seed data are flat structures without nested objects."
+    },
+    "seed_vs_raw_quality": {
+      "quality_improvements": [
+        "Seed provides a substantive output in the `output` field, while raw has an empty `output` field."
+      ],
+      "content_differences": "Seed records contain complete summaries derived from image content, whereas raw records lack these summaries.",
+      "style_differences": "Seed outputs are concise and structured, while raw outputs are empty and lack clarity.",
+      "format_improvements": "Seed enforces a single `output` field format with structured summaries, which raw lacks.",
+      "detail_level_comparison": "Seed outputs are detailed and informative, typically around 50-80 characters, while raw outputs are empty.",
+      "nested_field_improvements": "No nested fields are present in either raw or seed samples."
+    },
+    "processing_targets": [
+      "Implement OCR capability to extract text from images.",
+      "Generate concise summaries in the `output` field based on OCR results."
+    ],
+    "domain_characteristics": "The domain is multimodal, requiring integration of image processing and text summarization.",
+    "data_types": [],
+    "transformation_direction": "The transformation from raw to seed involves filling in the `output` field with meaningful summaries derived from OCR processing, which is absent in the raw data.",
+    "quality_standards": "Seed data is considered 'done' when it contains complete and concise summaries in the `output` field."
+  },
+  "schema_analysis": {
+    "schema_stable": true,
+    "raw_fields": [
+      "instruction",
+      "input",
+      "output",
+      "text"
+    ],
+    "seed_fields": [
+      "instruction",
+      "input",
+      "output"
+    ],
+    "raw_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for the OCR process."
+      },
+      "input": {
+        "type": "string",
+        "meaning": "Path to the image file to be processed."
+      },
+      "output": {
+        "type": "string",
+        "meaning": "Expected summary output from the OCR process."
+      },
+      "text": {
+        "type": "string",
+        "meaning": "Additional notes regarding OCR requirements."
+      }
+    },
+    "seed_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for the OCR process."
+      },
+      "input": {
+        "type": "string",
+        "meaning": "Path to the image file to be processed."
+      },
+      "output": {
+        "type": "string",
+        "meaning": "Concise summary output from the OCR process."
+      }
+    },
+    "new_fields": [],
+    "missing_fields": [
+      "text"
+    ],
+    "nested_structure_changes": "No nested structure changes; both raw and seed samples are flat.",
+    "schema_constraint": "The seed schema requires a non-empty `output` field, which is not enforced in the raw schema.",
+    "field_usage_guidance": {
+      "instruction": "Provide clear task instructions for OCR processing.",
+      "input": "Specify the path to the image file.",
+      "output": "Ensure the output is a concise summary derived from the OCR results."
+    }
+  },
+  "dataset_level_delta": {
+    "global_optimization_direction": "empty output → structured summary",
+    "key_improvements": [
+      "Field `output` in seed provides a structured summary, while raw has an empty `output` field.",
+      "Seed removes the `text` field which was present in raw, focusing on concise outputs."
+    ],
+    "transformation_strategies": [
+      "Implement OCR processing to populate the `output` field based on image content.",
+      "Remove the `text` field from the output structure to streamline the data format."
+    ],
+    "quality_focus": [
+      "Check that the `output` field in seed contains concise and informative summaries derived from OCR."
+    ],
+    "summary": "The transition from raw to seed data highlights a critical enhancement in the `output` field, which is essential for fulfilling the task requirements. The raw data lacks substantive outputs, while the seed data provides detailed summaries that are crucial for the image summary task. The removal of the `text` field in seed indicates a focus on delivering concise outputs without additional notes. This shift emphasizes the need for effective OCR processing.",
+    "concrete_field_and_schema_deltas": [
+      "Seed adds a populated `output` field that raw lacks."
+    ],
+    "value_pattern_contrasts": [
+      "Raw `output` is an empty string, while seed `output` contains structured summaries with specific details."
+    ],
+    "seed_higher_bar_signals": [
+      "Seed data imposes stricter expectations for the `output` field to be non-empty and informative."
+    ],
+    "risks_if_ignored": [
+      "Downstream processes relying on the `output` field would fail to generate meaningful summaries if the empty state of raw data is not addressed."
+    ]
+  },
+  "content_slot_library": {},
+  "quality_rubrics": {},
+  "meta": {
+    "understanding_mode": "full_llm",
+    "saved_at": "2026-05-23T14:51:57.444177+00:00",
+    "llm_steps": [
+      "unified_profile"
+    ]
+  },
+  "orchestration_assessment_feedback": {
+    "updated_at": "2026-05-23T14:52:52.415221+00:00",
+    "last_assessment_passed": false,
+    "iteration": 1,
+    "latest": {
+      "passed": false,
+      "is_valid": false,
+      "assessed_at": "2026-05-23T14:52:45.000724+00:00",
+      "structural_issue_count": 5,
+      "structural_issues_summary": [
+        "{\"type\": \"data_flow\", \"step_id\": \"step_2\", \"operator\": \"llm_extract_structure\", \"description\": \"步骤输入键无来源: ['input', 'extraction_spec']\", \"missing_inputs\": [\"input\", \"extraction_spec\"]}",
+        "{\"type\": \"data_flow\", \"step_id\": \"step_3\", \"operator\": \"llm_generate_field\", \"description\": \"步骤输入键无来源: ['input', 'target_field', 'generation_spec']\", \"missing_inputs\": [\"input\", \"target_field\", \"generation_spec\"]}",
+        "{\"type\": \"data_flow\", \"step_id\": \"step_4\", \"operator\": \"check_format\", \"description\": \"步骤输入键无来源: ['format_rules']\", \"missing_inputs\": [\"format_rules\"]}",
+        "{\"type\": \"data_flow\", \"step_id\": \"step_5\", \"operator\": \"validate_schema\", \"description\": \"步骤输入键无来源: ['schema_rules']\", \"missing_inputs\": [\"schema_rules\"]}",
+        "{\"type\": \"data_flow\", \"step_id\": \"step_6\", \"operator\": \"remove_field\", \"description\": \"步骤输入键无来源: ['field_names']\", \"missing_inputs\": [\"field_names\"]}"
+      ],
+      "task_fit_satisfied": false,
+      "task_fit_skipped": false,
+      "task_fit_reasoning": "结构上存在问题，多个步骤的输入键没有来源，导致无法正确传递数据。语义上，虽然目标是提取和生成摘要，但由于输入键缺失，无法实现这些功能。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [
+        "重新编排以确保所有步骤的输入键都有来源",
+        "调整某步输入键以匹配现有算子的输入要求"
+      ],
+      "optimization_suggestions": [],
+      "next_steps_for_user": [
+        "检查并修复步骤输入键的来源问题",
+        "重新运行 orchestrate 修正环路与键",
+        "若仍缺语义能力再运行 evolve-operators"
+      ]
+    },
+    "history": []
+  }
+}

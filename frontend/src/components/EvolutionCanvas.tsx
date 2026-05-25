@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import {
   AlertCircle,
   ArrowRight,
@@ -40,6 +40,29 @@ import { resolveDagForRow } from '../lib/resolveDagForRow'
 
 type Metric = { sec: number; tokens: number }
 
+function dagTabStatusMark(tab: DagTab): string {
+  if (tab.status === 'passed') return ' ✓'
+  if (tab.status === 'failed') return ' ✗'
+  return ''
+}
+
+function dagTabStyle(tab: DagTab, activeId: number | undefined): CSSProperties {
+  const active = tab.id === activeId
+  const failed = tab.status === 'failed'
+  return {
+    borderColor: active ? (failed ? 'var(--de-orange)' : 'var(--de-cyan)') : failed ? 'color-mix(in srgb, var(--de-orange) 55%, var(--border))' : 'var(--border)',
+    background: active
+      ? failed
+        ? 'color-mix(in srgb, var(--de-orange) 12%, transparent)'
+        : 'var(--de-cyan-glow)'
+      : failed
+        ? 'color-mix(in srgb, var(--de-orange) 6%, transparent)'
+        : 'transparent',
+    color: failed ? 'var(--de-orange)' : 'var(--text-dim)',
+    fontWeight: active ? 600 : 400,
+  }
+}
+
 type DagStatus = 'passed' | 'failed'
 
 interface DagTab {
@@ -60,6 +83,21 @@ interface InstantiationCard {
   summary: string
   code: string
   metrics: Metric
+  llmGenerated?: boolean
+}
+
+interface InstantiationMeta {
+  reused?: boolean
+  llm_codegen?: boolean
+  llm_steps?: string[]
+  note?: string
+  source?: string
+}
+
+interface ExperienceMeta {
+  llm_used?: boolean
+  source_kind?: string
+  detail?: string
 }
 
 interface EvolutionRow {
@@ -69,12 +107,15 @@ interface EvolutionRow {
   dagTabs: DagTab[]
   activeDagTabId?: number
   instantiationCards: InstantiationCard[]
+  instantiationMeta?: InstantiationMeta
   sampleScore?: number
   sampleMetrics?: Metric
   experience?: string
   experienceMetrics?: Metric
+  experienceMeta?: ExperienceMeta
   needNext: boolean
   completed: boolean
+  rowUi?: LiveArtifactsForCanvas
 }
 
 interface CanvasText {
@@ -127,6 +168,33 @@ const EMPTY_JUDGE: JudgeResult = {
   overall_assessment: '',
   critical_insights: [],
   implicit_quality_requirements: {},
+}
+
+function resolveRowUi(row: EvolutionRow | undefined, global: CanvasUiBundle): CanvasUiBundle {
+  if (!row?.rowUi) return global
+  const r = row.rowUi
+  // 已完成轮次：只读 rowUi 快照，禁止回退到 global live 数据（避免后一轮污染前一轮）
+  if (row.completed) {
+    return {
+      understanding: (r.understanding ?? EMPTY_UNDERSTANDING) as UnderstandingResult,
+      dag: r.dag ?? EMPTY_DAG,
+      orchVal: r.orchestrationValidation ?? EMPTY_ORCH_VALIDATION,
+      judge: r.judge ?? EMPTY_JUDGE,
+      experiences:
+        r.experienceBullets.length > 0
+          ? [...r.experienceBullets]
+          : row.experience?.trim()
+            ? [row.experience]
+            : [],
+    }
+  }
+  return {
+    understanding: (r.understanding ?? global.understanding) as UnderstandingResult,
+    dag: r.dag ?? global.dag,
+    orchVal: r.orchestrationValidation ?? global.orchVal,
+    judge: r.judge ?? global.judge,
+    experiences: r.experienceBullets.length > 0 ? [...r.experienceBullets] : global.experiences,
+  }
 }
 
 interface EvolutionCanvasProps {
@@ -799,10 +867,12 @@ function NodeDetailCenterModal({
     return parseRowBlock(nodeId, rows)
   }, [nodeId, rows])
 
+  const rowUi = useMemo(() => resolveRowUi(row, canvasUi), [row, canvasUi])
+
   if (!nodeId) return null
   const activeDag =
     row?.dagTabs.find((tab) => tab.id === row?.activeDagTabId) ?? row?.dagTabs?.[Math.max(0, (row?.dagTabs?.length ?? 1) - 1)]
-  const rowDagResolved = row ? resolveDagForRow(row, canvasUi.dag) : canvasUi.dag
+  const rowDagResolved = row ? resolveDagForRow(row, rowUi.dag) : rowUi.dag
 
   const metricRow = (m?: Metric) =>
     m ? (
@@ -839,12 +909,12 @@ function NodeDetailCenterModal({
       </div>
     )
   } else if (block === 'understanding') {
-    const bi = canvasUi.understanding.basic_information
-    const sa = canvasUi.understanding.schema_analysis ?? {}
+    const bi = rowUi.understanding.basic_information
+    const sa = rowUi.understanding.schema_analysis ?? {}
     const rawFields = Array.isArray(sa.raw_fields) ? (sa.raw_fields as string[]) : []
     const seedFields = Array.isArray(sa.seed_fields) ? (sa.seed_fields as string[]) : []
     const newFields = Array.isArray(sa.new_fields) ? (sa.new_fields as string[]) : []
-    const delta = canvasUi.understanding.dataset_level_delta ?? {}
+    const delta = rowUi.understanding.dataset_level_delta ?? {}
     const qualityGaps = Array.isArray(delta.quality_gaps) ? (delta.quality_gaps as string[]) : []
     body = (
       <div className="space-y-3">
@@ -855,13 +925,13 @@ function NodeDetailCenterModal({
           </div>
           {metricRow(row.understandingMetrics)}
         </div>
-        {(canvasUi.understanding.language || canvasUi.understanding.language_label) && (
+        {(rowUi.understanding.language || rowUi.understanding.language_label) && (
           <p className="text-xs text-[var(--text-dim)]">
             <span className="text-[var(--text-muted)]">{isZh ? '语言 / language' : 'Language'}: </span>
             <span className="font-medium text-[var(--text)]">
-              {canvasUi.understanding.language_label ?? canvasUi.understanding.language}
-              {canvasUi.understanding.language && canvasUi.understanding.language_label
-                ? ` (${canvasUi.understanding.language})`
+              {rowUi.understanding.language_label ?? rowUi.understanding.language}
+              {rowUi.understanding.language && rowUi.understanding.language_label
+                ? ` (${rowUi.understanding.language})`
                 : ''}
             </span>
           </p>
@@ -926,16 +996,16 @@ function NodeDetailCenterModal({
         <div className="rounded-lg border px-2 py-2" style={{ borderColor: 'var(--border)', background: 'color-mix(in srgb, var(--bg-panel) 98%, transparent)' }}>
           <p className="text-[10px] text-[var(--text-muted)] mb-1.5">{local.validationTitle}</p>
           <div className="flex items-center gap-2 text-xs text-[var(--text)]">
-            {canvasUi.orchVal.is_valid ? (
+            {rowUi.orchVal.is_valid ? (
               <CheckCircle2 className="w-4 h-4 shrink-0 text-[var(--de-green)]" />
             ) : (
               <AlertCircle className="w-4 h-4 shrink-0 text-[var(--de-orange)]" />
             )}
-            <span>{canvasUi.orchVal.is_valid ? local.validationValid : local.validationInvalid}</span>
+            <span>{rowUi.orchVal.is_valid ? local.validationValid : local.validationInvalid}</span>
           </div>
-          {(canvasUi.orchVal.validation_issues?.length ?? 0) > 0 ? (
+          {(rowUi.orchVal.validation_issues?.length ?? 0) > 0 ? (
             <ul className="mt-2 text-[10px] text-[var(--text-dim)] space-y-1 list-disc pl-4">
-              {canvasUi.orchVal.validation_issues.map((issue) => (
+              {rowUi.orchVal.validation_issues.map((issue) => (
                 <li key={issue}>{issue}</li>
               ))}
             </ul>
@@ -947,9 +1017,9 @@ function NodeDetailCenterModal({
               <BarChart3 className="w-3 h-3" />
               {local.evalSummary}
             </p>
-            <p className="text-xs text-[var(--text-dim)] leading-relaxed">{canvasUi.judge.overall_assessment || '—'}</p>
+            <p className="text-xs text-[var(--text-dim)] leading-relaxed">{rowUi.judge.overall_assessment || '—'}</p>
             <div className="mt-2 text-[10px] text-[var(--text-muted)]">
-              {local.judgeGap}: <span className="text-[var(--text)]">{String(canvasUi.judge.has_differences)}</span>
+              {local.judgeGap}: <span className="text-[var(--text)]">{String(rowUi.judge.has_differences)}</span>
             </div>
           </div>
           <div className="rounded-lg border p-2.5" style={{ borderColor: 'var(--border)', background: 'color-mix(in srgb, var(--bg-panel) 99%, transparent)' }}>
@@ -959,8 +1029,8 @@ function NodeDetailCenterModal({
             </p>
             <ul className="space-y-1 text-[10px] text-[var(--text-dim)] list-disc pl-4">
               {[
-                ...(canvasUi.judge.critical_insights ?? []).slice(0, 2),
-                ...canvasUi.experiences.slice(0, 3),
+                ...(rowUi.judge.critical_insights ?? []).slice(0, 2),
+                ...rowUi.experiences.slice(0, 3),
               ]
                 .slice(0, 5)
                 .map((x) => (
@@ -979,20 +1049,23 @@ function NodeDetailCenterModal({
                   type="button"
                   onClick={() => onSelectDagTab(rowId, tab.id)}
                   className="text-[10px] px-2 py-1 rounded-lg border transition-colors"
-                  style={{
-                    borderColor: tab.id === row.activeDagTabId ? 'var(--de-cyan)' : 'var(--border)',
-                    background: tab.id === row.activeDagTabId ? 'var(--de-cyan-glow)' : 'transparent',
-                    color: 'var(--text-dim)',
-                  }}
+                  style={dagTabStyle(tab, row.activeDagTabId)}
                 >
                   {tab.title}
-                  {tab.status === 'passed' ? ' ✓' : ''}
+                  {dagTabStatusMark(tab)}
                 </button>
               ))}
             </div>
           </div>
         )}
-        <p className="text-xs text-[var(--text-dim)]">{activeDag?.summary}</p>
+        <p
+          className="text-xs"
+          style={{
+            color: activeDag?.status === 'failed' ? 'var(--de-orange)' : 'var(--text-dim)',
+          }}
+        >
+          {activeDag?.summary}
+        </p>
         <div className="rounded-lg border p-2" style={{ borderColor: 'var(--border)', background: 'color-mix(in srgb, var(--bg-panel) 99%, transparent)' }}>
           <p className="text-[10px] text-[var(--text-muted)] mb-2 flex items-center gap-1">
             <Network className="w-3 h-3" />
@@ -1039,6 +1112,30 @@ function NodeDetailCenterModal({
             {row.instantiationCards.length} {local.instCards}
           </span>
         </div>
+        {row.instantiationMeta ? (
+          <p
+            className="text-[10px] rounded-lg border px-2 py-1.5"
+            style={{
+              borderColor: 'var(--border)',
+              color: row.instantiationMeta.reused ? 'var(--de-orange)' : 'var(--text-dim)',
+              background: 'color-mix(in srgb, var(--bg-panel) 96%, transparent)',
+            }}
+          >
+            {row.instantiationMeta.reused
+              ? isZh
+                ? '实例化：复用已有产物（未调用 LLM）'
+                : 'Instantiation: reused existing artifacts (no LLM)'
+              : row.instantiationMeta.llm_codegen
+                ? isZh
+                  ? `实例化：LLM 参与步骤 — ${(row.instantiationMeta.llm_steps ?? []).join(', ') || '是'}`
+                  : `Instantiation: LLM steps — ${(row.instantiationMeta.llm_steps ?? []).join(', ') || 'yes'}`
+                : isZh
+                  ? row.instantiationMeta.note ??
+                    '实例化：内置算子模板委托（本 DAG 未触发 LLM 写码）'
+                  : row.instantiationMeta.note ??
+                    'Instantiation: builtin delegate templates (no LLM codegen for this DAG)'}
+          </p>
+        ) : null}
         <EmbeddedOperatorSubDag dag={rowDagResolved} operatorPool={operatorPool} caption={local.subDagCaption} compact />
         <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
           {row.instantiationCards.length === 0 ? (
@@ -1051,6 +1148,11 @@ function NodeDetailCenterModal({
                     <span className="font-medium text-[var(--text)] flex items-center gap-1.5">
                       <Code2 className="w-3.5 h-3.5 text-[var(--de-cyan)]" />
                       {card.name}
+                      {card.llmGenerated ? (
+                        <span className="text-[9px] px-1 rounded border" style={{ borderColor: 'var(--de-cyan)', color: 'var(--de-cyan)' }}>
+                          LLM
+                        </span>
+                      ) : null}
                     </span>
                     <span className="text-[10px] text-[var(--text-muted)]">{metricText(card.metrics)}</span>
                   </div>
@@ -1119,11 +1221,11 @@ function NodeDetailCenterModal({
             <BarChart3 className="w-3 h-3" />
             {local.evalSummary}
           </p>
-          <p className="text-xs text-[var(--text-dim)] leading-relaxed">{canvasUi.judge.overall_assessment}</p>
+          <p className="text-xs text-[var(--text-dim)] leading-relaxed">{rowUi.judge.overall_assessment}</p>
           <div className="mt-2 flex items-center gap-2 text-[10px]">
             <AlertCircle className="w-3.5 h-3.5 text-[var(--de-orange)]" />
             <span className="text-[var(--text-muted)]">{local.judgeGap}:</span>
-            <span className="text-[var(--text)]">{String(canvasUi.judge.has_differences)}</span>
+            <span className="text-[var(--text)]">{String(rowUi.judge.has_differences)}</span>
           </div>
         </div>
         <div>
@@ -1132,7 +1234,7 @@ function NodeDetailCenterModal({
             {local.insights}
           </p>
           <ul className="space-y-1.5">
-            {(canvasUi.judge.critical_insights ?? []).map((ins) => (
+            {(rowUi.judge.critical_insights ?? []).map((ins) => (
               <li
                 key={ins}
                 className="text-xs text-[var(--text-dim)] flex gap-2 rounded-lg border px-2 py-1.5"
@@ -1156,6 +1258,12 @@ function NodeDetailCenterModal({
           </div>
           {metricRow(row.experienceMetrics)}
         </div>
+        {row.experienceMeta ? (
+          <p className="text-[10px] text-[var(--text-muted)] mb-2">
+            {row.experienceMeta.detail ??
+              (isZh ? '经验为规则聚合，非 LLM 逐步生成' : 'Experience is rule-aggregated, not LLM-generated')}
+          </p>
+        ) : null}
         <ExperienceDraftEditor initial={row.experience ?? ''} hint={local.expReflowHint} />
         <div className="rounded-lg border p-2" style={{ borderColor: 'var(--border)', background: 'color-mix(in srgb, var(--bg-panel) 98%, transparent)' }}>
           <p className="text-[10px] text-[var(--text-muted)] mb-1 flex items-center gap-1">
@@ -1165,8 +1273,8 @@ function NodeDetailCenterModal({
           <pre className="text-[10px] font-mono max-h-32 overflow-auto" style={{ color: 'var(--text-muted)' }}>
             {JSON.stringify(
               {
-                next_round_constraints: canvasUi.experiences,
-                implicit_quality: canvasUi.judge.implicit_quality_requirements,
+                next_round_constraints: rowUi.experiences,
+                implicit_quality: rowUi.judge.implicit_quality_requirements,
                 iterate: row.needNext,
               },
               null,
@@ -1651,7 +1759,7 @@ export function EvolutionCanvas({
     let yCursor = 40
 
     rows.forEach((row) => {
-      const rowDag = resolveDagForRow(row, canvasUi.dag)
+      const rowDag = resolveDagForRow(row, resolveRowUi(row, canvasUi).dag)
       const dagCardMetrics = computeOrchestrationDagCardMetrics(rowDag)
       const rowPitch = Math.max(420, dagCardMetrics.cardHeight + 140)
       const y = yCursor
@@ -1794,15 +1902,10 @@ export function EvolutionCanvas({
                     onSelectDagTab(row.id, tab.id)
                   }}
                   className="rounded-lg border px-2 py-1 text-[10px] transition-colors"
-                  style={{
-                    borderColor: tab.id === row.activeDagTabId ? 'var(--de-cyan)' : 'var(--border)',
-                    background: tab.id === row.activeDagTabId ? 'var(--de-cyan-glow)' : 'transparent',
-                    color: 'var(--text-dim)',
-                    fontWeight: tab.id === row.activeDagTabId ? 600 : 400,
-                  }}
+                  style={dagTabStyle(tab, row.activeDagTabId)}
                 >
                   {tab.title}
-                  {tab.status === 'passed' ? ' ✓' : ''}
+                  {dagTabStatusMark(tab)}
                 </button>
               ))}
             </div>

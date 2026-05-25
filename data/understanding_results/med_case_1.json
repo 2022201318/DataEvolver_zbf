@@ -1,0 +1,145 @@
+{
+  "pipeline_id": "med_case_1",
+  "domain": "The domain is medical, focusing on patient education and clear communication of medical instructions.",
+  "language": "en",
+  "language_label": "English",
+  "language_constraint": "en",
+  "language_consistency": true,
+  "user_declared_language": null,
+  "task_type": "patient_education",
+  "basic_information": {
+    "language": "English",
+    "file_format_analysis": {
+      "raw_data_format": "JSONL",
+      "seed_data_format": "JSONL",
+      "format_differences": "Both formats are JSONL, but the seed data has a more structured output field compared to the raw data, which contains an empty output field.",
+      "nested_structure_notes": "No nested structures are present in either raw or seed samples."
+    },
+    "seed_vs_raw_quality": {
+      "quality_improvements": [
+        "Seed provides a fully populated 'output' field, while raw has an empty 'output' field."
+      ],
+      "content_differences": "Seed outputs are patient-friendly and medically accurate, while raw outputs lack content.",
+      "style_differences": "Seed outputs use plain language and clear instructions, whereas raw outputs are clinical and jargon-heavy.",
+      "format_improvements": "Seed enforces a structured output format that raw lacks, specifically in the 'output' field.",
+      "detail_level_comparison": "Seed outputs are longer and more detailed, providing clear instructions and safety reminders, while raw outputs are minimal.",
+      "nested_field_improvements": "No nested fields to compare."
+    },
+    "processing_targets": [
+      "Transform empty 'output' field in raw to populated 'output' field in seed with patient-friendly language."
+    ],
+    "domain_characteristics": "The domain is medical, focusing on patient education and clear communication of medical instructions.",
+    "data_types": [],
+    "transformation_direction": "The transformation from raw to seed involves converting clinical notes into clear, patient-friendly instructions, enhancing the output field significantly.",
+    "quality_standards": "Seed outputs must be medically accurate, clear, and patient-friendly, adhering to the specified quality constraints."
+  },
+  "schema_analysis": {
+    "schema_stable": true,
+    "raw_fields": [
+      "instruction",
+      "input",
+      "output",
+      "text"
+    ],
+    "seed_fields": [
+      "instruction",
+      "input",
+      "output"
+    ],
+    "raw_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for rewriting clinical notes.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "Clinical note to be rewritten.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "Patient-friendly output (currently empty in raw).",
+        "nested_structure": "not applicable"
+      },
+      "text": {
+        "type": "string",
+        "meaning": "Draft version of the clinical note.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "seed_field_details": {
+      "instruction": {
+        "type": "string",
+        "meaning": "Task instruction for rewriting clinical notes.",
+        "nested_structure": "not applicable"
+      },
+      "input": {
+        "type": "string",
+        "meaning": "Clinical note to be rewritten.",
+        "nested_structure": "not applicable"
+      },
+      "output": {
+        "type": "string",
+        "meaning": "Patient-friendly output with clear instructions.",
+        "nested_structure": "not applicable"
+      }
+    },
+    "new_fields": [],
+    "missing_fields": [
+      "text"
+    ],
+    "nested_structure_changes": "The 'text' field present in raw is removed in seed, simplifying the schema to focus on essential outputs.",
+    "schema_constraint": "The seed schema requires a populated 'output' field, which is critical for patient education.",
+    "field_usage_guidance": {
+      "instruction": "Provide clear task instructions for rewriting clinical notes.",
+      "input": "Input should be a clinical note that needs to be rewritten.",
+      "output": "Output must be a clear, patient-friendly instruction."
+    }
+  },
+  "dataset_level_delta": {
+    "global_optimization_direction": "empty output → populated patient-friendly output",
+    "key_improvements": [
+      "Field 'output' changes from empty string in raw to detailed patient-friendly instructions in seed."
+    ],
+    "transformation_strategies": [
+      "Populate 'output' field in seed with clear, patient-friendly language derived from clinical notes."
+    ],
+    "quality_focus": [
+      "Ensure that the 'output' field in seed is medically accurate and easy to understand."
+    ],
+    "summary": "The transition from raw to seed involves a significant enhancement in the 'output' field, which is critical for meeting the goal of providing clear medical instructions. The removal of the 'text' field simplifies the schema, focusing on essential outputs required for patient education. The seed data enforces a structured format that the raw data lacks, ensuring clarity and safety in communication.",
+    "concrete_field_and_schema_deltas": [
+      "Seed removes path 'text' that raw has, focusing on the 'output' field."
+    ],
+    "value_pattern_contrasts": [
+      "Raw 'output' is an empty string, while seed 'output' is a detailed instruction with clear language."
+    ],
+    "seed_higher_bar_signals": [
+      "Seed outputs must adhere to patient-friendly language and safety reminders, raising the expectation for clarity and accuracy."
+    ],
+    "risks_if_ignored": [
+      "Ignoring the need to populate the 'output' field could lead to unclear or incomplete patient instructions, compromising patient understanding and safety."
+    ]
+  },
+  "content_slot_library": {},
+  "quality_rubrics": {},
+  "meta": {
+    "understanding_mode": "full_llm",
+    "saved_at": "2026-05-23T14:12:32.538269+00:00",
+    "llm_steps": [
+      "unified_profile"
+    ]
+  },
+  "orchestration_assessment_feedback": {
+    "updated_at": "2026-05-23T14:13:32.139080+00:00",
+    "last_assessment_passed": true,
+    "iteration": 0,
+    "latest": {
+      "passed": true,
+      "is_valid": true,
+      "assessed_at": "2026-05-23T14:13:23.737965+00:00"
+    },
+    "history": []
+  }
+}

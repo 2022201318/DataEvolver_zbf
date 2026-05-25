@@ -1,0 +1,35 @@
+{
+  "pipeline_id": "trigger_case_1",
+  "assessed_at": "2026-05-23T14:50:59.603627+00:00",
+  "structural_valid": false,
+  "structural_issue_count": 1,
+  "structural_issues": [
+    {
+      "type": "field_coverage",
+      "description": "新字段可能未被管线输出键覆盖: ['output.safe_response', 'output.risk_tier', 'output.compliance_checks', 'output.evidence_refs', 'output.follow_up_action']",
+      "missing_fields": [
+        "output.safe_response",
+        "output.risk_tier",
+        "output.compliance_checks",
+        "output.evidence_refs",
+        "output.follow_up_action"
+      ]
+    }
+  ],
+  "task_fit": {
+    "satisfied": false,
+    "skipped": false,
+    "reasoning": "结构上存在问题，管线输出键未覆盖所有新字段，导致无法满足数据准备目标。语义上，虽然生成了所需字段，但缺少必要的输出键，无法确保输出的完整性。",
+    "recommend_new_operators": false,
+    "recommended_fixes": [
+      "调整某步输出键以覆盖所有新字段"
+    ],
+    "optimization_suggestions": [],
+    "next_steps_for_user": [
+      "重新运行 orchestrate 修正环路与键",
+      "确保所有新字段在管线中都有输出"
+    ]
+  },
+  "is_valid": false,
+  "orchestration_results_path": "data/orchestration_results/trigger_case_1.json"
+}

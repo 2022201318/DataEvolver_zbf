@@ -114,13 +114,15 @@ class OpenPipelineOrchestrator:
     def __init__(
         self,
         root: Path,
+        pipeline_id: str,
         llm_config: dict[str, Any],
         on_usage: Callable[..., None] | None = None,
     ) -> None:
         self._root = root
+        self._pipeline_id = pipeline_id
         self._cfg = llm_config
         self._on_usage = on_usage
-        self._registry_store = OperatorRegistryStore(root)
+        self._registry_store = OperatorRegistryStore(root, pipeline_id=pipeline_id)
         self.template_library = self._load_template_library()
         self._manifest_record: dict[str, Any] = {}
 
@@ -752,7 +754,7 @@ def run_open_orchestration(
 ) -> dict[str, Any]:
     if not str(llm_config.get("api_key") or "").strip():
         raise ValueError("编排需要配置 API Key")
-    orch = OpenPipelineOrchestrator(root, llm_config, on_usage=on_usage)
+    orch = OpenPipelineOrchestrator(root, pipeline_id=pipeline_id, llm_config=llm_config, on_usage=on_usage)
     out = orch.orchestrate_pipeline(understanding_result, manifest_record)
     fp = out["final_pipeline"]
     return {

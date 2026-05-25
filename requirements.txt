@@ -1,4 +1,4 @@
-# 多模态数据准备 open-source backend
+# DataEvolver open-source backend
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 python-multipart>=0.0.6

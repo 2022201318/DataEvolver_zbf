@@ -42,10 +42,11 @@ export type EvolutionRowLike = {
 
 /** 当前选中编排 tab 对应的 DAG：优先 tab.dag，其次由 tab.nodes 线性展开，否则用管线级 fallback */
 export function resolveDagForRow(row: EvolutionRowLike, fallback: DagResult): DagResult {
+  const empty: DagResult = { nodes: [], edges: [], execution_order: [], total_nodes: 0, total_edges: 0 }
   const tab =
     row.dagTabs.find((t) => t.id === row.activeDagTabId) ?? row.dagTabs[row.dagTabs.length - 1]
-  if (!tab) return fallback
+  if (!tab) return row.dagTabs.length > 0 ? empty : fallback
   if (tab.dag) return tab.dag
   if (tab.nodes?.length) return buildLinearDagFromOperatorNames(tab.nodes)
-  return fallback
+  return empty
 }

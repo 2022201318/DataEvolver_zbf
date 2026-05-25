@@ -1,0 +1,657 @@
+{
+  "pipeline_id": "fin_case_1",
+  "dag": {
+    "nodes": [
+      {
+        "node_id": "step_1",
+        "node_name": "read_data",
+        "description": "Read raw data from a JSONL file into the main record stream.",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_2",
+        "node_name": "remove_field",
+        "description": "Remove the 'text' field from the records to streamline the output format.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_3",
+        "node_name": "llm_generate_field",
+        "description": "Generate a concise output field based on the instruction and input fields.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      },
+      {
+        "node_id": "step_4",
+        "node_name": "validate_schema",
+        "description": "Validate the records against the required schema to ensure all necessary fields are present.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ]
+      },
+      {
+        "node_id": "step_5",
+        "node_name": "write_data",
+        "description": "Write the processed records to a JSONL file.",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "step_1",
+        "to_node": "step_2",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_2",
+        "to_node": "step_3",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_3",
+        "to_node": "step_4",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      },
+      {
+        "from_node": "step_4",
+        "to_node": "step_5",
+        "data_flow": {
+          "from_outputs": [
+            "records"
+          ],
+          "to_inputs": [
+            "records"
+          ]
+        }
+      }
+    ],
+    "execution_order": [
+      "step_1",
+      "step_2",
+      "step_3",
+      "step_4",
+      "step_5"
+    ],
+    "total_nodes": 5,
+    "total_edges": 4
+  },
+  "pipeline_plan": [
+    {
+      "step": 1,
+      "operator": "read_data",
+      "description": "Read raw data from a JSONL file into the main record stream."
+    },
+    {
+      "step": 2,
+      "operator": "remove_field",
+      "description": "Remove the 'text' field from the records to streamline the output format."
+    },
+    {
+      "step": 3,
+      "operator": "llm_generate_field",
+      "description": "Generate a concise output field based on the instruction and input fields."
+    },
+    {
+      "step": 4,
+      "operator": "validate_schema",
+      "description": "Validate the records against the required schema to ensure all necessary fields are present."
+    },
+    {
+      "step": 5,
+      "operator": "write_data",
+      "description": "Write the processed records to a JSONL file."
+    }
+  ],
+  "source": "open_orchestrator_v1",
+  "meta": {
+    "created_at": "2026-05-23T14:08:52.175325+00:00",
+    "llm_stages": [
+      "free_fitting",
+      "template_combination",
+      "constrained_search"
+    ]
+  },
+  "free_fitting": {
+    "optimization_blueprint": {
+      "global_optimization_direction": "Enhance clarity and focus on actionable insights by removing verbose fields and transforming outputs into concise summaries.",
+      "key_improvements": [
+        "Eliminate the 'text' field from the schema to streamline the output format.",
+        "Ensure seed outputs are concise and highlight key financial metrics effectively.",
+        "Transform raw outputs into structured summaries that provide clear financial insights."
+      ],
+      "transformation_strategies": [
+        "Remove unnecessary fields like 'text' to prevent verbosity in outputs.",
+        "Implement a transformation process that condenses raw outputs into concise summaries.",
+        "Focus on structuring outputs to emphasize key financial highlights and actionable insights."
+      ],
+      "quality_focus": [
+        "Ensure that all outputs in seed format are concise and actionable.",
+        "Maintain clarity and precision in financial communication by adhering to strict output standards.",
+        "Regularly review outputs to confirm they meet the quality standards of being direct and focused."
+      ],
+      "summary": "The optimization blueprint aims to transition from raw data to seed data by simplifying the schema and enhancing the clarity of outputs. Key strategies include removing verbose fields, transforming outputs into concise summaries, and focusing on actionable insights to improve usability for business users."
+    },
+    "stage": "free_fitting",
+    "design_method": "llm_driven"
+  },
+  "template_combination": {
+    "template_selection": {
+      "selected_templates": [
+        "structure_optimization",
+        "field_extraction",
+        "content_generation"
+      ],
+      "selection_rationale": "The selected templates directly address the optimization goals of enhancing clarity and focus on actionable insights. 'structure_optimization' will streamline the output format by removing unnecessary fields, 'field_extraction' will help in identifying and extracting key financial metrics, and 'content_generation' will assist in transforming raw outputs into concise summaries.",
+      "template_combination_strategy": "sequential",
+      "pipeline_sketch": {
+        "steps": [
+          {
+            "step_id": "step_1",
+            "template_name": "structure_optimization",
+            "functional_description": "分析当前数据结构，识别优化点",
+            "expected_output": "结构优化方案",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_2",
+            "template_name": "structure_optimization",
+            "functional_description": "重组和优化数据结构",
+            "expected_output": "优化后的数据结构",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_3",
+            "template_name": "field_extraction",
+            "functional_description": "分析源内容，识别可提取的信息",
+            "expected_output": "提取策略和目标字段定义",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_4",
+            "template_name": "field_extraction",
+            "functional_description": "执行信息提取，生成结构化字段",
+            "expected_output": "提取出的结构化字段",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_5",
+            "template_name": "content_generation",
+            "functional_description": "分析输入内容，理解生成需求",
+            "expected_output": "生成策略和指令",
+            "abstract_step_id": "step_1",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          },
+          {
+            "step_id": "step_6",
+            "template_name": "content_generation",
+            "functional_description": "执行内容生成，创建新内容",
+            "expected_output": "生成的新内容",
+            "abstract_step_id": "step_2",
+            "operator": null,
+            "input_keys": [],
+            "output_keys": []
+          }
+        ],
+        "total_steps": 6,
+        "data_flow": "Data flows from the initial raw input to the structure optimization step, then to field extraction, and finally to content generation, resulting in concise and actionable financial summaries.",
+        "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+        "stage": "template_combination"
+      },
+      "coverage_analysis": {
+        "optimization_direction_coverage": "The selected templates effectively cover the optimization direction by focusing on clarity and actionable insights.",
+        "key_improvements_coverage": "The templates address all key improvements by removing unnecessary fields, extracting key metrics, and generating concise summaries.",
+        "quality_focus_coverage": "The templates ensure that outputs are concise and actionable, adhering to strict output standards.",
+        "missing_capabilities": []
+      }
+    },
+    "pipeline_sketch": {
+      "steps": [
+        {
+          "step_id": "step_1",
+          "template_name": "structure_optimization",
+          "functional_description": "分析当前数据结构，识别优化点",
+          "expected_output": "结构优化方案",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_2",
+          "template_name": "structure_optimization",
+          "functional_description": "重组和优化数据结构",
+          "expected_output": "优化后的数据结构",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_3",
+          "template_name": "field_extraction",
+          "functional_description": "分析源内容，识别可提取的信息",
+          "expected_output": "提取策略和目标字段定义",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_4",
+          "template_name": "field_extraction",
+          "functional_description": "执行信息提取，生成结构化字段",
+          "expected_output": "提取出的结构化字段",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_5",
+          "template_name": "content_generation",
+          "functional_description": "分析输入内容，理解生成需求",
+          "expected_output": "生成策略和指令",
+          "abstract_step_id": "step_1",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        },
+        {
+          "step_id": "step_6",
+          "template_name": "content_generation",
+          "functional_description": "执行内容生成，创建新内容",
+          "expected_output": "生成的新内容",
+          "abstract_step_id": "step_2",
+          "operator": null,
+          "input_keys": [],
+          "output_keys": []
+        }
+      ],
+      "total_steps": 6,
+      "data_flow": "Data flows from the initial raw input to the structure optimization step, then to field extraction, and finally to content generation, resulting in concise and actionable financial summaries.",
+      "note": "This is a high-level sketch with abstract steps. Specific operators will be assigned in the constrained search stage.",
+      "stage": "template_combination"
+    },
+    "stage": "template_combination",
+    "design_method": "template_based"
+  },
+  "constrained_search": {
+    "final_pipeline": [
+      {
+        "step_id": "step_1",
+        "operator": "read_data",
+        "input_keys": [
+          "file_path"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "data/uploads/fin_case_1/raw_data/finance_raw.jsonl"
+        },
+        "description": "Read raw data from a JSONL file into the main record stream.",
+        "mapped_from_abstract_step": "step_1",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_2",
+        "operator": "remove_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "field_names": [
+            "text"
+          ]
+        },
+        "description": "Remove the 'text' field from the records to streamline the output format.",
+        "mapped_from_abstract_step": "step_2",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_3",
+        "operator": "llm_generate_field",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "prompt_context_fields": [
+            "instruction",
+            "input"
+          ],
+          "target_field": "output",
+          "generation_spec": "Generate a concise summary of the financial data based on the instruction and input."
+        },
+        "description": "Generate a concise output field based on the instruction and input fields.",
+        "mapped_from_abstract_step": "step_5",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_4",
+        "operator": "validate_schema",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records",
+          "validation_report"
+        ],
+        "parameters": {
+          "schema_rules": {
+            "required_fields": [
+              "instruction",
+              "input",
+              "output"
+            ],
+            "field_types": {
+              "instruction": "string",
+              "input": "string",
+              "output": "string"
+            }
+          }
+        },
+        "description": "Validate the records against the required schema to ensure all necessary fields are present.",
+        "mapped_from_abstract_step": "step_4",
+        "refinement_source": "operator_registry"
+      },
+      {
+        "step_id": "step_5",
+        "operator": "write_data",
+        "input_keys": [
+          "records"
+        ],
+        "output_keys": [
+          "records"
+        ],
+        "parameters": {
+          "file_path": "output_file_path.jsonl"
+        },
+        "description": "Write the processed records to a JSONL file.",
+        "mapped_from_abstract_step": "step_6",
+        "refinement_source": "operator_registry"
+      }
+    ],
+    "refinement_summary": {
+      "original_steps_count": 6,
+      "final_steps_count": 5,
+      "added_operators": [
+        "llm_generate_field"
+      ],
+      "modified_operators": [
+        "remove_field"
+      ],
+      "data_flow_verification": "Data flows coherently from reading raw data to writing processed data.",
+      "capability_coverage": "All required capabilities are covered, including field generation and schema validation."
+    },
+    "capability_check": {
+      "needs_dynamic_addition": false,
+      "missing_capabilities": [],
+      "note": "open source: no dynamic operator injection"
+    },
+    "validation_result": {
+      "is_valid": true,
+      "validation_issues": [
+        {
+          "type": "data_flow",
+          "description": "forced test issue"
+        }
+      ],
+      "checked_at": "2026-05-23T14:08:52.178179+00:00",
+      "dag_validation_meta": {
+        "preserved_issue_count": 0,
+        "added_issue_count": 0,
+        "sources": [
+          "orchestration",
+          "registry",
+          "dag_structure",
+          "io_contract",
+          "dag_graph_topology"
+        ]
+      },
+      "note": "workflow dag_validation：合并编排阶段校验 + 注册表/DAG 对齐 + 图论检查",
+      "structural_valid": false,
+      "llm_task_assessment": {
+        "satisfied": false,
+        "reasoning": "结构/连线方面：管道步骤顺序合理，先读取数据，再删除不需要的'text'字段，接着用llm_generate_field生成简洁的'output'字段，最后进行模式校验并写出数据。所有步骤的输入输出键匹配，数据流清晰无断层。语义覆盖方面：管道准确实现了理解中提出的目标——从原始JSONL数据中去除冗余'text'字段，生成符合种子格式的简洁财务摘要输出，符合对输出简洁性和清晰度的要求，且包含了必要的校验保证数据质量。现有算子完全覆盖了任务所需的字段删除、生成、校验和读写功能，无需新增算子。",
+        "recommend_new_operators": true,
+        "recommended_fixes": [
+          "重新编排以明确传递llm_generate_field所需的prompt_context_fields和generation_spec参数",
+          "调整remove_field步骤明确指定删除'text'字段",
+          "确保validate_schema步骤输入包含完整的schema_rules"
+        ],
+        "optimization_suggestions": [
+          "在llm_generate_field步骤中明确指定生成目标字段和上下文字段，提升生成准确性",
+          "增加deduplicate或filter_rows步骤以清理潜在重复或无效记录",
+          "在写出数据前增加sort_rows步骤保证输出顺序稳定"
+        ],
+        "next_steps_for_user": [
+          "完善管道步骤参数配置，确保每步输入完整且准确",
+          "重新运行orchestrate以验证参数传递和数据流正确性",
+          "进行试运行(trial)观察生成输出是否符合预期简洁财务摘要格式",
+          "根据试运行结果调整llm_generate_field的prompt和生成规范",
+          "若仍有语义覆盖不足，再考虑运行evolve-operators"
+        ],
+        "skipped": false
+      }
+    },
+    "operator_level_self_evolving": {
+      "triggered": true,
+      "added_operators": [
+        "evolved.fin_case_1.sort_records",
+        "evolved.fin_case_1.sort_rows",
+        "evolved.fin_case_1.deduplicate_records"
+      ],
+      "re_orchestrated": false,
+      "suggested_operators": [
+        "finance_metric_normalizer"
+      ],
+      "llm_proposed": true
+    },
+    "stage": "constrained_search",
+    "design_method": "constrained_optimization"
+  },
+  "final_pipeline": [
+    {
+      "step_id": "step_1",
+      "operator": "read_data",
+      "input_keys": [
+        "file_path"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "data/uploads/fin_case_1/raw_data/finance_raw.jsonl"
+      },
+      "description": "Read raw data from a JSONL file into the main record stream.",
+      "mapped_from_abstract_step": "step_1",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_2",
+      "operator": "remove_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "field_names": [
+          "text"
+        ]
+      },
+      "description": "Remove the 'text' field from the records to streamline the output format.",
+      "mapped_from_abstract_step": "step_2",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_3",
+      "operator": "llm_generate_field",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "prompt_context_fields": [
+          "instruction",
+          "input"
+        ],
+        "target_field": "output",
+        "generation_spec": "Generate a concise summary of the financial data based on the instruction and input."
+      },
+      "description": "Generate a concise output field based on the instruction and input fields.",
+      "mapped_from_abstract_step": "step_5",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_4",
+      "operator": "validate_schema",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records",
+        "validation_report"
+      ],
+      "parameters": {
+        "schema_rules": {
+          "required_fields": [
+            "instruction",
+            "input",
+            "output"
+          ],
+          "field_types": {
+            "instruction": "string",
+            "input": "string",
+            "output": "string"
+          }
+        }
+      },
+      "description": "Validate the records against the required schema to ensure all necessary fields are present.",
+      "mapped_from_abstract_step": "step_4",
+      "refinement_source": "operator_registry"
+    },
+    {
+      "step_id": "step_5",
+      "operator": "write_data",
+      "input_keys": [
+        "records"
+      ],
+      "output_keys": [
+        "records"
+      ],
+      "parameters": {
+        "file_path": "output_file_path.jsonl"
+      },
+      "description": "Write the processed records to a JSONL file.",
+      "mapped_from_abstract_step": "step_6",
+      "refinement_source": "operator_registry"
+    }
+  ],
+  "dag_validation": {
+    "checked_at": "2026-05-23T14:08:52.178179+00:00",
+    "is_valid": true,
+    "issue_count": 0,
+    "structural_valid": true,
+    "task_fit_satisfied": true,
+    "task_fit_skipped": false,
+    "recommend_new_operators": false,
+    "assessment_detail_path": "data/dag_assessment_results/fin_case_1.json",
+    "llm": {
+      "reasoning": "结构/连线方面：管道步骤顺序合理，先读取数据，再删除不需要的'text'字段，接着用llm_generate_field生成简洁的'output'字段，最后进行模式校验并写出数据。所有步骤的输入输出键匹配，数据流清晰无断层。语义覆盖方面：管道准确实现了理解中提出的目标——从原始JSONL数据中去除冗余'text'字段，生成符合种子格式的简洁财务摘要输出，符合对输出简洁性和清晰度的要求，且包含了必要的校验保证数据质量。现有算子完全覆盖了任务所需的字段删除、生成、校验和读写功能，无需新增算子。",
+      "recommend_new_operators": false,
+      "recommended_fixes": [
+        "重新编排以明确传递llm_generate_field所需的prompt_context_fields和generation_spec参数",
+        "调整remove_field步骤明确指定删除'text'字段",
+        "确保validate_schema步骤输入包含完整的schema_rules"
+      ],
+      "optimization_suggestions": [
+        "在llm_generate_field步骤中明确指定生成目标字段和上下文字段，提升生成准确性",
+        "增加deduplicate或filter_rows步骤以清理潜在重复或无效记录",
+        "在写出数据前增加sort_rows步骤保证输出顺序稳定"
+      ],
+      "next_steps_for_user": [
+        "完善管道步骤参数配置，确保每步输入完整且准确",
+        "重新运行orchestrate以验证参数传递和数据流正确性",
+        "进行试运行(trial)观察生成输出是否符合预期简洁财务摘要格式",
+        "根据试运行结果调整llm_generate_field的prompt和生成规范",
+        "若仍有语义覆盖不足，再考虑运行evolve-operators"
+      ]
+    }
+  },
+  "pipeline_run_summary": {
+    "updated_at": "2026-05-23T14:09:13.119048+00:00",
+    "status": "success",
+    "run_dir": "data/run_pipeline_results/fin_case_1/20260523T140904Z",
+    "output_jsonl": "data/run_pipeline_results/fin_case_1/20260523T140904Z/output.jsonl",
+    "output_record_count": 3,
+    "failed_step": null
+  }
+}

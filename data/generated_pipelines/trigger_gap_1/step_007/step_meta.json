@@ -1,0 +1,37 @@
+{
+  "step_index": 7,
+  "step_id": "step_7",
+  "operator_name": "write_data",
+  "description": "Write the processed records to a JSONL file.",
+  "input_keys": [
+    "records",
+    "file_path"
+  ],
+  "output_keys": [
+    "records"
+  ],
+  "parameters": {
+    "file_path": "output_file_path"
+  },
+  "requires_llm": false,
+  "prompt_generated": false,
+  "relative_dir": "data/generated_pipelines/trigger_gap_1/step_007",
+  "orchestration_step": {
+    "step_id": "step_7",
+    "operator": "write_data",
+    "input_keys": [
+      "records",
+      "file_path"
+    ],
+    "output_keys": [
+      "records"
+    ],
+    "parameters": {
+      "file_path": "output_file_path"
+    },
+    "description": "Write the processed records to a JSONL file.",
+    "mapped_from_abstract_step": "step_7",
+    "refinement_source": "operator_registry"
+  },
+  "impl_kind": "builtin_delegate"
+}

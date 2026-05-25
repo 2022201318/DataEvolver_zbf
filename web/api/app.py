@@ -3,7 +3,7 @@ FastAPI application factory. Run with:
 
     uvicorn web.api.app:create_app --factory --reload --host 0.0.0.0 --port 8000
 
-Working directory must be the repository root (`GitHub_Release/多模态数据准备`).
+Working directory must be the repository root (`GitHub_Release/DataEvolver`).
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ def create_app() -> FastAPI:
     cm = ConfigManager()
     settings = cm.api_settings()
     app = FastAPI(
-        title=settings.get("title", "多模态数据准备 API"),
+        title=settings.get("title", "DataEvolver API"),
         version=settings.get("version", "0.1.0"),
         lifespan=lifespan,
     )
@@ -56,7 +56,7 @@ def create_app() -> FastAPI:
     @app.get("/")
     def root() -> dict[str, str]:
         return {
-            "service": settings.get("title", "多模态数据准备 API"),
+            "service": settings.get("title", "DataEvolver API"),
             "version": settings.get("version", "0.1.0"),
             "docs": "/docs",
         }

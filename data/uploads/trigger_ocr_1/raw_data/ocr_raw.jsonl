@@ -1,0 +1,3 @@
+{"instruction":"Extract invoice fields from screenshot image.","input":"image_path=assets/mock/invoice_001.png","output":"","text":"Use OCR on invoice image and produce normalized fields."}
+{"instruction":"Extract lab report indicators from image.","input":"image_path=assets/mock/lab_042.png","output":"","text":"Use OCR on lab report image and normalize units."}
+{"instruction":"Extract contract clauses from scanned page.","input":"image_path=assets/mock/contract_007.png","output":"","text":"Use OCR on scanned contract and return key clauses."}

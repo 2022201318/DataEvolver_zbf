@@ -1,0 +1,59 @@
+{
+  "step_index": 3,
+  "step_id": "step_3",
+  "operator_name": "validate_schema",
+  "description": "Validate each record against required fields and types, emitting a structured report.",
+  "input_keys": [
+    "records"
+  ],
+  "output_keys": [
+    "records",
+    "validation_report"
+  ],
+  "parameters": {
+    "schema_rules": {
+      "required_fields": [
+        "instruction",
+        "input",
+        "output"
+      ],
+      "field_types": {
+        "instruction": "string",
+        "input": "string",
+        "output": "string"
+      }
+    }
+  },
+  "requires_llm": false,
+  "prompt_generated": false,
+  "relative_dir": "data/generated_pipelines/a1/step_003",
+  "orchestration_step": {
+    "step_id": "step_3",
+    "operator": "validate_schema",
+    "input_keys": [
+      "records"
+    ],
+    "output_keys": [
+      "records",
+      "validation_report"
+    ],
+    "parameters": {
+      "schema_rules": {
+        "required_fields": [
+          "instruction",
+          "input",
+          "output"
+        ],
+        "field_types": {
+          "instruction": "string",
+          "input": "string",
+          "output": "string"
+        }
+      }
+    },
+    "description": "Validate each record against required fields and types, emitting a structured report.",
+    "mapped_from_abstract_step": "step_5",
+    "refinement_source": "operator_registry"
+  },
+  "impl_kind": "builtin_delegate"
+}

@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Callable, Literal
 
 from subsystems.operator_management.registry_store import OperatorRegistryStore
+from subsystems.pipeline_session.manifest_store import get_latest_manifest_record
 
 from subsystems.pipeline_runtime.execution.handlers_deterministic import DETERMINISTIC_REGISTRY
 from subsystems.pipeline_runtime.execution.handlers_llm import LLM_OPERATOR_NAMES, LLM_REGISTRY
@@ -162,7 +163,7 @@ def execute_generated_pipeline(
     if not fp:
         raise ValueError("final_pipeline_snapshot 为空，请先完成实例化")
 
-    store = OperatorRegistryStore(root)
+    store = OperatorRegistryStore(root, pipeline_id=pipeline_id)
     merged = store.merged_raw()
     _ensure_llm_config_for_pipeline(fp, merged, llm_config)
 
@@ -170,9 +171,12 @@ def execute_generated_pipeline(
     run_dir = root / "data" / "run_pipeline_results" / pipeline_id / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
+    manifest_path = root / "data" / "manifest.jsonl"
+    mrec = get_latest_manifest_record(manifest_path, pipeline_id)
     ctx: dict[str, Any] = {
         "root": str(root.resolve()),
         "pipeline_id": pipeline_id,
+        "manifest_record": mrec if isinstance(mrec, dict) else {},
         "llm_config": llm_config,
         "on_usage": on_usage,
         "max_input_records": max_input_records,
