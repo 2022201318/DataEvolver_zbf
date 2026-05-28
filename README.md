@@ -14,7 +14,7 @@ Turn noisy raw data + a handful of seed examples into **training-ready, seed-ali
 [![Paper](https://img.shields.io/badge/Paper-PDF-red?logo=adobeacrobatreader&logoColor=white)](assets/DataEvolver.pdf)
 [![Demo](https://img.shields.io/badge/Demo-Watch%20Video-FF0000?logo=youtube&logoColor=white)](#-demo)
 
-[Paper](assets/DataEvolver.pdf) · [Demo](#-demo) · [Quick Start](#-quick-start) · [Usage](#-usage) · [Results](#-results) · [Community](#-community)
+[Paper](assets/DataEvolver.pdf) · [Demo](#-demo) · [Install](docs/INSTALL.md) · [Quick Start](#-quick-start) · [Usage](#-usage) · [Results](#-results) · [Community](#-community)
 
 <br/>
 
@@ -47,6 +47,7 @@ Turn noisy raw data + a handful of seed examples into **training-ready, seed-ali
 - [How It Works](#-how-it-works)
 - [Results](#-results)
 - [Demo](#-demo)
+- [Installation](docs/INSTALL.md)
 - [Quick Start](#-quick-start)
 - [Usage](#-usage)
 - [Project Structure](#-project-structure)
@@ -174,49 +175,59 @@ The Web UI shows the evolution canvas — DAG orchestration tabs, instantiation 
 
 ## ⚡ Quick Start
 
+> Full cross-platform guide: **[docs/INSTALL.md](docs/INSTALL.md)**
+
 ### Prerequisites
 
-- Python **3.10+**
-- Node.js **18+** (for the frontend)
-- An OpenAI-compatible LLM API key
+| Component | Version |
+|-----------|---------|
+| Python | **3.10+** |
+| Node.js | **18+** LTS (Web UI) |
+| LLM API | OpenAI-compatible endpoint + key |
 
-### 1. Bootstrap
+### 1. Clone & install (pick your OS)
 
 ```bash
 git clone https://github.com/Akanezora0/DataEvolver.git
 cd DataEvolver
-
-# Linux / macOS / Git Bash
-bash setup_env.sh
-
-# Windows PowerShell
-# powershell -ExecutionPolicy Bypass -File .\setup_env.ps1
 ```
 
-`setup_env.sh` creates `.venv`, installs backend + frontend deps, and generates config templates when missing.
+| Platform | One-command setup |
+|----------|-------------------|
+| Linux / macOS / Git Bash | `bash setup_env.sh` |
+| Windows PowerShell | `powershell -ExecutionPolicy Bypass -File .\setup_env.ps1` |
+| Windows CMD | `setup_env.bat` |
+| **Any OS** | `python scripts/setup_env.py` |
 
-### 2. Configure LLM access
+This creates `.venv`, installs Python + npm dependencies, and copies `config/*.example.json` → `config/*.json` when missing.
 
-Edit:
+Optional flags: `--skip-frontend` (API/CLI only) · `--frontend-only` (npm only).
+
+### 2. Configure LLM
 
 ```text
 config/api_config.json   # provider, base URL, model
-config/api_keys.json     # API key
+config/api_keys.json     # API key (gitignored — do not commit)
 ```
 
-### 3. Start services
+### 3. Start services (two terminals)
 
-**Backend**
+| Service | Cross-platform | Classic |
+|---------|----------------|---------|
+| **Backend** `:8000` | `python scripts/dev.py backend` | `python run_server.py --reload` *(after activating `.venv`)* |
+| **Frontend** `:5173` | `python scripts/dev.py frontend` | `cd frontend && npm run dev` |
 
-```bash
-source .venv/bin/activate   # Windows Git Bash: source .venv/Scripts/activate
-python run_server.py --reload
-```
-
-**Frontend**
+Activate virtualenv if needed:
 
 ```bash
-cd frontend && npm run dev
+# Linux / macOS
+source .venv/bin/activate
+
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# Windows Git Bash
+source .venv/Scripts/activate
 ```
 
 ### 4. Open the app
@@ -227,18 +238,16 @@ cd frontend && npm run dev
 | HTTP API | http://127.0.0.1:8000 |
 | OpenAPI docs | http://127.0.0.1:8000/docs |
 
-### 5. First pipeline (CLI option)
+### 5. First pipeline (CLI)
 
 ```bash
-source .venv/bin/activate
-
 dataevolver session-start my_pipeline \
-  --raw path/to/raw.jsonl \
-  --seed path/to/seed.jsonl \
-  --description path/to/task.txt   # optional
+  --raw tmp/samples/finance_raw.jsonl \
+  --seed tmp/samples/finance_seed.jsonl \
+  --description tmp/samples/finance_description.txt
 
 dataevolver workflow advance-all my_pipeline --max-steps 32
-dataevolver state my_pipeline
+dataevolver workflow state my_pipeline
 ```
 
 ---
@@ -285,6 +294,39 @@ dataevolver state --json my_pipeline
 dataevolver advance --json my_pipeline
 ```
 
+### Operator pool (manual add)
+
+Add custom operators to the **task memory** layer (`data/operator_registry_user/<pipeline_id>.json`). Same assimilation path as auto-evolution — eligible for domain/general promotion later.
+
+```bash
+# List pool for a pipeline
+dataevolver operators list -p my_pipeline
+dataevolver op list -p my_pipeline --source task   # short alias: op
+
+# Add one operator
+dataevolver op add my_task.clean_answer -p my_pipeline \
+  -d "Strip boilerplate and keep direct answers" \
+  -c semantic --requires-llm
+
+# Interactive wizard
+dataevolver op add -p my_pipeline -i
+
+# Import from JSON (see examples/operator_template.json)
+dataevolver op add -p my_pipeline --from-file examples/operator_template.json
+
+# Clone spec from an existing operator
+dataevolver op add my_task.custom_filter -p my_pipeline --copy-from remove_field -d "My variant"
+
+# Remove from task memory (cannot delete base operators)
+dataevolver op remove my_task.clean_answer -p my_pipeline
+```
+
+After adding operators, **re-run orchestration** so the DAG can pick them up:
+
+```bash
+dataevolver workflow orchestrate my_pipeline
+```
+
 ### HTTP API (recommended for integration)
 
 | Endpoint | Purpose |
@@ -294,6 +336,9 @@ dataevolver advance --json my_pipeline
 | `POST /api/workflow/{pipeline_id}/advance` | Advance one step |
 | `POST /api/workflow/{pipeline_id}/rerun` | Rerun from a stage |
 | `POST /api/pipeline/{pipeline_id}/run-full` | Full dataset execution |
+| `GET /api/operators/?pipeline_id=` | List merged operator pool |
+| `POST /api/operators/add` | Manually add operator(s) |
+| `POST /api/operators/remove` | Remove from task/domain/general memory |
 
 Interactive schema: http://127.0.0.1:8000/docs
 
@@ -311,8 +356,14 @@ DataEvolver/
 ├── config/         # runtime configs & templates
 ├── data/           # artifacts, workflow state, uploads (runtime)
 ├── assets/         # paper figures, demo media
-├── setup_env.sh    # one-command bootstrap (Unix)
-└── setup_env.ps1   # one-command bootstrap (Windows)
+├── examples/       # sample configs (e.g. operator_template.json)
+├── scripts/
+│   ├── setup_env.py   # cross-platform installer (core)
+│   └── dev.py         # dev server helpers
+├── setup_env.sh       # Linux / macOS / Git Bash → setup_env.py
+├── setup_env.ps1      # Windows PowerShell → setup_env.py
+├── setup_env.bat      # Windows CMD → setup_env.py
+└── docs/INSTALL.md    # full deployment guide
 ```
 
 ---

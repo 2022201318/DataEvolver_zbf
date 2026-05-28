@@ -721,9 +721,13 @@ def _root_callback(
     return
 
 
+from .operators_cmd import operators_app
+
 app.add_typer(workflow_app, name="workflow")
 # 更短的别名：减少输入负担（保留 workflow 兼容）
 app.add_typer(workflow_app, name="wf")
+app.add_typer(operators_app, name="operators")
+app.add_typer(operators_app, name="op")
 
 
 @app.command("lang")

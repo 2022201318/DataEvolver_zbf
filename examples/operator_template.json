@@ -1,0 +1,9 @@
+{
+  "my_task.clean_response": {
+    "description": "Remove boilerplate prefixes and keep only the direct answer in each record.",
+    "category": "semantic",
+    "input_keys": ["records"],
+    "output_keys": ["records"],
+    "requires_llm": true
+  }
+}

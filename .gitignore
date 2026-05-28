@@ -21,3 +21,35 @@ temp/
 # IDE
 .idea/
 .vscode/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# --- Runtime data (created by workflow / CLI / Web UI) ---
+data/manifest.jsonl
+data/cli_prefs.json
+data/workflow_runs/
+data/uploads/
+data/generated_pipelines/
+data/orchestration_results/
+data/understanding_results/
+data/experiences/
+data/trial_runs/
+data/run_pipeline_results/
+data/quality_checks/
+data/quality_check_results/
+data/dag_assessment_results/
+data/artifact_history/
+data/operator_memory/
+data/operator_registry_user/
+data/operator_registry_domain/
+
+# Legacy global user registry (use per-pipeline dir instead)
+data/operator_registry_user.json
+
+# Accidental pipeline outputs at repo root (write_data placeholder paths)
+output_file_path
+output_file_path.json
+output_file_path.jsonl
+*_processed.jsonl

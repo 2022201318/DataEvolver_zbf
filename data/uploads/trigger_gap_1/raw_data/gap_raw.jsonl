@@ -1,3 +1,0 @@
-{"instruction":"Read invoice screenshot and summarize key amount.","input":"image_path=assets/mock/invoice_a.png","output":"","text":"Need OCR from image pixels."}
-{"instruction":"Read receipt photo and summarize key amount.","input":"image_path=assets/mock/receipt_b.png","output":"","text":"Need OCR from image pixels."}
-{"instruction":"Read lab screenshot and summarize highlighted indicator.","input":"image_path=assets/mock/lab_c.png","output":"","text":"Need OCR from image pixels."}
