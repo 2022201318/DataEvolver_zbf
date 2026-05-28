@@ -133,18 +133,7 @@ Watch the **evolution canvas** in action — DAG orchestration tabs, instantiati
   <img src="assets/ill.png" width="92%" alt="DataEvolver framework"/>
 </p>
 
-```mermaid
-flowchart LR
-  A[Raw Data + Seeds] --> B[Understanding]
-  B --> C[Orchestration]
-  C --> D[Operator Evolution]
-  D --> E[Instantiation]
-  E --> F[Trial Run]
-  F --> G[Quality Check]
-  G --> H[Experience]
-  H -->|not aligned| B
-  G -->|ready| I[Full Run]
-```
+
 
 **Core workflow loop**
 
