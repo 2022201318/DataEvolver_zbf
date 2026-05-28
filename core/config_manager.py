@@ -12,7 +12,9 @@ from typing import Any, Optional
 
 
 def _default_project_root() -> Path:
-    return Path(__file__).resolve().parent.parent
+    from core.workspace import resolve_project_root
+
+    return resolve_project_root()
 
 
 class ConfigManager:

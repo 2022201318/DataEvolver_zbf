@@ -6,10 +6,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from core.workspace import resolve_project_root
+
 
 def _default_project_root() -> Path:
-    """Directory containing `config/`, `core/`, `web/`, etc."""
-    return Path(__file__).resolve().parent.parent
+    """Workspace root: repo checkout, DATAEVOLVER_ROOT, or cwd after `dataevolver init`."""
+    return resolve_project_root()
 
 
 class PathManager:

@@ -4,10 +4,36 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dataevolver"
-version = "0.1.0"
-description = "Self-evolving data preparation for LLMs (open-source edition)"
+version = "0.1.1"
+description = "Automatic data preparation for LLMs via multi-level self-evolving pipelines"
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.10"
+authors = [
+  { name = "DataEvolver Contributors" },
+]
+keywords = [
+  "llm",
+  "data-preparation",
+  "dataset",
+  "pipeline",
+  "dag",
+  "self-evolving",
+  "fine-tuning",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
   "fastapi>=0.109.0",
   "uvicorn[standard]>=0.27.0",
@@ -16,9 +42,34 @@ dependencies = [
   "typer>=0.12.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+  "build>=1.0.0",
+  "twine>=4.0.0",
+  "httpx>=0.25.0",
+]
+
 [project.scripts]
 dataevolver = "cli.app:main"
+dataevolver-server = "run_server:main"
+
+[project.urls]
+Homepage = "https://github.com/Akanezora0/DataEvolver"
+Repository = "https://github.com/Akanezora0/DataEvolver"
+Documentation = "https://github.com/Akanezora0/DataEvolver#readme"
+"Bug Tracker" = "https://github.com/Akanezora0/DataEvolver/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["core*", "subsystems*", "web*", "cli*"]
+
+[tool.setuptools.package-data]
+core = [
+  "_bundled/config/*.json",
+  "_bundled/data/*.json",
+  "_bundled/data/README.md",
+]
+
+[tool.setuptools]
+py-modules = ["run_server"]
+include-package-data = true

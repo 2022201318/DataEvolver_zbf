@@ -17,6 +17,10 @@ from typing import Annotated, Optional
 
 import typer
 
+from cli.i18n import bootstrap_cli_language, set_cli_language, t, tr
+
+bootstrap_cli_language()
+
 from core.config_manager import ConfigManager
 from core.cli_prefs import load_cli_prefs, save_global_cli_prefs, save_project_cli_prefs
 from .step_progress import step_running_display
@@ -42,15 +46,6 @@ from subsystems.workflow import (
 )
 
 
-def _lang() -> str:
-    v = (os.environ.get("DATAEVOLVER_LANG") or "zh").strip().lower()
-    return "en" if v == "en" else "zh"
-
-
-def _tr(zh: str, en: str) -> str:
-    return en if _lang() == "en" else zh
-
-
 def _package_version() -> str:
     try:
         return importlib.metadata.version("dataevolver")
@@ -65,21 +60,13 @@ def _version_callback(value: bool) -> None:
 
 
 def _resolve_root(root: Optional[Path]) -> Path:
-    if root is not None:
-        r = Path(root).resolve()
-    else:
-        env_root = (os.environ.get("DATAEVOLVER_ROOT") or "").strip()
-        r = Path(env_root).resolve() if env_root else Path.cwd().resolve()
-    if not (r / "config").is_dir() or not (r / "data").is_dir():
-        typer.secho(
-            _tr(
-                "警告: 当前目录不像仓库根（需含 config/ 与 data/）。请 cd 到 DataEvolver 仓库根、设置环境变量 DATAEVOLVER_ROOT，或使用 --root。",
-                "Warning: current directory does not look like repo root (needs config/ and data/). Please cd to repo root, set DATAEVOLVER_ROOT, or use --root.",
-            ),
-            err=True,
-            fg=typer.colors.YELLOW,
-        )
-    return r
+    from core.workspace import WorkspaceNotFoundError, resolve_project_root
+
+    try:
+        return resolve_project_root(root)
+    except WorkspaceNotFoundError as e:
+        typer.secho(str(e), err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=2) from e
 
 
 _PIPELINE_ID_RE = re.compile(r"^[a-zA-Z0-9_-]{1,128}$")
@@ -124,7 +111,7 @@ def _do_run_full(
     cm = ConfigManager(project_root=r)
     if pipeline_run_execution_mode not in ("in_process", "subprocess"):
         raise typer.BadParameter(
-            _tr(
+            tr(
                 "pipeline_run_execution_mode 须为 in_process 或 subprocess",
                 "pipeline_run_execution_mode must be in_process or subprocess",
             )
@@ -151,7 +138,7 @@ def _do_run_full(
                 err=True,
             )
         else:
-            typer.secho(_tr(f"全量执行失败: {e}", f"Pipeline run failed: {e}"), err=True, fg=typer.colors.RED)
+            typer.secho(tr(f"全量执行失败: {e}", f"Pipeline run failed: {e}"), err=True, fg=typer.colors.RED)
         raise typer.Exit(code=1)
     if as_json:
         typer.echo(json.dumps(out, ensure_ascii=False, indent=2))
@@ -160,7 +147,7 @@ def _do_run_full(
         run_dir = (detail or {}).get("run_dir")
         out_path = (detail or {}).get("output_jsonl")
         count = (detail or {}).get("output_record_count")
-        typer.secho(_tr("全量执行完成。", "Pipeline run completed."), fg=typer.colors.GREEN)
+        typer.secho(tr("全量执行完成。", "Pipeline run completed."), fg=typer.colors.GREEN)
         typer.echo(f"run_dir: {run_dir}")
         typer.echo(f"output_jsonl: {out_path}")
         typer.echo(f"output_record_count: {count}")
@@ -178,7 +165,7 @@ def _do_state(pipeline_id: str, root: Optional[Path], *, as_json: bool, verbose:
         if verbose:
             typer.secho("（STEP_ORDER: " + ", ".join(STEP_ORDER) + "）", fg=typer.colors.BLUE)
         typer.echo(
-            _tr("机器可读", "Machine-readable")
+            tr("机器可读", "Machine-readable")
             + ": dataevolver workflow state --json "
             + pipeline_id
         )
@@ -199,7 +186,7 @@ def _do_advance(
     cm = ConfigManager(project_root=r)
     if pipeline_run_execution_mode not in ("in_process", "subprocess"):
         raise typer.BadParameter(
-            _tr(
+            tr(
                 "pipeline_run_execution_mode 须为 in_process 或 subprocess",
                 "pipeline_run_execution_mode must be in_process or subprocess",
             )
@@ -277,7 +264,7 @@ def _do_advance_all(
     cm = ConfigManager(project_root=r)
     if pipeline_run_execution_mode not in ("in_process", "subprocess"):
         raise typer.BadParameter(
-            _tr(
+            tr(
                 "pipeline_run_execution_mode 须为 in_process 或 subprocess",
                 "pipeline_run_execution_mode must be in_process or subprocess",
             )
@@ -287,8 +274,8 @@ def _do_advance_all(
     while guard < max_steps:
         st = load_workflow_state(r, pipeline_id)
         if st.step_index >= len(STEP_ORDER):
-            msg = {"ok": True, "done": True, "message": _tr("已全部完成", "completed")}
-            typer.echo(json.dumps(msg, ensure_ascii=False) if as_json else _tr("已全部完成。", "All done."))
+            msg = {"ok": True, "done": True, "message": tr("已全部完成", "completed")}
+            typer.echo(json.dumps(msg, ensure_ascii=False) if as_json else tr("已全部完成。", "All done."))
             return
         next_key = STEP_ORDER[st.step_index]
         spin_label = step_label(next_key)
@@ -352,7 +339,7 @@ def _do_advance_all(
             st_after.dag_evolution_cycles,
         )
         if prev_sig == sig:
-            msg = _tr(
+            msg = tr(
                 "检测到状态未前进（连续两次相同结果），已停止 advance-all。请改用显式命令（如 orchestrate --force-reset-state）处理后再继续。",
                 "No progress detected (same result twice). Stopped advance-all. Use explicit commands (e.g. orchestrate --force-reset-state) before continuing.",
             )
@@ -363,7 +350,7 @@ def _do_advance_all(
             raise typer.Exit(code=2)
         prev_sig = sig
         guard += 1
-    typer.secho(_tr("达到 max_steps 上限，未跑完。", "Reached max_steps; not finished."), err=True)
+    typer.secho(tr("达到 max_steps 上限，未跑完。", "Reached max_steps; not finished."), err=True)
     raise typer.Exit(code=2)
 
 
@@ -384,7 +371,7 @@ def _do_named_step(
     cm = ConfigManager(project_root=r)
     if pipeline_run_execution_mode not in ("in_process", "subprocess"):
         raise typer.BadParameter(
-            _tr(
+            tr(
                 "pipeline_run_execution_mode 须为 in_process 或 subprocess",
                 "pipeline_run_execution_mode must be in_process or subprocess",
             )
@@ -443,14 +430,12 @@ def _do_named_step(
 
 _RootOpt = Annotated[
     Optional[Path],
-    typer.Option("--root", exists=True, file_okay=False, dir_okay=True, help="仓库根；不设则用 DATAEVOLVER_ROOT 或当前目录"),
+    typer.Option("--root", exists=True, file_okay=False, dir_okay=True, help=t("opt.root")),
 ]
 
 workflow_app = typer.Typer(
     no_args_is_help=True,
-    help="工作流：understand / orchestrate 等子命令可**随时执行**（只检查前置产物，并默认强制重跑会跳过的步）；"
-    "编排结束会自动写 LLM 评估。`validate-dag` 仅刷新评估。`advance` 按 state 推「下一步」。"
-    " 长步骤运行时终端会显示动态等待行（已用时间）；`DATAEVOLVER_NO_PROGRESS=1` 可关闭。默认简洁输出，`--verbose` 显示完整说明。",
+    help=t("wf.group_help"),
 )
 
 
@@ -459,40 +444,40 @@ def _workflow_options(
     ctx: typer.Context,
     verbose: Annotated[
         bool,
-        typer.Option("--verbose", "-v", help="显示完整步骤说明、分支提示与路径（默认简洁输出）"),
+        typer.Option("--verbose", "-v", help=t("opt.verbose")),
     ] = False,
 ) -> None:
     ctx.ensure_object(dict)
     ctx.obj["verbose"] = verbose
 
 
-@workflow_app.command("state")
+@workflow_app.command("state", help=t("wf.state.doc"))
 def wf_state(
     ctx: typer.Context,
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
-    as_json: Annotated[bool, typer.Option("--json", help="输出 JSON（默认人类可读）")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help=t("opt.json"))] = False,
 ) -> None:
-    """查看当前 workflow 状态与步骤顺序。"""
     verbose = bool((ctx.obj or {}).get("verbose"))
     _do_state(pipeline_id, root, as_json=as_json, verbose=verbose)
 
 
-@workflow_app.command("advance")
+@workflow_app.command("advance", help=t("wf.advance.doc"))
 def wf_advance(
     ctx: typer.Context,
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
-    force_reset_state: Annotated[bool, typer.Option("--force-reset-state", help="删 state 后从第 0 步执行本步")] = False,
+    force_reset_state: Annotated[
+        bool, typer.Option("--force-reset-state", help=t("opt.force_reset_state"))
+    ] = False,
     pipeline_run_execution_mode: Annotated[
         str,
-        typer.Option(help="仅当本步为 pipeline_run 时有效"),
+        typer.Option(help=t("opt.pipeline_run_mode")),
     ] = "in_process",
     subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
     subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
-    as_json: Annotated[bool, typer.Option("--json", help="输出 JSON（默认人类可读）")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help=t("opt.json"))] = False,
 ) -> None:
-    """只执行「下一步」；可反复执行直到整链跑完。"""
     verbose = bool((ctx.obj or {}).get("verbose"))
     _do_advance(
         pipeline_id,
@@ -506,18 +491,17 @@ def wf_advance(
     )
 
 
-@workflow_app.command("advance-all")
+@workflow_app.command("advance-all", help=t("wf.advance_all.doc"))
 def wf_advance_all(
     ctx: typer.Context,
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
     max_steps: Annotated[int, typer.Option("--max-steps", min=1, max=256)] = 32,
     pipeline_run_execution_mode: Annotated[str, typer.Option()] = "in_process",
     subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
     subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
-    as_json: Annotated[bool, typer.Option("--json", help="每步一行 JSON")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help=t("opt.json_lines"))] = False,
 ) -> None:
-    """连续 advance 直到完成、失败或达到 --max-steps。"""
     verbose = bool((ctx.obj or {}).get("verbose"))
     _do_advance_all(
         pipeline_id,
@@ -531,14 +515,13 @@ def wf_advance_all(
     )
 
 
-@workflow_app.command("rerun")
+@workflow_app.command("rerun", help=t("wf.rerun.doc"))
 def wf_rerun(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
-    step: Annotated[str, typer.Argument(help="步骤名，见 workflow state 中的 STEP_ORDER")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
+    step: Annotated[str, typer.Argument(help=t("opt.step"))],
     root: _RootOpt = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
-    """从指定步骤重跑：删除该步及之后的产物，并把 state 指到该步；随后执行该步对应的 workflow 子命令。"""
     r = _resolve_root(root)
     try:
         out = rerun_workflow_from_step(r, pipeline_id, step.strip())
@@ -551,17 +534,16 @@ def wf_rerun(
         print_rerun_human(out)
 
 
-@workflow_app.command("run-pipeline")
+@workflow_app.command("run-pipeline", help=t("wf.run_pipeline.doc"))
 def wf_run_pipeline(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
-    force: Annotated[bool, typer.Option("--force", help="忽略 latest 成功记录并强制重跑")] = False,
-    pipeline_run_execution_mode: Annotated[str, typer.Option(help="执行模式：in_process 或 subprocess")] = "in_process",
+    force: Annotated[bool, typer.Option("--force", help=t("opt.force"))] = False,
+    pipeline_run_execution_mode: Annotated[str, typer.Option(help=t("opt.pipeline_run_exec"))] = "in_process",
     subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
     subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
-    """执行 full run（不属于 workflow 中间推进步）。"""
     _do_run_full(
         pipeline_id,
         root,
@@ -574,28 +556,30 @@ def wf_run_pipeline(
 
 
 _NAMED_STEPS: list[tuple[str, str, str]] = [
-    ("understanding", "understand", "结构化理解（LLM）"),
-    ("orchestration", "orchestrate", "算子编排三阶段（LLM）；完成后自动结构检查 + 模型评估 DAG"),
-    ("operator_evolution", "evolve-operators", "算子进化：仅当编排内评估建议新增算子时生成粗粒度算子并写入注册表"),
-    ("instantiation", "instantiate", "管线实例化"),
-    ("trial_run", "trial", "试运行（采样）"),
-    ("quality_check", "quality-check", "质量快照"),
-    ("experience", "experience", "经验快照"),
+    ("understanding", "understand", "wf.named.understand"),
+    ("orchestration", "orchestrate", "wf.named.orchestrate"),
+    ("operator_evolution", "evolve-operators", "wf.named.evolve_operators"),
+    ("instantiation", "instantiate", "wf.named.instantiate"),
+    ("trial_run", "trial", "wf.named.trial"),
+    ("quality_check", "quality-check", "wf.named.quality_check"),
+    ("experience", "experience", "wf.named.experience"),
 ]
 
-def _register_one_named_step(step_key: str, cli_name: str, help_txt: str) -> None:
+def _register_one_named_step(step_key: str, cli_name: str, help_key: str) -> None:
+    help_txt = t(help_key)
+
     @workflow_app.command(cli_name, help=help_txt)
     def _named_cmd(
         ctx: typer.Context,
-        pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+        pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
         root: _RootOpt = None,
         force_reset_state: Annotated[
             bool,
-            typer.Option("--force-reset-state", help="删除 state.json；下一待执行步将回到 understanding"),
+            typer.Option("--force-reset-state", help=t("opt.force_reset_state_long")),
         ] = False,
         pipeline_run_execution_mode: Annotated[
             str,
-            typer.Option(help="仅 run-pipeline 步有效"),
+            typer.Option(help=t("opt.pipeline_run_mode_run")),
         ] = "in_process",
         subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
         subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
@@ -617,17 +601,14 @@ def _register_one_named_step(step_key: str, cli_name: str, help_txt: str) -> Non
     _named_cmd.__doc__ = help_txt
 
 
-for _sk, _cn, _ht in _NAMED_STEPS:
-    _register_one_named_step(_sk, _cn, _ht)
+for _sk, _cn, _hk in _NAMED_STEPS:
+    _register_one_named_step(_sk, _cn, _hk)
 
 
-@workflow_app.command(
-    "validate-dag",
-    help="不重新编排：仅对当前 orchestration_results 重新跑结构检查 + LLM 评估并写回（不改 workflow state）",
-)
+@workflow_app.command("validate-dag", help=t("wf.validate_dag.help"))
 def wf_validate_dag_only(
     ctx: typer.Context,
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
@@ -645,7 +626,7 @@ def wf_validate_dag_only(
             )
             elapsed = None
         else:
-            with step_running_display(_tr("刷新 DAG 评估", "Refresh DAG assessment")) as disp:
+            with step_running_display(tr("刷新 DAG 评估", "Refreshing DAG assessment")) as disp:
                 detail = run_pipeline_assessment_and_persist(
                     r,
                     pipeline_id,
@@ -679,7 +660,7 @@ def wf_validate_dag_only(
 
 app = typer.Typer(
     no_args_is_help=True,
-    help="DataEvolver 开源版 CLI。推荐：`dataevolver --help`（支持短命令别名与中英文输出）。",
+    help=t("app.help"),
 )
 
 
@@ -690,7 +671,7 @@ def _root_callback(
         typer.Option(
             "--version",
             "-V",
-            help="打印包版本",
+            help=t("app.opt.version"),
             callback=_version_callback,
             is_eager=True,
         ),
@@ -699,29 +680,32 @@ def _root_callback(
         str,
         typer.Option(
             "--lang",
-            help="CLI 输出语言：zh / en；也可用环境变量 DATAEVOLVER_LANG",
+            help=t("app.opt.lang"),
         ),
     ] = "",
 ) -> None:
-    """根级选项（如 --version）；子命令见 workflow / check / tokens。"""
     # 语言优先级：显式 --lang > 环境变量 > 项目级 prefs > 全局 prefs > 默认 zh
     # 注意：不要强依赖 cwd 是 repo root；全局 prefs 应始终可用。
+    from core.workspace import WorkspaceNotFoundError, resolve_project_root
+
     project_root = None
     try:
-        r0 = _resolve_root(None)
-        project_root = r0 if (r0 / "config").is_dir() and (r0 / "data").is_dir() else None
-    except Exception:
+        project_root = resolve_project_root()
+    except WorkspaceNotFoundError:
         project_root = None
     prefs = load_cli_prefs(project_root)
     pref_lang = str(prefs.get("lang") or "").strip().lower()
     v = (lang or os.environ.get("DATAEVOLVER_LANG") or pref_lang or "zh").strip().lower()
     if v not in ("zh", "en"):
-        raise typer.BadParameter(_tr("lang 需为 zh 或 en", "lang must be zh or en"))
-    os.environ["DATAEVOLVER_LANG"] = v
+        raise typer.BadParameter(tr("lang 需为 zh 或 en", "lang must be zh or en"))
+    set_cli_language(v)
     return
 
 
+from .init_cmd import register_init_command
 from .operators_cmd import operators_app
+
+register_init_command(app)
 
 app.add_typer(workflow_app, name="workflow")
 # 更短的别名：减少输入负担（保留 workflow 兼容）
@@ -730,16 +714,15 @@ app.add_typer(operators_app, name="operators")
 app.add_typer(operators_app, name="op")
 
 
-@app.command("lang")
+@app.command("lang", help=t("cmd.lang.doc"))
 def cmd_lang(
-    value: Annotated[str, typer.Argument(help="zh 或 en")],
+    value: Annotated[str, typer.Argument(help=t("cmd.lang.arg"))],
     root: _RootOpt = None,
 ) -> None:
-    """一条命令切换 CLI 输出语言（写入全局 prefs；若在仓库根也写入项目 prefs）。"""
     r = _resolve_root(root)
     v = (value or "").strip().lower()
     if v not in ("zh", "en"):
-        raise typer.BadParameter(_tr("lang 需为 zh 或 en", "lang must be zh or en"))
+        raise typer.BadParameter(tr("lang 需为 zh 或 en", "lang must be zh or en"))
     # global
     prefs = load_cli_prefs(None)
     prefs["lang"] = v
@@ -753,30 +736,28 @@ def cmd_lang(
             proj_rel = save_project_cli_prefs(r, proj)
         except Exception:
             proj_rel = None
-    os.environ["DATAEVOLVER_LANG"] = v
+    set_cli_language(v)
     tail = f"  ({gpath})" if not proj_rel else f"  ({gpath}; {proj_rel})"
-    typer.echo(_tr("已设置语言", "Language set") + f": {v}" + tail)
+    typer.echo(tr("已设置语言", "Language set") + f": {v}" + tail)
 
 
 # 顶层短命令：dataevolver trial <pipeline_id> 代替 dataevolver workflow trial <pipeline_id>
-@app.command("state")
+@app.command("state", help=t("top.state.doc"))
 def cmd_state(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
-    as_json: Annotated[bool, typer.Option("--json", help="输出 JSON（默认人类可读）")] = False,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="显示更完整状态")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help=t("opt.json"))] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help=t("opt.verbose_state"))] = False,
 ) -> None:
-    """查看当前 workflow 状态与下一步。"""
     # 顶层命令不走 workflow callback，这里显式接收 -v
     _do_state(pipeline_id, root, as_json=as_json, verbose=verbose)
 
 
-@app.command("next")
+@app.command("next", help=t("top.next.doc"))
 def cmd_next(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
 ) -> None:
-    """只打印「下一步命令」（适合脚本与复制粘贴）。"""
     r = _resolve_root(root)
     st = load_workflow_state(r, pipeline_id)
     d = st.to_dict()
@@ -787,18 +768,19 @@ def cmd_next(
         typer.echo("dataevolver state " + pipeline_id)
 
 
-@app.command("advance")
+@app.command("advance", help=t("top.advance.doc"))
 def cmd_advance(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
-    force_reset_state: Annotated[bool, typer.Option("--force-reset-state", help="删 state 后从第 0 步执行本步")] = False,
-    pipeline_run_execution_mode: Annotated[str, typer.Option(help="仅当本步为 pipeline_run 时有效")] = "in_process",
+    force_reset_state: Annotated[
+        bool, typer.Option("--force-reset-state", help=t("opt.force_reset_state"))
+    ] = False,
+    pipeline_run_execution_mode: Annotated[str, typer.Option(help=t("opt.pipeline_run_mode"))] = "in_process",
     subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
     subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
-    as_json: Annotated[bool, typer.Option("--json", help="输出 JSON（默认人类可读）")] = False,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="显示完整步骤说明")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help=t("opt.json"))] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help=t("opt.verbose_short"))] = False,
 ) -> None:
-    """只执行「下一步」（顶层短命令）。"""
     _do_advance(
         pipeline_id,
         root,
@@ -811,14 +793,13 @@ def cmd_advance(
     )
 
 
-@app.command("rerun")
+@app.command("rerun", help=t("top.rerun.doc"))
 def cmd_rerun(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
-    step: Annotated[str, typer.Argument(help="步骤名，见 state 的 STEP_ORDER")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
+    step: Annotated[str, typer.Argument(help=t("opt.step_top"))],
     root: _RootOpt = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
-    """从指定步骤重跑（顶层短命令）。"""
     r = _resolve_root(root)
     try:
         out = rerun_workflow_from_step(r, pipeline_id, step.strip())
@@ -847,17 +828,17 @@ def _register_top_step(step_key: str, cli_name: str) -> None:
     @app.command(cli_name)
     def _top_step_cmd(
         ctx: typer.Context,
-        pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+        pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
         root: _RootOpt = None,
         force_reset_state: Annotated[
             bool,
-            typer.Option("--force-reset-state", help="删除 state.json；下一待执行步将回到 understanding"),
+            typer.Option("--force-reset-state", help=t("opt.force_reset_state_long")),
         ] = False,
-        pipeline_run_execution_mode: Annotated[str, typer.Option(help="仅 run 步有效")] = "in_process",
+        pipeline_run_execution_mode: Annotated[str, typer.Option(help=t("opt.pipeline_run_mode_top"))] = "in_process",
         subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
         subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
         as_json: Annotated[bool, typer.Option("--json")] = False,
-        verbose: Annotated[bool, typer.Option("--verbose", "-v", help="显示完整说明")] = False,
+        verbose: Annotated[bool, typer.Option("--verbose", "-v", help=t("opt.verbose_short"))] = False,
     ) -> None:
         # 顶层：直接显式执行 step_key（等价 workflow 子命令）
         _do_named_step(
@@ -872,24 +853,23 @@ def _register_top_step(step_key: str, cli_name: str) -> None:
             verbose=verbose,
         )
 
-    _top_step_cmd.__doc__ = f"顶层短命令：等价 `dataevolver workflow {cli_name} <pipeline_id>`"
+    _top_step_cmd.__doc__ = t("top.step.doc").format(cmd=cli_name)
 
 
 for _sk, _cn in _TOP_STEP_ALIASES:
     _register_top_step(_sk, _cn)
 
 
-@app.command("run")
+@app.command("run", help=t("top.run.doc"))
 def cmd_run(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
-    force: Annotated[bool, typer.Option("--force", help="忽略 latest 成功记录并强制重跑")] = False,
-    pipeline_run_execution_mode: Annotated[str, typer.Option(help="执行模式：in_process 或 subprocess")] = "in_process",
+    force: Annotated[bool, typer.Option("--force", help=t("opt.force"))] = False,
+    pipeline_run_execution_mode: Annotated[str, typer.Option(help=t("opt.pipeline_run_exec"))] = "in_process",
     subprocess_fallback: Annotated[bool, typer.Option("--subprocess-fallback/--no-subprocess-fallback")] = True,
     subprocess_timeout: Annotated[float, typer.Option("--subprocess-timeout")] = 600.0,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
-    """顶层 full run 短命令（等价 `dataevolver workflow run-pipeline <pipeline_id>`）。"""
     _do_run_full(
         pipeline_id,
         root,
@@ -901,14 +881,24 @@ def cmd_run(
     )
 
 
-@app.command("session-start")
+@app.command("session-start", help=t("cmd.session.doc"))
 def cmd_session_start(
-    pipeline_id: Annotated[str, typer.Argument(help="会话 id，例如 demo_001")],
-    raw_file: Annotated[Path, typer.Option("--raw", exists=True, file_okay=True, dir_okay=False, help="原始数据文件路径")],
-    seed_file: Annotated[Path, typer.Option("--seed", exists=True, file_okay=True, dir_okay=False, help="种子数据文件路径")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("cmd.session.pipeline_id"))],
+    raw_file: Annotated[
+        Path, typer.Option("--raw", exists=True, file_okay=True, dir_okay=False, help=t("cmd.session.raw"))
+    ],
+    seed_file: Annotated[
+        Path, typer.Option("--seed", exists=True, file_okay=True, dir_okay=False, help=t("cmd.session.seed"))
+    ],
     description_file: Annotated[
         Path | None,
-        typer.Option("--description", exists=True, file_okay=True, dir_okay=False, help="可选任务描述文件"),
+        typer.Option(
+            "--description",
+            exists=True,
+            file_okay=True,
+            dir_okay=False,
+            help=t("cmd.session.description"),
+        ),
     ] = None,
     domain: Annotated[str, typer.Option("--domain")] = "",
     task_type: Annotated[str, typer.Option("--task-type")] = "",
@@ -916,11 +906,10 @@ def cmd_session_start(
     root: _RootOpt = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
-    """CLI 创建会话并写入 manifest（等价前端 sessions/start）。"""
     pid = pipeline_id.strip()
     if not _PIPELINE_ID_RE.match(pid):
         raise typer.BadParameter(
-            _tr(
+            tr(
                 "pipeline_id 无效：仅允许字母、数字、下划线、连字符，长度 1-128",
                 "Invalid pipeline_id: only letters, numbers, underscore and hyphen, length 1-128",
             )
@@ -966,7 +955,7 @@ def cmd_session_start(
     if as_json:
         typer.echo(json.dumps(out, ensure_ascii=False, indent=2))
     else:
-        typer.secho(_tr("会话创建完成。", "Session created."), fg=typer.colors.GREEN)
+        typer.secho(tr("会话创建完成。", "Session created."), fg=typer.colors.GREEN)
         typer.echo(f"pipeline_id: {pid}")
         typer.echo(f"raw: {out['saved_paths']['raw']}")
         typer.echo(f"seed: {out['saved_paths']['seed']}")
@@ -974,15 +963,14 @@ def cmd_session_start(
             typer.echo(f"description: {out['saved_paths']['description']}")
 
 
-@app.command("tokens")
+@app.command("tokens", help=t("cmd.tokens.doc"))
 def cmd_tokens(
-    pipeline_id: Annotated[str, typer.Argument(help="如 my_pipeline")],
+    pipeline_id: Annotated[str, typer.Argument(help=t("opt.pipeline_id"))],
     root: _RootOpt = None,
-    no_events: Annotated[bool, typer.Option("--no-events", help="不输出 events 数组，只看汇总")] = False,
+    no_events: Annotated[bool, typer.Option("--no-events", help=t("opt.no_events"))] = False,
     max_events: Annotated[int, typer.Option("--max-events", min=1, max=2000)] = 200,
-    as_json: Annotated[bool, typer.Option("--json", help="完整 JSON（含 for_frontend）")] = False,
+    as_json: Annotated[bool, typer.Option("--json", help=t("opt.json_full"))] = False,
 ) -> None:
-    """汇总该 pipeline 的 LLM token（`data/workflow_runs/<id>/token_usage.jsonl`）。"""
     r = _resolve_root(root)
     summary = summarize_token_ledger(
         r,
@@ -995,7 +983,7 @@ def cmd_tokens(
     else:
         print_tokens_human(summary)
         typer.secho(
-            _tr(
+            tr(
                 "完整 JSON（含 for_frontend / 可选 events）: dataevolver tokens --json " + pipeline_id,
                 "Full JSON (for_frontend / optional events): dataevolver tokens --json " + pipeline_id,
             ),

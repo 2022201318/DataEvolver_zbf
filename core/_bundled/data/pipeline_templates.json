@@ -1,0 +1,310 @@
+{
+  "content_enhancement": {
+    "name": "内容增强",
+    "description": "增强内容质量，使其更详细、结构化、高质量。这是一个功能性的处理流程，具体实现由底层算子组合完成。",
+    "function": "enhance_content_quality",
+    "abstract_steps": [
+          {
+            "step_id": "step_1",
+        "functional_description": "分析内容现状，确定增强方向",
+        "expected_output": "增强策略和具体目标"
+          },
+          {
+            "step_id": "step_2",
+        "functional_description": "执行内容增强，提升详细程度和结构化程度",
+        "expected_output": "增强后的内容"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "验证增强效果，确保质量提升",
+        "expected_output": "验证结果和最终增强内容"
+      }
+    ],
+    "input_requirements": ["数据包含需要增强的内容字段"],
+    "output_produces": ["增强后的高质量内容"],
+    "use_cases": ["提升内容详细程度", "优化表达质量", "增强结构化程度"],
+    "typical_scenarios": ["从简单描述生成详细说明", "优化解决方案的表述", "增强问答对的质量"]
+  },
+  "structure_optimization": {
+    "name": "结构优化",
+    "description": "优化数据结构，使其更清晰、规范。处理嵌套结构、字段组织等问题。",
+    "function": "optimize_data_structure",
+    "abstract_steps": [
+      {
+        "step_id": "step_1",
+        "functional_description": "分析当前数据结构，识别优化点",
+        "expected_output": "结构优化方案"
+      },
+      {
+        "step_id": "step_2",
+        "functional_description": "重组和优化数据结构",
+        "expected_output": "优化后的数据结构"
+      }
+    ],
+    "input_requirements": ["数据存在结构问题（嵌套混乱、字段组织不当等）"],
+    "output_produces": ["优化后的清晰数据结构"],
+    "use_cases": ["优化嵌套结构", "规范化字段组织", "改进数据格式"],
+    "typical_scenarios": ["整理复杂的JSON嵌套", "统一字段命名规范", "重组数据层次结构"]
+      },
+  "field_extraction": {
+    "name": "字段提取",
+    "description": "从现有内容中提取结构化字段。从非结构化或半结构化内容中识别并提取目标信息。",
+    "function": "extract_structured_fields",
+    "abstract_steps": [
+          {
+            "step_id": "step_1",
+        "functional_description": "分析源内容，识别可提取的信息",
+        "expected_output": "提取策略和目标字段定义"
+          },
+          {
+            "step_id": "step_2",
+        "functional_description": "执行信息提取，生成结构化字段",
+        "expected_output": "提取出的结构化字段"
+          },
+          {
+            "step_id": "step_3",
+        "functional_description": "验证提取结果的准确性和完整性",
+        "expected_output": "验证后的提取字段"
+      }
+    ],
+    "input_requirements": ["数据包含非结构化或半结构化内容"],
+    "output_produces": ["提取出的结构化字段"],
+    "use_cases": ["从solution提取final_answer", "从文本提取关键信息", "解析嵌套内容"],
+    "typical_scenarios": ["从数学解答中提取最终答案", "从长文本中提取关键实体", "从对话中提取意图"]
+  },
+  "quality_validation": {
+    "name": "质量验证",
+    "description": "全面验证和检查数据质量。包括内容质量评估、格式验证、完整性检查等。",
+    "function": "validate_data_quality",
+    "abstract_steps": [
+      {
+        "step_id": "step_1",
+        "functional_description": "评估内容质量，从多个维度打分",
+        "expected_output": "质量评分和评估报告"
+          },
+          {
+        "step_id": "step_2",
+        "functional_description": "验证数据格式是否符合规范",
+        "expected_output": "格式验证结果"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "检查数据完整性，确保必要字段存在",
+        "expected_output": "完整性检查结果和修复建议"
+      }
+    ],
+    "input_requirements": ["需要验证质量的数据"],
+    "output_produces": ["质量评分", "验证结果", "修复后的数据"],
+    "use_cases": ["质量评估", "格式验证", "完整性检查"],
+    "typical_scenarios": ["评估生成内容的质量", "验证数据schema一致性", "检查必填字段完整性"]
+  },
+  "consistency_check": {
+    "name": "一致性检查",
+    "description": "检查数据字段间的一致性，验证逻辑关联。确保相关字段之间的逻辑关系正确。",
+    "function": "check_data_consistency",
+    "abstract_steps": [
+      {
+        "step_id": "step_1",
+        "functional_description": "识别需要检查一致性的字段对",
+        "expected_output": "一致性检查策略"
+      },
+      {
+        "step_id": "step_2",
+        "functional_description": "执行一致性检查，验证字段关联",
+        "expected_output": "一致性检查结果"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "修复不一致的数据",
+        "expected_output": "修复后的数据"
+      }
+    ],
+    "input_requirements": ["数据包含多个逻辑相关的字段"],
+    "output_produces": ["一致性检查结果", "修复后的数据"],
+    "use_cases": ["检查solution和final_answer一致性", "验证字段关联性", "确保数据逻辑正确"],
+    "typical_scenarios": ["验证数学解答与答案的一致性", "检查问答对的匹配度", "验证推理过程的逻辑性"]
+      },
+  "content_generation": {
+    "name": "内容生成",
+    "description": "基于输入生成新内容。根据输入字段和生成指令，创建新的内容字段。",
+    "function": "generate_new_content",
+    "abstract_steps": [
+          {
+            "step_id": "step_1",
+        "functional_description": "分析输入内容，理解生成需求",
+        "expected_output": "生成策略和指令"
+          },
+          {
+            "step_id": "step_2",
+        "functional_description": "执行内容生成，创建新内容",
+        "expected_output": "生成的新内容"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "优化生成内容的质量",
+        "expected_output": "优化后的生成内容"
+      }
+    ],
+    "input_requirements": ["数据包含输入字段和生成指令"],
+    "output_produces": ["生成的新内容"],
+    "use_cases": ["生成问答对", "生成对话", "生成解释说明"],
+    "typical_scenarios": ["从文档生成问答对", "基于主题生成对话", "为问题生成详细解答"]
+      },
+  "format_normalization": {
+    "name": "格式标准化",
+    "description": "标准化数据格式，确保一致性。统一命名规范、格式规范、结构规范等。",
+    "function": "normalize_data_format",
+    "abstract_steps": [
+          {
+            "step_id": "step_1",
+        "functional_description": "分析当前格式，识别不一致之处",
+        "expected_output": "标准化方案"
+          },
+          {
+            "step_id": "step_2",
+        "functional_description": "执行格式标准化",
+        "expected_output": "标准化后的数据"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "格式化输出以符合目标schema",
+        "expected_output": "符合目标schema的数据"
+      }
+    ],
+    "input_requirements": ["数据存在格式不一致问题"],
+    "output_produces": ["标准化和格式化后的数据"],
+    "use_cases": ["统一格式", "规范化输出", "确保schema一致性"],
+    "typical_scenarios": ["统一字段命名", "规范化日期格式", "确保输出符合目标schema"]
+  },
+  "data_cleaning": {
+    "name": "数据清理",
+    "description": "清理和预处理数据。去除噪声、无效值、异常值、重复数据等。",
+    "function": "clean_and_preprocess",
+    "abstract_steps": [
+      {
+        "step_id": "step_1",
+        "functional_description": "识别需要清理的问题（噪声、无效值等）",
+        "expected_output": "清理策略"
+      },
+      {
+        "step_id": "step_2",
+        "functional_description": "执行数据清理",
+        "expected_output": "清理后的数据"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "去除重复数据",
+        "expected_output": "去重后的数据"
+      }
+    ],
+    "input_requirements": ["原始数据，可能包含噪声和问题"],
+    "output_produces": ["清理后的干净数据"],
+    "use_cases": ["数据预处理", "去除噪声", "数据清洗"],
+    "typical_scenarios": ["清理文本中的HTML标签", "去除异常值", "去除重复记录"]
+      },
+  "field_enhancement": {
+    "name": "字段增强",
+    "description": "增强特定字段的质量和内容，并添加相关的新字段。",
+    "function": "enhance_specific_field",
+    "abstract_steps": [
+          {
+            "step_id": "step_1",
+        "functional_description": "增强目标字段的内容质量",
+        "expected_output": "增强后的字段"
+          },
+          {
+            "step_id": "step_2",
+        "functional_description": "从增强内容中提取相关信息",
+        "expected_output": "提取的相关信息"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "添加相关的新字段",
+        "expected_output": "包含新字段的完整数据"
+      }
+    ],
+    "input_requirements": ["数据包含需要增强的字段"],
+    "output_produces": ["增强后的字段", "相关的新字段"],
+    "use_cases": ["增强solution字段", "添加final_answer字段", "补充元数据"],
+    "typical_scenarios": ["增强数学解答的详细程度", "从解答中提取最终答案", "添加难度等级等元数据"]
+  },
+  "logic_validation": {
+    "name": "逻辑验证",
+    "description": "验证逻辑正确性，如推理过程的逻辑一致性。确保逻辑推理的合理性和正确性。",
+    "function": "validate_logic_correctness",
+    "abstract_steps": [
+      {
+        "step_id": "step_1",
+        "functional_description": "分析逻辑内容，识别需要验证的逻辑关系",
+        "expected_output": "验证策略"
+      },
+      {
+        "step_id": "step_2",
+        "functional_description": "执行逻辑验证",
+        "expected_output": "逻辑验证结果"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "修复逻辑错误（如需要）",
+        "expected_output": "修复后的逻辑内容"
+      }
+    ],
+    "input_requirements": ["数据包含逻辑推理内容"],
+    "output_produces": ["逻辑验证结果", "修复后的逻辑内容"],
+    "use_cases": ["验证数学推理", "检查逻辑一致性", "确保推理正确"],
+    "typical_scenarios": ["验证数学解题步骤的逻辑性", "检查推理链的连贯性", "验证结论的正确性"]
+  },
+  "multi_step_enhancement": {
+    "name": "多步骤增强",
+    "description": "通过多个步骤逐步增强内容，确保质量提升。",
+    "function": "multi_step_content_enhancement",
+    "abstract_steps": [
+      {
+        "step_id": "step_1",
+        "functional_description": "第一步：基础内容增强",
+        "expected_output": "初步增强的内容"
+      },
+      {
+        "step_id": "step_2",
+        "functional_description": "第二步：结构优化",
+        "expected_output": "结构优化后的内容"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "第三步：质量评估和最终验证",
+        "expected_output": "最终增强的高质量内容"
+      }
+    ],
+    "input_requirements": ["数据包含需要复杂增强的内容"],
+    "output_produces": ["多步骤增强后的高质量内容"],
+    "use_cases": ["复杂内容增强", "多轮优化", "质量保证"],
+    "typical_scenarios": ["逐步优化复杂解答", "多轮迭代提升质量", "确保最终输出高质量"]
+  },
+  "extract_and_validate": {
+    "name": "提取与验证",
+    "description": "从内容中提取信息并验证提取结果的准确性。",
+    "function": "extract_and_validate",
+    "abstract_steps": [
+      {
+        "step_id": "step_1",
+        "functional_description": "从源内容中提取结构化信息",
+        "expected_output": "提取出的信息"
+      },
+      {
+        "step_id": "step_2",
+        "functional_description": "验证提取信息与源内容的一致性",
+        "expected_output": "验证结果"
+      },
+      {
+        "step_id": "step_3",
+        "functional_description": "修复不一致的提取结果",
+        "expected_output": "修复后的提取信息"
+      }
+    ],
+    "input_requirements": ["数据包含可提取的内容"],
+    "output_produces": ["提取并验证后的结构化信息"],
+    "use_cases": ["提取final_answer并验证", "提取关键信息并检查", "结构化提取"],
+    "typical_scenarios": ["从解答中提取答案并验证", "从文本中提取实体并检查", "提取结构化信息并确保准确性"]
+    }
+  }
+  

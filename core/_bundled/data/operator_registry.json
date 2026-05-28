@@ -1,0 +1,177 @@
+{
+  "read_data": {
+    "category": "io",
+    "description": "Read a JSONL (or supported) file into the main record stream.",
+    "input_keys": ["file_path"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "write_data": {
+    "category": "io",
+    "description": "Write records to JSONL and pass the same stream through for downstream steps.",
+    "input_keys": ["records", "file_path"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "map_fields": {
+    "category": "structure",
+    "description": "Rename or remap field keys per record using a mapping table.",
+    "input_keys": ["records", "field_mapping"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "add_field": {
+    "category": "structure",
+    "description": "Add a new field to each record (constant, derived, or placeholder for instantiation).",
+    "input_keys": ["records", "field_name", "field_value"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "remove_field": {
+    "category": "structure",
+    "description": "Remove one or more fields from each record.",
+    "input_keys": ["records", "field_names"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "merge_fields": {
+    "category": "structure",
+    "description": "Combine multiple fields into one target field with a join strategy.",
+    "input_keys": ["records", "source_fields", "target_field"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "split_field": {
+    "category": "structure",
+    "description": "Split one field into several new fields using delimiter or pattern rules.",
+    "input_keys": ["records", "source_field", "target_fields"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "transform_field": {
+    "category": "structure",
+    "description": "Deterministic transforms on a field (trim, casing, regex, type cast) — not LLM.",
+    "input_keys": ["records", "field_name", "transform_rules"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "normalize_schema": {
+    "category": "structure",
+    "description": "Align records to a target schema: defaults, coercion, nested shape alignment.",
+    "input_keys": ["records", "target_schema"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "combine_sources": {
+    "category": "structure",
+    "description": "Merge two record streams (join, concat, align) into one stream.",
+    "input_keys": ["records_primary", "records_secondary", "merge_strategy"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "aggregate_group": {
+    "category": "structure",
+    "description": "Group records by keys and compute aggregates per group.",
+    "input_keys": ["records", "group_keys", "aggregations"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "filter_rows": {
+    "category": "control",
+    "description": "Keep or drop records matching a predicate over fields.",
+    "input_keys": ["records", "predicate"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "deduplicate": {
+    "category": "control",
+    "description": "Remove duplicate records by key fields or full-row identity.",
+    "input_keys": ["records", "key_fields"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "sample_rows": {
+    "category": "control",
+    "description": "Take a fixed-size or ratio sample for trial runs or QA.",
+    "input_keys": ["records", "sample_config"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "sort_rows": {
+    "category": "control",
+    "description": "Order records by one or more keys with stable tie-breaking.",
+    "input_keys": ["records", "sort_keys"],
+    "output_keys": ["records"],
+    "requires_llm": false
+  },
+  "llm_generate_field": {
+    "category": "semantic",
+    "description": "Generate a new field from context fields and a generation spec (answers, SQL, instructions, etc.).",
+    "input_keys": ["records", "prompt_context_fields", "target_field", "generation_spec"],
+    "output_keys": ["records"],
+    "requires_llm": true
+  },
+  "llm_rewrite_field": {
+    "category": "semantic",
+    "description": "Rewrite an existing field to a target style, template, length band, or format.",
+    "input_keys": ["records", "field_name", "rewrite_spec"],
+    "output_keys": ["records"],
+    "requires_llm": true
+  },
+  "llm_extract_structure": {
+    "category": "semantic",
+    "description": "Extract structured fields from unstructured text in a source field.",
+    "input_keys": ["records", "source_field", "extraction_spec"],
+    "output_keys": ["records"],
+    "requires_llm": true
+  },
+  "llm_expand_content": {
+    "category": "semantic",
+    "description": "Expand short content into fuller, layered text while preserving intent.",
+    "input_keys": ["records", "field_name", "expansion_spec"],
+    "output_keys": ["records"],
+    "requires_llm": true
+  },
+  "validate_schema": {
+    "category": "quality",
+    "description": "Validate each record against required fields, types, and constraints; emit a structured report.",
+    "input_keys": ["records", "schema_rules"],
+    "output_keys": ["records", "validation_report"],
+    "requires_llm": false
+  },
+  "check_format": {
+    "category": "quality",
+    "description": "Check format patterns (tags, sections, regex) and emit a human-readable report.",
+    "input_keys": ["records", "format_rules"],
+    "output_keys": ["records", "report"],
+    "requires_llm": false
+  },
+  "llm_score_quality": {
+    "category": "quality",
+    "description": "LLM-based scoring of a field against a rubric (not a full rewrite).",
+    "input_keys": ["records", "field_name", "rubric"],
+    "output_keys": ["records", "scores"],
+    "requires_llm": true
+  },
+  "llm_check_consistency": {
+    "category": "quality",
+    "description": "Check logical consistency across multiple fields; output issues in a report.",
+    "input_keys": ["records", "field_group", "constraints"],
+    "output_keys": ["records", "report"],
+    "requires_llm": true
+  },
+  "llm_verify_reasoning": {
+    "category": "quality",
+    "description": "Verify multi-step reasoning or derivation chains for internal soundness.",
+    "input_keys": ["records", "reasoning_spec"],
+    "output_keys": ["records", "report"],
+    "requires_llm": true
+  },
+  "llm_verify_answer_grounding": {
+    "category": "quality",
+    "description": "Verify that an answer is grounded in given evidence or context fields.",
+    "input_keys": ["records", "grounding_spec"],
+    "output_keys": ["records", "report"],
+    "requires_llm": true
+  }
+}

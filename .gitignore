@@ -5,6 +5,8 @@ __pycache__/
 .eggs/
 dist/
 build/
+*.egg-info/
+dataevolver.egg-info/
 .venv/
 venv/
 .env

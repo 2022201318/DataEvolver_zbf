@@ -1,0 +1,18 @@
+include LICENSE
+include README.md
+include requirements.txt
+include run_server.py
+
+recursive-include core/_bundled *
+recursive-include examples *.json
+
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude .git*
+prune frontend
+prune assets
+prune tmp
+prune data
+prune .venv
+global-exclude dist/*
+global-exclude *.egg-info

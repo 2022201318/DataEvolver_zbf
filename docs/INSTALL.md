@@ -72,6 +72,19 @@ Use **two terminals** (backend + frontend).
 | HTTP API | http://127.0.0.1:8000 |
 | OpenAPI | http://127.0.0.1:8000/docs |
 
+## PyPI install (CLI + API server)
+
+```bash
+pip install dataevolver
+mkdir my_project && cd my_project
+dataevolver init
+# edit config/api_config.json and config/api_keys.json
+dataevolver --help
+dataevolver-server --reload
+```
+
+The Web UI is not included in the wheel; clone the GitHub repository and run `bash setup_env.sh` for the full stack.
+
 ## CLI smoke test
 
 ```bash
