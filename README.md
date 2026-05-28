@@ -119,12 +119,14 @@ See how an initial logical plan evolves into a refined executable pipeline, and 
 Watch the **evolution canvas** in action — DAG orchestration tabs, instantiation cards, sample evaluation, and experience reflow across rounds.
 
 <p align="center">
-  <video src="assets/demo.mp4" controls width="92%">
-    Your browser does not support embedded video.
-    <a href="assets/demo.mp4">Download demo.mp4</a>
-    or the
-    <a href="https://github.com/Akanezora0/DataEvolver/releases/download/demo-2026-04-18/DataEvolver_Demo_small.mov">full-resolution release (.mov)</a>.
-  </video>
+  <img src="assets/demo_preview.gif" alt="DataEvolver evolution canvas demo preview" width="92%"/>
+</p>
+
+<p align="center">
+  ▶ <b><a href="https://github.com/Akanezora0/DataEvolver/raw/main/assets/demo.mp4">Watch full demo</a></b>
+  (2m50s)
+  ·
+  <a href="https://github.com/Akanezora0/DataEvolver/releases/download/demo-2026-04-18/DataEvolver_Demo_small.mov">Download HD .mov</a>
 </p>
 
 ## How it works
@@ -452,12 +454,7 @@ We welcome issues, ideas, and contributions!
 If you use DataEvolver in research, please cite our paper:
 
 ```bibtex
-@article{dataevolver2026,
-  title   = {DataEvolver: Automatic Data Preparation for Large Language Models via Multi-Level Self-Evolving},
-  author  = {/* authors */},
-  journal = {/* venue */},
-  year    = {2026}
-}
+
 ```
 
 📄 Full paper: [assets/DataEvolver.pdf](assets/DataEvolver.pdf)
