@@ -457,7 +457,7 @@ If you use DataEvolver in research, please cite our paper:
 
 ```
 
-📄 Full paper: [assets/DataEvolver.pdf](assets/DataEvolver.pdf)
+<!-- 📄 Full paper: [assets/DataEvolver.pdf](assets/DataEvolver.pdf) -->
 
 <p align="center">
   <sub>Built for teams who want <b>executable</b> and <b>seed-aligned</b> data pipelines — not one-shot prompts.</sub>
