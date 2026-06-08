@@ -1356,34 +1356,69 @@ def advance_workflow(
                 "instantiation: completed — 内置算子模板委托（本 DAG 无 requires_llm 算子或未触发 LLM 写码）"
             )
     elif key == "experience":
-        # 仅在 quality_check 未通过时进入：写经验后回流理解，开启下一轮
+        # 检查 Pilot 评分，达到阈值则直接标记为可全量执行，不进下一轮
+        PILOT_SCORE_THRESHOLD = 81
+        trial_path = root / "data" / "trial_runs" / pipeline_id / "trial_result.json"
+        pilot_score: int | None = None
+        pilot_recommendation: str | None = None
+        try:
+            if trial_path.is_file():
+                trial_data = json.loads(trial_path.read_text(encoding="utf-8"))
+                pilot_eval = trial_data.get("llm_pilot_evaluation") or {}
+                pilot_score = pilot_eval.get("overall_score")
+                pilot_recommendation = pilot_eval.get("recommendation")
+        except (OSError, json.JSONDecodeError, TypeError):
+            pass
+
+        score_ok = (
+            pilot_score is not None and int(pilot_score) >= PILOT_SCORE_THRESHOLD
+        ) or pilot_recommendation == "proceed_full"
+
         snapshot_round_artifacts(
             root,
             pipeline_id,
             round_no=max(1, state.round),
-            quality_passed=False,
+            quality_passed=score_ok,
         )
-        snapshot_iteration_artifacts(
-            root,
-            pipeline_id,
-            round_no=max(1, state.round),
-            dag_evolution_cycles=state.dag_evolution_cycles,
-            reason="round_rollover_after_experience",
-        )
-        touched = _clear_for_next_round(root, pipeline_id)
-        state.round = max(1, state.round) + 1
-        state.quality_passed = False
-        state.ready_for_full_run = False
-        state.steps_completed = []
-        state.step_index = STEP_ORDER.index("understanding")
-        state.next_action = "advance"
-        state.last_message = (
-            f"experience: completed → 规则聚合（非 LLM）回流下一轮（round={state.round}）"
-        )
-        if isinstance(detail, dict):
-            detail["next_round_started"] = True
-            detail["round"] = state.round
-            detail["artifacts_cleared"] = touched
+
+        if score_ok:
+            # 分数达标，标记可全量执行，不进下一轮
+            state.quality_passed = True
+            state.ready_for_full_run = True
+            state.step_index = len(STEP_ORDER)
+            state.next_action = "run_full"
+            state.last_message = (
+                f"experience: completed → Pilot 评分 {pilot_score} >= {PILOT_SCORE_THRESHOLD} 或建议 proceed_full，可执行 run-full"
+            )
+            if isinstance(detail, dict):
+                detail["auto_approved"] = True
+                detail["pilot_score"] = pilot_score
+                detail["pilot_recommendation"] = pilot_recommendation
+        else:
+            # 分数未达标，回流下一轮
+            snapshot_iteration_artifacts(
+                root,
+                pipeline_id,
+                round_no=max(1, state.round),
+                dag_evolution_cycles=state.dag_evolution_cycles,
+                reason="round_rollover_after_experience",
+            )
+            touched = _clear_for_next_round(root, pipeline_id)
+            state.round = max(1, state.round) + 1
+            state.quality_passed = False
+            state.ready_for_full_run = False
+            state.steps_completed = []
+            state.step_index = STEP_ORDER.index("understanding")
+            state.next_action = "advance"
+            state.last_message = (
+                f"experience: completed → Pilot 评分 {pilot_score} < {PILOT_SCORE_THRESHOLD}，回流下一轮（round={state.round}）"
+            )
+            if isinstance(detail, dict):
+                detail["next_round_started"] = True
+                detail["round"] = state.round
+                detail["artifacts_cleared"] = touched
+                detail["pilot_score"] = pilot_score
+                detail["pilot_score_threshold"] = PILOT_SCORE_THRESHOLD
     else:
         if key == "operator_evolution" and detail.get("status") == "skipped":
             state.dag_evolution_cycles = 0
