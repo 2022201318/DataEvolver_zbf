@@ -462,6 +462,6 @@ If you use DataEvolver in research, please cite our paper:
 }
 ```
 
-📄 Full paper: [link](https://arxiv.org/abs/2606.07001)
+<!-- 📄 Full paper: [link](https://arxiv.org/abs/2606.07001) -->
 
 Built for teams who want **executable** and **seed-aligned** data pipelines — not one-shot prompts.
