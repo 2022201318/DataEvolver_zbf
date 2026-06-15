@@ -227,9 +227,49 @@ def load_experience(root: Path, pipeline_id: str) -> str | None:
         try:
             data = json.loads(p.read_text(encoding="utf-8"))
             if isinstance(data, dict):
+                parts: list[str] = []
+
+                # 基础经验文本
                 exp = data.get("experience_text")
                 if isinstance(exp, str) and exp.strip():
-                    return exp.strip()
+                    parts.append(exp.strip())
+
+                # 算子级诊断（experience_snapshot_v2新增）
+                diagnoses = data.get("operator_diagnoses") or []
+                if isinstance(diagnoses, list) and diagnoses:
+                    parts.append("【算子级诊断 - 下一轮编排必须针对性修复】")
+                    for d in diagnoses[:5]:
+                        if not isinstance(d, dict):
+                            continue
+                        sev = d.get("severity", "medium")
+                        op = d.get("operator", "unknown")
+                        prob = str(d.get("problem") or "")[:200]
+                        fix = str(d.get("fix_suggestion") or "")[:200]
+                        parts.append(f"  [{sev.upper()}] {op}: {prob}")
+                        if fix:
+                            parts.append(f"    建议修复: {fix}")
+
+                # 最优先修复项
+                priority = str(data.get("priority_fix") or "").strip()
+                if priority:
+                    parts.append(f"【最优先修复】{priority}")
+
+                # 下轮编排指令
+                instruction = str(data.get("next_round_instruction") or "").strip()
+                if instruction:
+                    parts.append(f"【下轮编排指令】{instruction}")
+
+                # strategy_pool历史
+                try:
+                    from subsystems.workflow.strategy_pool import format_strategy_pool_for_prompt
+                    sp_text = format_strategy_pool_for_prompt(root, pipeline_id)
+                    if sp_text:
+                        parts.append(sp_text)
+                except Exception:
+                    pass
+
+                if parts:
+                    return "\n".join(parts)
         except (json.JSONDecodeError, OSError):
             pass
     legacy = root / "datasets" / pipeline_id / "experience.txt"

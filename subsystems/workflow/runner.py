@@ -894,17 +894,40 @@ def _step_experience(root: Path, pipeline_id: str, *, force: bool = False) -> di
     path = exp_dir / f"{pipeline_id}.json"
     if force and path.is_file():
         path.unlink()
-    # 经验需要随轮次更新：即使文件已存在也重算并覆盖，避免多轮闭环复用旧经验。
     payload = build_experience_snapshot(root, pipeline_id)
     _atomic_write_json(path, payload)
+
+    # ── 把本轮Pilot分数回写到strategy_pool ──
+    candidate_sids = payload.get("candidate_strategy_ids") or []
+    try:
+        trial_path = root / "data" / "trial_runs" / pipeline_id / "trial_result.json"
+        if trial_path.is_file() and candidate_sids:
+            trial_data = json.loads(trial_path.read_text(encoding="utf-8"))
+            pilot = trial_data.get("llm_pilot_evaluation") or {}
+            score = pilot.get("overall_score")
+            dim_scores = pilot.get("dimension_scores")
+            if score is not None:
+                from subsystems.workflow.strategy_pool import update_strategy_score
+                for sid in candidate_sids:
+                    update_strategy_score(
+                        root, pipeline_id, sid,
+                        score=int(score),
+                        dimension_scores=dim_scores,
+                        trial_path=f"data/trial_runs/{pipeline_id}/trial_result.json",
+                    )
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("strategy_pool分数回写失败: %s", e)
+
     return {
         "stage": "experience",
         "status": "completed",
         "path": f"data/experiences/{pipeline_id}.json",
         "source": payload.get("source"),
-        "llm_used": False,
-        "source_kind": "rule_aggregation",
-        "detail": "经验由质检/试运行/Pilot 结果规则聚合生成，非 LLM 逐步调用",
+        "llm_used": payload.get("meta", {}).get("llm_diagnosis_triggered", False),
+        "candidate_strategies": candidate_sids,
+        "source_kind": "rule_aggregation_with_llm_diagnosis",
+        "detail": "经验由质检/试运行/Pilot结果聚合生成，含LLM算子诊断与策略池更新",
     }
 
 

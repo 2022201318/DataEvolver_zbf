@@ -63,7 +63,20 @@ Evaluate these additional aspects and reflect them in dimension_scores:
 - image_text_grounding: are QA answers actually based on image content, not generic? (affects semantic + info scores)
 - image_quality_improvement: is image quality (resolution, noise) better in output than input? (affects format score)
 - visual_consistency: do question/answer pairs make sense given the visual content shown? (affects logic score)
-When images are present, semantic score should heavily weight image-text grounding quality."""
+When images are present, semantic score should heavily weight image-text grounding quality.
+
+EXECUTABLE QUALITY SPECIFICATION (always required):
+You must also output "sample_quality_specs": an array, one entry per output record (up to 8).
+Each entry:
+{
+  "record_index": 0,
+  "violations": [
+    {"rule": "short rule name", "severity": "high/medium/low", "detail": "what exactly is wrong in this record"}
+  ],
+  "passed": ["list of quality rules this record satisfied"]
+}
+If a record has no violations, set violations to [] and list what it passed.
+This enables per-sample quality attribution — which record violated which rule."""
 
 
 def _emit_usage(
@@ -376,6 +389,27 @@ def run_pilot_llm_judge(
 
     exp = [str(x) for x in (parsed.get("experience_bullets") or []) if isinstance(x, str)][:8]
 
+    # ── Executable Quality Specification：样本级质量归因 ──
+    raw_specs = parsed.get("sample_quality_specs")
+    sample_quality_specs: list[dict] = []
+    if isinstance(raw_specs, list):
+        for spec in raw_specs[:8]:
+            if not isinstance(spec, dict):
+                continue
+            sample_quality_specs.append({
+                "record_index": int(spec.get("record_index", 0)),
+                "violations": [
+                    {
+                        "rule": str(v.get("rule", ""))[:80],
+                        "severity": str(v.get("severity", "medium")),
+                        "detail": str(v.get("detail", ""))[:300],
+                    }
+                    for v in (spec.get("violations") or [])
+                    if isinstance(v, dict)
+                ][:10],
+                "passed": [str(x)[:80] for x in (spec.get("passed") or []) if x][:8],
+            })
+
     return {
         "dimension_scores": dimension_scores,
         "dimension_notes": dim_notes,
@@ -385,6 +419,7 @@ def run_pilot_llm_judge(
         "recommendation_rationale": str(parsed.get("recommendation_rationale") or "").strip()[:500],
         "judge_result": judge_result,
         "experience_bullets": exp,
+        "sample_quality_specs": sample_quality_specs,
     }
 
 
@@ -442,4 +477,5 @@ def apply_pilot_llm_judge(
         "recommendation_rationale": inner.get("recommendation_rationale"),
         "judge_result": inner.get("judge_result"),
         "experience_bullets": inner.get("experience_bullets") or [],
+        "sample_quality_specs": inner.get("sample_quality_specs") or [],
     }
